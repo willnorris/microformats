@@ -151,7 +151,7 @@ func (p *Parser) walk(node *html.Node) {
 					Value:      value,
 					HTML:       htmlbody,
 				}
-			} else if value != "" {
+			} else if value != "" && p.curItem != nil {
 				if htmlbody != "" {
 					p.curItem.Properties[prop[2]] = map[string]interface{}{"value": value, "html": htmlbody}
 				} else {
