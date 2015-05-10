@@ -2,6 +2,7 @@
 package microformats
 
 import (
+	"bytes"
 	"io"
 	"regexp"
 	"strings"
@@ -17,6 +18,7 @@ var (
 
 type MicroFormat struct {
 	Value      string                 `json:"value,omitempty"`
+	HTML       string                 `json:"html,omitempty"`
 	Type       []string               `json:"type"`
 	Properties map[string]interface{} `json:"properties"`
 	Shape      string                 `json:"shape,omitempty"`
@@ -65,11 +67,39 @@ func (p *Parser) walk(node *html.Node) {
 		p.walk(c)
 	}
 
+	if curItem != nil {
+		if _, ok := curItem.Properties["name"]; !ok {
+			var name string
+			if isAtom(node, atom.Img, atom.Area) {
+				name = GetAttr(node, "alt")
+			}
+			if name == "" {
+				name = GetTextContent(node)
+			}
+			name = strings.Trim(name, " ")
+			if name != "" {
+				curItem.Properties["name"] = name
+			}
+		}
+		if _, ok := curItem.Properties["url"]; !ok {
+			var url string
+			if node.DataAtom == atom.A || node.DataAtom == atom.Area {
+				url = GetAttr(node, "href")
+			}
+			if url != "" {
+				curItem.Properties["url"] = url
+			}
+		}
+
+		p.curItem = priorItem
+	}
+
 	propertyclasses := PropertyClassNames.FindAllStringSubmatch(GetAttr(node, "class"), -1)
 	if len(propertyclasses) > 0 {
 		for _, prop := range propertyclasses {
 
 			var value string
+			var htmlbody string
 			switch prop[1] {
 			case "p":
 				// TODO: value-class-pattern
@@ -106,42 +136,29 @@ func (p *Parser) walk(node *html.Node) {
 				if value == "" {
 					value = GetTextContent(node)
 				}
+			case "e":
+				value = GetTextContent(node)
+				buf := &bytes.Buffer{}
+				html.Render(buf, node)
+				htmlbody = buf.String()
 			}
-			if curItem != nil && priorItem != nil {
-				priorItem.Properties[prop[2]] = &MicroFormat{
+			if curItem != nil && p.curItem != nil {
+				p.curItem.Properties[prop[2]] = &MicroFormat{
 					Type:       curItem.Type,
 					Properties: curItem.Properties,
 					Coords:     curItem.Coords,
 					Shape:      curItem.Shape,
 					Value:      value,
+					HTML:       htmlbody,
+				}
+			} else if value != "" {
+				if htmlbody != "" {
+					p.curItem.Properties[prop[2]] = map[string]interface{}{"value": value, "html": htmlbody}
+				} else {
+					p.curItem.Properties[prop[2]] = value
 				}
 			}
-			if value != "" {
-				p.curItem.Properties[prop[2]] = value
-			}
 		}
-	}
-	if curItem != nil {
-		if _, ok := curItem.Properties["name"]; !ok {
-			var name string
-			if node.DataAtom == atom.Img || node.DataAtom == atom.Area {
-				name = GetAttr(node, "alt")
-			}
-			if name != "" {
-				curItem.Properties["name"] = name
-			}
-		}
-		if _, ok := curItem.Properties["url"]; !ok {
-			var url string
-			if node.DataAtom == atom.A || node.DataAtom == atom.Area {
-				url = GetAttr(node, "href")
-			}
-			if url != "" {
-				curItem.Properties["url"] = url
-			}
-		}
-
-		p.curItem = priorItem
 	}
 }
 

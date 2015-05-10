@@ -17,6 +17,17 @@ func TestHCard(t *testing.T) {
 
 	data := p.Parse(strings.NewReader(test))
 
-	output, _ := json.Marshal(data)
+	output, _ := json.MarshalIndent(data, "", "  ")
+	fmt.Println(string(output))
+}
+
+func TestHCardEProp(t *testing.T) {
+	test := `<div class="h-entry"><div class="e-content h-card"><p>Hello</p></div></div>`
+
+	p := New()
+
+	data := p.Parse(strings.NewReader(test))
+
+	output, _ := json.MarshalIndent(data, "", "  ")
 	fmt.Println(string(output))
 }
