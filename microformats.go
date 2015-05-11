@@ -66,6 +66,17 @@ func (p *Parser) walk(node *html.Node) {
 		p.curItem = curItem
 	}
 
+	if isAtom(node, atom.A) {
+		if rel := GetAttr(node, "rel"); rel != "" {
+			url := GetAttr(node, "href")
+			//TODO: normalize url
+			rels := strings.Split(rel, " ")
+			for _, relval := range rels {
+				p.curData.Rels[relval] = append(p.curData.Rels[relval], url)
+			}
+		}
+	}
+
 	for c := node.FirstChild; c != nil; c = c.NextSibling {
 		p.walk(c)
 	}
