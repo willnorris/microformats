@@ -20,7 +20,7 @@ type MicroFormat struct {
 	Value      string                 `json:"value,omitempty"`
 	HTML       string                 `json:"html,omitempty"`
 	Type       []string               `json:"type"`
-	Properties map[string]interface{} `json:"properties"`
+	Properties map[string][]interface{} `json:"properties"`
 	Shape      string                 `json:"shape,omitempty"`
 	Coords     string                 `json:"coords,omitempty"`
 }
@@ -31,8 +31,8 @@ type Parser struct {
 }
 
 type Data struct {
-	Items []*MicroFormat
-	Rels  map[string][]string
+	Items []*MicroFormat `json:"items"`
+	Rels  map[string][]string `json:"rels,omitempty"`
 }
 
 func New() *Parser {
@@ -57,7 +57,7 @@ func (p *Parser) walk(node *html.Node) {
 	if len(rootclasses) > 0 {
 		curItem = &MicroFormat{}
 		curItem.Type = rootclasses
-		curItem.Properties = make(map[string]interface{})
+		curItem.Properties = make(map[string][]interface{})
 		p.curData.Items = append(p.curData.Items, curItem)
 		priorItem = p.curItem
 		p.curItem = curItem
@@ -78,7 +78,7 @@ func (p *Parser) walk(node *html.Node) {
 			}
 			name = strings.Trim(name, " ")
 			if name != "" {
-				curItem.Properties["name"] = name
+				curItem.Properties["name"] = append(curItem.Properties["name"], name)
 			}
 		}
 		if _, ok := curItem.Properties["url"]; !ok {
@@ -87,7 +87,7 @@ func (p *Parser) walk(node *html.Node) {
 				url = GetAttr(node, "href")
 			}
 			if url != "" {
-				curItem.Properties["url"] = url
+				curItem.Properties["url"] = append(curItem.Properties["url"], url)
 			}
 		}
 
@@ -143,19 +143,19 @@ func (p *Parser) walk(node *html.Node) {
 				htmlbody = buf.String()
 			}
 			if curItem != nil && p.curItem != nil {
-				p.curItem.Properties[prop[2]] = &MicroFormat{
+				p.curItem.Properties[prop[2]] = append(p.curItem.Properties[prop[2]], &MicroFormat{
 					Type:       curItem.Type,
 					Properties: curItem.Properties,
 					Coords:     curItem.Coords,
 					Shape:      curItem.Shape,
 					Value:      value,
 					HTML:       htmlbody,
-				}
+				})
 			} else if value != "" && p.curItem != nil {
 				if htmlbody != "" {
-					p.curItem.Properties[prop[2]] = map[string]interface{}{"value": value, "html": htmlbody}
+					p.curItem.Properties[prop[2]] = append(p.curItem.Properties[prop[2]], map[string]interface{}{"value": value, "html": htmlbody})
 				} else {
-					p.curItem.Properties[prop[2]] = value
+					p.curItem.Properties[prop[2]] = append(p.curItem.Properties[prop[2]], value)
 				}
 			}
 		}

@@ -41,9 +41,9 @@ var index = `<html>
 <body>
 <form method="POST">
 <textarea name="MF" style="width: 100%;" rows="15">{{.MF}}</textarea>
-<br/>
+<br>
 <input type="submit" value="Parse"/>
-</form><br/>
+</form><br>
 <code><pre>
 {{.Parsed}}
 </pre></code>
