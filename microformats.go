@@ -17,12 +17,13 @@ var (
 )
 
 type MicroFormat struct {
-	Value      string                 `json:"value,omitempty"`
-	HTML       string                 `json:"html,omitempty"`
-	Type       []string               `json:"type"`
+	Value      string                   `json:"value,omitempty"`
+	HTML       string                   `json:"html,omitempty"`
+	Type       []string                 `json:"type"`
 	Properties map[string][]interface{} `json:"properties"`
-	Shape      string                 `json:"shape,omitempty"`
-	Coords     string                 `json:"coords,omitempty"`
+	Shape      string                   `json:"shape,omitempty"`
+	Coords     string                   `json:"coords,omitempty"`
+	Children   []*MicroFormat           `json:"children,omitempty"`
 }
 
 type Parser struct {
@@ -31,7 +32,7 @@ type Parser struct {
 }
 
 type Data struct {
-	Items []*MicroFormat `json:"items"`
+	Items []*MicroFormat      `json:"items"`
 	Rels  map[string][]string `json:"rels,omitempty"`
 }
 
@@ -158,6 +159,10 @@ func (p *Parser) walk(node *html.Node) {
 					p.curItem.Properties[prop[2]] = append(p.curItem.Properties[prop[2]], value)
 				}
 			}
+		}
+	} else {
+		if curItem != nil && p.curItem != nil {
+			p.curItem.Children = append(p.curItem.Children, curItem)
 		}
 	}
 }

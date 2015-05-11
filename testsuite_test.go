@@ -1,14 +1,14 @@
 package microformats_test
 
 import (
+	"bytes"
+	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"os"
-	"testing"
 	"path"
-	"bytes"
-	"fmt"
-	"encoding/json"
 	"reflect"
+	"testing"
 
 	"github.com/andyleap/microformats"
 )
@@ -34,7 +34,7 @@ func TestSuite(t *testing.T) {
 						fmt.Printf("FAIL: %s/%s\n", suite.Name(), test.Name())
 						t.Fail()
 					}
-					
+
 				}
 			}
 		}
@@ -45,15 +45,14 @@ func TestSuite(t *testing.T) {
 func runTest(test string) bool {
 	input, _ := ioutil.ReadFile(path.Join(test, "input.html"))
 	data := parser.Parse(bytes.NewReader(input))
-	
+
 	expectedJson, _ := ioutil.ReadFile(path.Join(test, "output.json"))
 	expected := make(map[string]interface{})
 	json.Unmarshal(expectedJson, &expected)
-	
+
 	outputJson, _ := json.Marshal(data)
 	output := make(map[string]interface{})
 	json.Unmarshal(outputJson, &output)
-	
-	
+
 	return reflect.DeepEqual(output, expected)
 }
