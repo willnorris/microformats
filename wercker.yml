@@ -19,7 +19,7 @@ build:
     - script:
         name: go build
         code: |
-          go build ./...
+          go build -v ./...
 
     # Test the project
 #    - script:
