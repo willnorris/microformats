@@ -34,7 +34,7 @@ build:
 
 deploy:
   steps:
-  - add-to-known_hosts:
+   - add-to-known_hosts:
         hostname: vendaria.net
    - mktemp:
       envvar: PRIVATEKEY_PATH
