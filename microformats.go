@@ -6,7 +6,7 @@ import (
 	"io"
 	"regexp"
 	"strings"
-//	"encoding/json"
+	//	"encoding/json"
 
 	"golang.org/x/net/html"
 	"golang.org/x/net/html/atom"
@@ -33,8 +33,9 @@ type Parser struct {
 }
 
 type Data struct {
-	Items []*MicroFormat `json:"items"`
-	Rels  map[string]interface{}           `json:"rels,omitempty"`
+	Items      []*MicroFormat      `json:"items"`
+	Rels       map[string][]string `json:"rels,omitempty"`
+	Alternates []*AlternateRel     `json:"alternates,omitempty"`
 }
 
 type AlternateRel struct {
@@ -53,7 +54,7 @@ func (p *Parser) Parse(r io.Reader) *Data {
 	doc, _ := html.Parse(r)
 	p.curData = &Data{
 		Items: make([]*MicroFormat, 0),
-		Rels:  make(map[string]interface{}),
+		Rels:  make(map[string][]string),
 	}
 	p.walk(doc)
 	return p.curData
@@ -89,17 +90,11 @@ func (p *Parser) walk(node *html.Node) {
 			}
 			if !alternate {
 				for _, relval := range rels {
-					if p.curData.Rels[relval] == nil {
-						p.curData.Rels[relval] = []string{}
-					}
-					p.curData.Rels[relval] = append(p.curData.Rels[relval].([]string), url)
+					p.curData.Rels[relval] = append(p.curData.Rels[relval], url)
 				}
 			} else {
-				if p.curData.Rels["alternates"] == nil {
-					p.curData.Rels["alternates"] = []*AlternateRel{}
-				}
 				relstring := strings.Join(rels, " ")
-				p.curData.Rels["alternates"] = append(p.curData.Rels["alternates"].([]*AlternateRel), &AlternateRel{
+				p.curData.Alternates = append(p.curData.Alternates, &AlternateRel{
 					URL:      url,
 					Rel:      relstring,
 					Media:    GetAttr(node, "media"),
@@ -116,28 +111,23 @@ func (p *Parser) walk(node *html.Node) {
 
 	if curItem != nil {
 		if _, ok := curItem.Properties["name"]; !ok {
-			var name string
-			if isAtom(node, atom.Img, atom.Area) {
-				name = GetAttr(node, "alt")
-			}
-			if name == "" {
-				name = GetTextContent(node)
-			}
-			name = strings.Trim(name, " ")
+			name := p.getImpliedName(node)
 			if name != "" {
 				curItem.Properties["name"] = append(curItem.Properties["name"], name)
 			}
 		}
-		if _, ok := curItem.Properties["url"]; !ok {
-			var url string
-			if node.DataAtom == atom.A || node.DataAtom == atom.Area {
-				url = GetAttr(node, "href")
+		if _, ok := curItem.Properties["photo"]; !ok {
+			photo := p.getImpliedPhoto(node)
+			if photo != "" {
+				curItem.Properties["photo"] = append(curItem.Properties["photo"], photo)
 			}
+		}
+		if _, ok := curItem.Properties["url"]; !ok {
+			url := p.getImpliedURL(node)
 			if url != "" {
 				curItem.Properties["url"] = append(curItem.Properties["url"], url)
 			}
 		}
-
 		p.curItem = priorItem
 	}
 
@@ -160,7 +150,7 @@ func (p *Parser) walk(node *html.Node) {
 					value = GetAttr(node, "alt")
 				}
 				if value == "" {
-					value = GetTextContent(node)
+					value = getTextContent(node)
 				}
 			case "u":
 				if value == "" && isAtom(node, atom.A, atom.Area) {
@@ -181,10 +171,10 @@ func (p *Parser) walk(node *html.Node) {
 					value = GetAttr(node, "value")
 				}
 				if value == "" {
-					value = GetTextContent(node)
+					value = getTextContent(node)
 				}
 			case "e":
-				value = GetTextContent(node)
+				value = getTextContent(node)
 				buf := &bytes.Buffer{}
 				html.Render(buf, node)
 				htmlbody = buf.String()
@@ -222,6 +212,15 @@ func GetAttr(node *html.Node, name string) string {
 	return ""
 }
 
+func getAttrPtr(node *html.Node, name string) *string {
+	for _, attr := range node.Attr {
+		if strings.EqualFold(attr.Key, name) {
+			return &attr.Val
+		}
+	}
+	return nil
+}
+
 func isAtom(node *html.Node, atoms ...atom.Atom) bool {
 	for _, atom := range atoms {
 		if atom == node.DataAtom {
@@ -234,15 +233,4 @@ func isAtom(node *html.Node, atoms ...atom.Atom) bool {
 func ParseValueClass(node *html.Node) string {
 
 	return ""
-}
-
-func GetTextContent(node *html.Node) string {
-	if node.Type == html.TextNode {
-		return node.Data
-	}
-	buf := make([]string, 0)
-	for c := node.FirstChild; c != nil; c = c.NextSibling {
-		buf = append(buf, GetTextContent(c))
-	}
-	return strings.Join(buf, "")
 }
