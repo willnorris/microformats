@@ -59,7 +59,9 @@ func (p *Parser) walk(node *html.Node) {
 		curItem = &MicroFormat{}
 		curItem.Type = rootclasses
 		curItem.Properties = make(map[string][]interface{})
-		p.curData.Items = append(p.curData.Items, curItem)
+		if p.curItem == nil {
+			p.curData.Items = append(p.curData.Items, curItem)
+		}
 		priorItem = p.curItem
 		p.curItem = curItem
 	}
