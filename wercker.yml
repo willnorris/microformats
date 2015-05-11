@@ -19,6 +19,7 @@ build:
     - script:
         name: go build
         code: |
+          cd $WERCKER_SOURCE_DIR
           go build -v ./...
 
     # Test the project
@@ -30,7 +31,8 @@ build:
     - script:
         name: copy output
         code: |-
-          rsync -avz "$WERCKER_SOURCE_DIR/" "$WERCKER_OUTPUT_DIR"
+          cp "$WERCKER_SOURCE_DIR/gomfweb/gomfweb" "$WERCKER_OUTPUT_DIR/gomfweb"
+          cp "$WERCKER_SOURCE_DIR/gomf/gomf" "$WERCKER_OUTPUT_DIR/gomf"
 
 deploy:
   steps:
@@ -52,7 +54,7 @@ deploy:
       code: |
         pwd
         ls -la
-        scp -i $PRIVATEKEY_PATH -o StrictHostKeyChecking=no -o UserKnownHostsFile=no gomfweb/gomfweb vendan@vendaria.net:/var/gomfweb/gomfweb
+        scp -i $PRIVATEKEY_PATH -o StrictHostKeyChecking=no -o UserKnownHostsFile=no gomfweb vendan@vendaria.net:/var/gomfweb/gomfweb
    - script:
       name: start application
       code: ssh -i $PRIVATEKEY_PATH -l vendan -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no vendaria.net sudo start gomfweb
