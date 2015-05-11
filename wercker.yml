@@ -22,11 +22,10 @@ build:
           go build ./...
 
     # Test the project
-    - script:
-        name: go test
-        code: |
-          go test ./...
-          exit 0
+#    - script:
+#        name: go test
+#        code: |
+#          go test
 
     - script:
         name: copy output
@@ -42,18 +41,18 @@ deploy:
    - create-file:
       name: write key
       filename: $PRIVATEKEY_PATH
-      content: $FOO_PRIVATE
+      content: $VENDARIA_PRIVATE
       overwrite: true
       hide-from-log: true
    - script:
       name: stop application
-      code: ssh -i $PRIVATEKEY_PATH -l root -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no vendaria.net stop gomfweb
+      code: ssh -i $PRIVATEKEY_PATH -l vendan -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no vendaria.net sudo stop gomfweb
    - script:
       name: transfer application
       code: |
         pwd
         ls -la
-        scp -i $PRIVATEKEY_PATH -o StrictHostKeyChecking=no -o UserKnownHostsFile=no gomfweb/gomfweb root@vendaria.net:/var/gomfweb/gomfweb
+        scp -i $PRIVATEKEY_PATH -o StrictHostKeyChecking=no -o UserKnownHostsFile=no gomfweb/gomfweb vendan@vendaria.net:/var/gomfweb/gomfweb
    - script:
       name: start application
-      code: ssh -i $PRIVATEKEY_PATH -l root -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no vendaria.net start gomfweb
+      code: ssh -i $PRIVATEKEY_PATH -l vendan -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no vendaria.net sudo start gomfweb
