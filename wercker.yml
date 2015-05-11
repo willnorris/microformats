@@ -20,7 +20,9 @@ build:
         name: go build
         code: |
           cd $WERCKER_SOURCE_DIR
-          go build -v ./...
+          go version
+          go build -v github.com/andyleap/microformats/gomfweb
+          go build -v github.com/andyleap/microformats/gomf
 
     # Test the project
 #    - script:
