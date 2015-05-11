@@ -1,1 +1,58 @@
-box: wercker/default
+box: wercker/golang
+# Build definition
+build:
+  # The steps that will be executed on build
+  steps:
+    # Sets the go workspace and places you package
+    # at the right place in the workspace tree
+    - setup-go-workspace
+
+    # Gets the dependencies
+    - script:
+        name: go get
+        code: |
+          cd $WERCKER_SOURCE_DIR
+          go version
+          go get ./...
+
+    # Build the project
+    - script:
+        name: go build
+        code: |
+          go build ./...
+
+    # Test the project
+    - script:
+        name: go test
+        code: |
+          go test ./...
+
+    - script:
+        name: copy output
+        code: |-
+          rsync -avz "$WERCKER_SOURCE_DIR/" "$WERCKER_OUTPUT_DIR"
+
+deploy:
+  steps:
+  - add-to-known_hosts:
+        hostname: vendaria.net
+   - mktemp:
+      envvar: PRIVATEKEY_PATH
+   - create-file:
+      name: write key
+      filename: $PRIVATEKEY_PATH
+      content: $FOO_PRIVATE
+      overwrite: true
+      hide-from-log: true
+   - script:
+      name: stop application
+      code: ssh -i $PRIVATEKEY_PATH -l root -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no vendaria.net stop gomfweb
+   - script:
+      name: transfer application
+      code: |
+        pwd
+        ls -la
+        scp -i $PRIVATEKEY_PATH -o StrictHostKeyChecking=no -o UserKnownHostsFile=no gomfweb/gomfweb root@vendaria.net:/var/gomfweb/gomfweb
+   - script:
+      name: start application
+      code: ssh -i $PRIVATEKEY_PATH -l root -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no vendaria.net start gomfweb
