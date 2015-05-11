@@ -135,46 +135,49 @@ func (p *Parser) walk(node *html.Node) {
 	if len(propertyclasses) > 0 {
 		for _, prop := range propertyclasses {
 
-			var value string
+			var value *string
 			var htmlbody string
 			switch prop[1] {
 			case "p":
-				// TODO: value-class-pattern
-				if value == "" && isAtom(node, atom.Abbr) {
-					value = GetAttr(node, "title")
+				value = p.getValueClassPattern(node)
+				if value == nil && isAtom(node, atom.Abbr) {
+					value = getAttrPtr(node, "title")
 				}
-				if value == "" && isAtom(node, atom.Data, atom.Input) {
-					value = GetAttr(node, "value")
+				if value == nil && isAtom(node, atom.Data, atom.Input) {
+					value = getAttrPtr(node, "value")
 				}
-				if value == "" && isAtom(node, atom.Img, atom.Area) {
-					value = GetAttr(node, "alt")
+				if value == nil && isAtom(node, atom.Img, atom.Area) {
+					value = getAttrPtr(node, "alt")
 				}
-				if value == "" {
-					value = getTextContent(node)
+				if value == nil {
+					value = new(string)
+					*value = getTextContent(node)
 				}
 			case "u":
-				if value == "" && isAtom(node, atom.A, atom.Area) {
-					value = GetAttr(node, "href")
+				if value == nil && isAtom(node, atom.A, atom.Area) {
+					value = getAttrPtr(node, "href")
 				}
-				if value == "" && isAtom(node, atom.Img, atom.Audio, atom.Video, atom.Source) {
-					value = GetAttr(node, "src")
+				if value == nil && isAtom(node, atom.Img, atom.Audio, atom.Video, atom.Source) {
+					value = getAttrPtr(node, "src")
 				}
-				if value == "" && isAtom(node, atom.Object) {
-					value = GetAttr(node, "data")
+				if value == nil && isAtom(node, atom.Object) {
+					value = getAttrPtr(node, "data")
 				}
 				// TODO: normalize
 				// TODO: value-class-pattern
-				if value == "" && isAtom(node, atom.Abbr) {
-					value = GetAttr(node, "title")
+				if value == nil && isAtom(node, atom.Abbr) {
+					value = getAttrPtr(node, "title")
 				}
-				if value == "" && isAtom(node, atom.Data, atom.Input) {
-					value = GetAttr(node, "value")
+				if value == nil && isAtom(node, atom.Data, atom.Input) {
+					value = getAttrPtr(node, "value")
 				}
-				if value == "" {
-					value = getTextContent(node)
+				if value == nil {
+					value = new(string)
+					*value = getTextContent(node)
 				}
 			case "e":
-				value = getTextContent(node)
+				value = new(string)
+				*value = getTextContent(node)
 				buf := &bytes.Buffer{}
 				html.Render(buf, node)
 				htmlbody = buf.String()
@@ -185,14 +188,14 @@ func (p *Parser) walk(node *html.Node) {
 					Properties: curItem.Properties,
 					Coords:     curItem.Coords,
 					Shape:      curItem.Shape,
-					Value:      value,
+					Value:      *value,
 					HTML:       htmlbody,
 				})
-			} else if value != "" && p.curItem != nil {
+			} else if value != nil && *value != "" && p.curItem != nil {
 				if htmlbody != "" {
-					p.curItem.Properties[prop[2]] = append(p.curItem.Properties[prop[2]], map[string]interface{}{"value": value, "html": htmlbody})
+					p.curItem.Properties[prop[2]] = append(p.curItem.Properties[prop[2]], map[string]interface{}{"value": *value, "html": htmlbody})
 				} else {
-					p.curItem.Properties[prop[2]] = append(p.curItem.Properties[prop[2]], value)
+					p.curItem.Properties[prop[2]] = append(p.curItem.Properties[prop[2]], *value)
 				}
 			}
 		}

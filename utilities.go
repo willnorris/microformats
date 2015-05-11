@@ -203,6 +203,24 @@ func (p *Parser) getImpliedURL(node *html.Node) string {
 	return *url
 }
 
-func (p *Parser) getValueClassPattern(node *html.Node) string {
-	return ""
+func (p *Parser) getValueClassPattern(node *html.Node) *string {
+	var values []string
+	for c := node.FirstChild; c != nil; c = c.NextSibling {
+		classes := strings.Split(GetAttr(c, "class"), " ")
+		valueclass := false
+		for _, class := range classes {
+			if class == "value" {
+				valueclass = true
+			}
+		}
+		if valueclass {
+			values = append(values, getTextContent(c))
+		}
+	}
+	if len(values) > 0 {
+		var val string
+		val = strings.Join(values, "")
+		return &val
+	}
+	return nil
 }
