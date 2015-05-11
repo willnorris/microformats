@@ -74,7 +74,7 @@ func (p *Parser) walk(node *html.Node) {
 		p.curItem = curItem
 	}
 
-	if isAtom(node, atom.A) {
+	if isAtom(node, atom.A, atom.Link) {
 		if rel := GetAttr(node, "rel"); rel != "" {
 			url := GetAttr(node, "href")
 			//TODO: normalize url
@@ -95,11 +95,11 @@ func (p *Parser) walk(node *html.Node) {
 					p.curData.Rels[relval] = append(p.curData.Rels[relval].([]string), url)
 				}
 			} else {
-				if p.curData.Rels["alternate"] == nil {
-					p.curData.Rels["alternate"] = []AlternateRel{}
+				if p.curData.Rels["alternates"] == nil {
+					p.curData.Rels["alternates"] = []*AlternateRel{}
 				}
 				relstring := strings.Join(rels, " ")
-				p.curData.Rels["alternate"] = append(p.curData.Rels["alternates"].([]*AlternateRel), &AlternateRel{
+				p.curData.Rels["alternates"] = append(p.curData.Rels["alternates"].([]*AlternateRel), &AlternateRel{
 					URL:      url,
 					Rel:      relstring,
 					Media:    GetAttr(node, "media"),
