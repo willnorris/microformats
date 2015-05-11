@@ -6,6 +6,7 @@ import (
 	"io"
 	"regexp"
 	"strings"
+//	"encoding/json"
 
 	"golang.org/x/net/html"
 	"golang.org/x/net/html/atom"
@@ -32,20 +33,27 @@ type Parser struct {
 }
 
 type Data struct {
-	Items []*MicroFormat      `json:"items"`
-	Rels  map[string][]string `json:"rels,omitempty"`
+	Items []*MicroFormat `json:"items"`
+	Rels  map[string]interface{}           `json:"rels,omitempty"`
+}
+
+type AlternateRel struct {
+	URL      string `json:"url,omitempty"`
+	Rel      string `json:"rel,omitempty"`
+	Media    string `json:"media,omitempty"`
+	HrefLang string `json:"hreflang,omitempty"`
+	Type     string `json:"type,omitempty"`
 }
 
 func New() *Parser {
 	return &Parser{}
-
 }
 
 func (p *Parser) Parse(r io.Reader) *Data {
 	doc, _ := html.Parse(r)
 	p.curData = &Data{
 		Items: make([]*MicroFormat, 0),
-		Rels:  make(map[string][]string),
+		Rels:  make(map[string]interface{}),
 	}
 	p.walk(doc)
 	return p.curData
@@ -71,8 +79,33 @@ func (p *Parser) walk(node *html.Node) {
 			url := GetAttr(node, "href")
 			//TODO: normalize url
 			rels := strings.Split(rel, " ")
-			for _, relval := range rels {
-				p.curData.Rels[relval] = append(p.curData.Rels[relval], url)
+			alternate := false
+			for i, relval := range rels {
+				if relval == "alternate" {
+					alternate = true
+					rels = append(rels[:i], rels[i+1:]...)
+					break
+				}
+			}
+			if !alternate {
+				for _, relval := range rels {
+					if p.curData.Rels[relval] == nil {
+						p.curData.Rels[relval] = []string{}
+					}
+					p.curData.Rels[relval] = append(p.curData.Rels[relval].([]string), url)
+				}
+			} else {
+				if p.curData.Rels["alternate"] == nil {
+					p.curData.Rels["alternate"] = []AlternateRel{}
+				}
+				relstring := strings.Join(rels, " ")
+				p.curData.Rels["alternate"] = append(p.curData.Rels["alternates"].([]*AlternateRel), &AlternateRel{
+					URL:      url,
+					Rel:      relstring,
+					Media:    GetAttr(node, "media"),
+					HrefLang: GetAttr(node, "hreflang"),
+					Type:     GetAttr(node, "type"),
+				})
 			}
 		}
 	}
