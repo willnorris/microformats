@@ -179,8 +179,23 @@ func (p *Parser) walk(node *html.Node) {
 				value = new(string)
 				*value = getTextContent(node)
 				buf := &bytes.Buffer{}
-				html.Render(buf, node)
+				for c := node.FirstChild; c != nil; c = c.NextSibling {
+					html.Render(buf, c)
+				}
 				htmlbody = buf.String()
+			case "dt":
+				if value == nil {
+					value = p.getValueClassPattern(node)
+				}
+				if value == nil && isAtom(node, atom.Time, atom.Ins, atom.Del) {
+					value = getAttrPtr(node, "datetime")
+				}
+				if value == nil && isAtom(node, atom.Abbr) {
+					value = getAttrPtr(node, "title")
+				}
+				if value == nil && isAtom(node, atom.Data, atom.Input) {
+					value = getAttrPtr(node, "value")
+				}
 			}
 			if curItem != nil && p.curItem != nil {
 				p.curItem.Properties[prop[2]] = append(p.curItem.Properties[prop[2]], &MicroFormat{

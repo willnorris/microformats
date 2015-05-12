@@ -211,10 +211,19 @@ func (p *Parser) getValueClassPattern(node *html.Node) *string {
 		for _, class := range classes {
 			if class == "value" {
 				valueclass = true
+				break
 			}
 		}
 		if valueclass {
-			values = append(values, getTextContent(c))
+			if isAtom(c, atom.Img, atom.Area) && getAttrPtr(c, "alt") != nil {
+				values = append(values, *getAttrPtr(c, "alt"))
+			} else if isAtom(c, atom.Data) && getAttrPtr(c, "value") != nil {
+				values = append(values, *getAttrPtr(c, "value"))
+			} else if isAtom(c, atom.Abbr) && getAttrPtr(c, "title") != nil {
+				values = append(values, *getAttrPtr(c, "title"))
+			} else {
+				values = append(values, getTextContent(c))
+			}
 		}
 	}
 	if len(values) > 0 {
