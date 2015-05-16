@@ -13,8 +13,8 @@ import (
 )
 
 var (
-	RootClassNames     = regexp.MustCompile("h-\\S*")
-	PropertyClassNames = regexp.MustCompile("(?:^|\\s)(p|u|dt|e)-(\\S*)")
+	RootClassNames     = regexp.MustCompile("\\bh-\\S*")
+	PropertyClassNames = regexp.MustCompile("\\b(p|u|dt|e)-(\\S*)")
 )
 
 type MicroFormat struct {
