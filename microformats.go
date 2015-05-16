@@ -60,6 +60,15 @@ func (p *Parser) Parse(r io.Reader) *Data {
 	return p.curData
 }
 
+func (p *Parser) ParseNode(doc *html.Node) *Data {
+	p.curData = &Data{
+		Items: make([]*MicroFormat, 0),
+		Rels:  make(map[string][]string),
+	}
+	p.walk(doc)
+	return p.curData
+}
+
 func (p *Parser) walk(node *html.Node) {
 	var curItem *MicroFormat
 	var priorItem *MicroFormat
