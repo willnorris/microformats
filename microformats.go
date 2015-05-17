@@ -36,7 +36,7 @@ type Data struct {
 	Items      []*MicroFormat      `json:"items"`
 	Rels       map[string][]string `json:"rels,omitempty"`
 	Alternates []*AlternateRel     `json:"alternates,omitempty"`
-	RelURLs map[string]*RelURL `json:"rel-urls,omitempty"`
+	RelURLs    map[string]*RelURL  `json:"rel-urls,omitempty"`
 }
 
 type AlternateRel struct {
@@ -49,10 +49,10 @@ type AlternateRel struct {
 
 type RelURL struct {
 	Rels     []string `json:"rel,omitempty"`
-	Text    string `json:"text,omitempty"`
-	Media    string `json:"media,omitempty"`
-	HrefLang string `json:"hreflang,omitempty"`
-	Type     string `json:"type,omitempty"`
+	Text     string   `json:"text,omitempty"`
+	Media    string   `json:"media,omitempty"`
+	HrefLang string   `json:"hreflang,omitempty"`
+	Type     string   `json:"type,omitempty"`
 }
 
 func New() *Parser {
@@ -66,8 +66,8 @@ func (p *Parser) Parse(r io.Reader) *Data {
 
 func (p *Parser) ParseNode(doc *html.Node) *Data {
 	p.curData = &Data{
-		Items: make([]*MicroFormat, 0),
-		Rels:  make(map[string][]string),
+		Items:   make([]*MicroFormat, 0),
+		Rels:    make(map[string][]string),
 		RelURLs: make(map[string]*RelURL),
 	}
 	p.walk(doc)
@@ -105,12 +105,13 @@ func (p *Parser) walk(node *html.Node) {
 			if !alternate {
 				for _, relval := range rels {
 					p.curData.Rels[relval] = append(p.curData.Rels[relval], url)
-					p.curData.RelURLs[url] = &RelURL{
-						Text: getTextContent(node),
-						Media:    GetAttr(node, "media"),
-						HrefLang: GetAttr(node, "hreflang"),
-						Type:     GetAttr(node, "type"),
-					}
+				}
+				p.curData.RelURLs[url] = &RelURL{
+					Text:     getTextContent(node),
+					Rels:     rels,
+					Media:    GetAttr(node, "media"),
+					HrefLang: GetAttr(node, "hreflang"),
+					Type:     GetAttr(node, "type"),
 				}
 			} else {
 				relstring := strings.Join(rels, " ")
