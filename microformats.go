@@ -48,7 +48,7 @@ type AlternateRel struct {
 }
 
 type RelURL struct {
-	Rels     []string `json:"rel,omitempty"`
+	Rels     []string `json:"rels,omitempty"`
 	Text     string   `json:"text,omitempty"`
 	Media    string   `json:"media,omitempty"`
 	HrefLang string   `json:"hreflang,omitempty"`
