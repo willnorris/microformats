@@ -14,6 +14,7 @@ var indextemplate = template.Must(template.New("index").Parse(index))
 var parser = microformats.New()
 
 func main() {
+	http.Handle("/parse", http.HandlerFunc(Parse))
 	http.Handle("/", http.HandlerFunc(Index))
 	http.ListenAndServe(":4001", nil)
 
@@ -33,6 +34,14 @@ func Index(rw http.ResponseWriter, req *http.Request) {
 	}
 
 	indextemplate.Execute(rw, data)
+}
+
+func Parse(rw http.ResponseWriter, req *http.Request) {
+	mf := req.FormValue("html")
+	parsed := parser.Parse(strings.NewReader(mf))
+	parsedjson, _ := json.MarshalIndent(parsed, "", "    ")
+	
+	rw.Write(parsedjson)
 }
 
 var index = `<html>
