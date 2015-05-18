@@ -17,11 +17,10 @@ func main() {
 	http.Handle("/parse", http.HandlerFunc(Parse))
 	http.Handle("/", http.HandlerFunc(Index))
 	http.ListenAndServe(":4001", nil)
-
 }
 
 func Index(rw http.ResponseWriter, req *http.Request) {
-	mf := req.FormValue("MF")
+	mf := req.FormValue("html")
 	parsed := parser.Parse(strings.NewReader(mf))
 	parsedjson, _ := json.MarshalIndent(parsed, "", "    ")
 
@@ -37,6 +36,17 @@ func Index(rw http.ResponseWriter, req *http.Request) {
 }
 
 func Parse(rw http.ResponseWriter, req *http.Request) {
+	if req.Method == "GET" {
+		data := struct {
+			MF     string
+			Parsed string
+		}{
+			"",
+			"",
+		}
+		indextemplate.Execute(rw, data)
+		return
+	}
 	mf := req.FormValue("html")
 	parsed := parser.Parse(strings.NewReader(mf))
 	parsedjson, _ := json.MarshalIndent(parsed, "", "    ")
@@ -49,7 +59,7 @@ var index = `<html>
 </head>
 <body>
 <form method="POST">
-<textarea name="MF" style="width: 100%;" rows="15">{{.MF}}</textarea>
+<textarea name="html" style="width: 100%;" rows="15">{{.MF}}</textarea>
 <br>
 <input type="submit" value="Parse"/>
 </form><br>
