@@ -187,13 +187,13 @@ func (p *Parser) getImpliedURL(node *html.Node) string {
 	if url == nil {
 		subnode := getOnlyChildAtomWithAttr(node, atom.A, "href")
 		if subnode != nil && !RootClassNames.MatchString(GetAttr(subnode, "class")) {
-			url = getAttrPtr(node, "href")
+			url = getAttrPtr(subnode, "href")
 		}
 	}
 	if url == nil {
 		subnode := getOnlyChildAtomWithAttr(node, atom.Area, "href")
 		if subnode != nil && !RootClassNames.MatchString(GetAttr(subnode, "class")) {
-			url = getAttrPtr(node, "href")
+			url = getAttrPtr(subnode, "href")
 		}
 	}
 	if url == nil {
