@@ -1,5 +1,3 @@
-// microformats project doc.go
-
 /*
 Microformats V2 parser library
 
