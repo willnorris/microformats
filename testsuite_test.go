@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"net/url"
 	"os"
 	"path"
 	"reflect"
@@ -44,7 +45,10 @@ func TestSuite(t *testing.T) {
 
 func runTest(test string) bool {
 	input, _ := ioutil.ReadFile(path.Join(test, "input.html"))
-	data := parser.Parse(bytes.NewReader(input))
+
+	URL, _ := url.Parse("http://tantek.com/")
+
+	data := parser.Parse(bytes.NewReader(input), URL)
 
 	expectedJson, _ := ioutil.ReadFile(path.Join(test, "output.json"))
 	expected := make(map[string]interface{})

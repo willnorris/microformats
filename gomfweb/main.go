@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"html/template"
 	"net/http"
+	"net/url"
 	"strings"
 
 	"github.com/andyleap/microformats"
@@ -21,14 +22,18 @@ func main() {
 
 func Index(rw http.ResponseWriter, req *http.Request) {
 	mf := req.FormValue("html")
-	parsed := parser.Parse(strings.NewReader(mf))
+	URL := req.FormValue("url")
+	urlparsed, _ := url.Parse(URL)
+	parsed := parser.Parse(strings.NewReader(mf), urlparsed)
 	parsedjson, _ := json.MarshalIndent(parsed, "", "    ")
 
 	data := struct {
 		MF     string
+		URL    string
 		Parsed string
 	}{
 		mf,
+		URL,
 		string(parsedjson),
 	}
 
@@ -39,8 +44,10 @@ func Parse(rw http.ResponseWriter, req *http.Request) {
 	if req.Method == "GET" {
 		data := struct {
 			MF     string
+			URL    string
 			Parsed string
 		}{
+			"",
 			"",
 			"",
 		}
@@ -48,9 +55,11 @@ func Parse(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 	mf := req.FormValue("html")
-	parsed := parser.Parse(strings.NewReader(mf))
+	URL := req.FormValue("url")
+	urlparsed, _ := url.Parse(URL)
+	parsed := parser.Parse(strings.NewReader(mf), urlparsed)
 	parsedjson, _ := json.MarshalIndent(parsed, "", "    ")
-	
+
 	rw.Write(parsedjson)
 }
 
@@ -60,6 +69,8 @@ var index = `<html>
 <body>
 <form method="POST">
 <textarea name="html" style="width: 100%;" rows="15">{{.MF}}</textarea>
+<br>
+<input name="url" type="text" style="width: 100%;" value="{{.URL}}"></input>
 <br>
 <input type="submit" value="Parse"/>
 </form><br>

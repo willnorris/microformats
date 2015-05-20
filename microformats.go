@@ -7,6 +7,7 @@ import (
 	"regexp"
 	"strings"
 	//	"encoding/json"
+	"net/url"
 
 	"golang.org/x/net/html"
 	"golang.org/x/net/html/atom"
@@ -28,8 +29,10 @@ type MicroFormat struct {
 }
 
 type Parser struct {
-	curData *Data
-	curItem *MicroFormat
+	curData   *Data
+	curItem   *MicroFormat
+	base      *url.URL
+	baseFound bool
 }
 
 type Data struct {
@@ -59,17 +62,19 @@ func New() *Parser {
 	return &Parser{}
 }
 
-func (p *Parser) Parse(r io.Reader) *Data {
+func (p *Parser) Parse(r io.Reader, baseURL *url.URL) *Data {
 	doc, _ := html.Parse(r)
-	return p.ParseNode(doc)
+	return p.ParseNode(doc, baseURL)
 }
 
-func (p *Parser) ParseNode(doc *html.Node) *Data {
+func (p *Parser) ParseNode(doc *html.Node, baseURL *url.URL) *Data {
 	p.curData = &Data{
 		Items:   make([]*MicroFormat, 0),
 		Rels:    make(map[string][]string),
 		RelURLs: make(map[string]*RelURL),
 	}
+	p.base = baseURL
+	p.baseFound = false
 	p.walk(doc)
 	return p.curData
 }
@@ -88,11 +93,22 @@ func (p *Parser) walk(node *html.Node) {
 		priorItem = p.curItem
 		p.curItem = curItem
 	}
+	if !p.baseFound && isAtom(node, atom.Base) {
+		if GetAttr(node, "href") != "" {
+			p.base, _ = url.Parse(GetAttr(node, "href"))
+		}
+	}
 
 	if isAtom(node, atom.A, atom.Link) {
 		if rel := GetAttr(node, "rel"); rel != "" {
-			url := GetAttr(node, "href")
-			//TODO: normalize url
+			urlVal := GetAttr(node, "href")
+
+			if p.base != nil {
+				urlParsed, _ := url.Parse(urlVal)
+				urlParsed = p.base.ResolveReference(urlParsed)
+				urlVal = urlParsed.String()
+			}
+
 			rels := strings.Split(rel, " ")
 			alternate := false
 			for i, relval := range rels {
@@ -104,9 +120,9 @@ func (p *Parser) walk(node *html.Node) {
 			}
 			if !alternate {
 				for _, relval := range rels {
-					p.curData.Rels[relval] = append(p.curData.Rels[relval], url)
+					p.curData.Rels[relval] = append(p.curData.Rels[relval], urlVal)
 				}
-				p.curData.RelURLs[url] = &RelURL{
+				p.curData.RelURLs[urlVal] = &RelURL{
 					Text:     getTextContent(node),
 					Rels:     rels,
 					Media:    GetAttr(node, "media"),
@@ -116,7 +132,7 @@ func (p *Parser) walk(node *html.Node) {
 			} else {
 				relstring := strings.Join(rels, " ")
 				p.curData.Alternates = append(p.curData.Alternates, &AlternateRel{
-					URL:      url,
+					URL:      urlVal,
 					Rel:      relstring,
 					Media:    GetAttr(node, "media"),
 					HrefLang: GetAttr(node, "hreflang"),
@@ -184,7 +200,11 @@ func (p *Parser) walk(node *html.Node) {
 				if value == nil && isAtom(node, atom.Object) {
 					value = getAttrPtr(node, "data")
 				}
-				// TODO: normalize
+				if p.base != nil && value != nil {
+					urlParsed, _ := url.Parse(*value)
+					urlParsed = p.base.ResolveReference(urlParsed)
+					*value = urlParsed.String()
+				}
 				// TODO: value-class-pattern
 				if value == nil && isAtom(node, atom.Abbr) {
 					value = getAttrPtr(node, "title")

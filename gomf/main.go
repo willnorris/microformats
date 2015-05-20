@@ -1,10 +1,11 @@
 package main
 
 import (
-	"fmt"
-	"os"
-	"net/http"
 	"encoding/json"
+	"fmt"
+	"net/http"
+	"net/url"
+	"os"
 
 	"github.com/andyleap/microformats"
 )
@@ -16,10 +17,10 @@ func main() {
 		fmt.Println(err)
 		return
 	}
-	data := parser.Parse(resp.Body)
-	
+	urlparsed, _ := url.Parse(os.Args[1])
+	data := parser.Parse(resp.Body, urlparsed)
+
 	json, _ := json.MarshalIndent(data, "", "  ")
 
 	fmt.Println(string(json))
 }
-

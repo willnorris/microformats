@@ -1,6 +1,7 @@
 package microformats
 
 import (
+	"net/url"
 	"regexp"
 	"strings"
 
@@ -180,27 +181,31 @@ func (p *Parser) getImpliedPhoto(node *html.Node) string {
 }
 
 func (p *Parser) getImpliedURL(node *html.Node) string {
-	var url *string
-	if url == nil && isAtom(node, atom.A, atom.Area) {
-		url = getAttrPtr(node, "href")
+	var urlVal *string
+	if urlVal == nil && isAtom(node, atom.A, atom.Area) {
+		urlVal = getAttrPtr(node, "href")
 	}
-	if url == nil {
+	if urlVal == nil {
 		subnode := getOnlyChildAtomWithAttr(node, atom.A, "href")
 		if subnode != nil && !RootClassNames.MatchString(GetAttr(subnode, "class")) {
-			url = getAttrPtr(subnode, "href")
+			urlVal = getAttrPtr(subnode, "href")
 		}
 	}
-	if url == nil {
+	if urlVal == nil {
 		subnode := getOnlyChildAtomWithAttr(node, atom.Area, "href")
 		if subnode != nil && !RootClassNames.MatchString(GetAttr(subnode, "class")) {
-			url = getAttrPtr(subnode, "href")
+			urlVal = getAttrPtr(subnode, "href")
 		}
 	}
-	if url == nil {
+	if urlVal == nil {
 		return ""
 	}
-	//TODO: normalize
-	return *url
+	if p.base != nil {
+		urlParsed, _ := url.Parse(*urlVal)
+		urlParsed = p.base.ResolveReference(urlParsed)
+		*urlVal = urlParsed.String()
+	}
+	return *urlVal
 }
 
 func (p *Parser) getValueClassPattern(node *html.Node) *string {
