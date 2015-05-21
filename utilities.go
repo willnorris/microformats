@@ -146,13 +146,13 @@ func (p *Parser) getImpliedPhoto(node *html.Node) string {
 	}
 	if photo == nil {
 		subnode := getOnlyChildAtomWithAttr(node, atom.Img, "src")
-		if subnode != nil && !RootClassNames.MatchString(GetAttr(subnode, "class")) {
+		if subnode != nil && !HasMatchingClass(subnode, RootClassNames) {
 			photo = getAttrPtr(subnode, "src")
 		}
 	}
 	if photo == nil {
 		subnode := getOnlyChildAtomWithAttr(node, atom.Object, "data")
-		if subnode != nil && !RootClassNames.MatchString(GetAttr(subnode, "class")) {
+		if subnode != nil && !HasMatchingClass(subnode, RootClassNames) {
 			photo = getAttrPtr(subnode, "data")
 		}
 	}
@@ -160,7 +160,7 @@ func (p *Parser) getImpliedPhoto(node *html.Node) string {
 		subnode := getOnlyChild(node)
 		if subnode != nil {
 			subsubnode := getOnlyChildAtomWithAttr(subnode, atom.Img, "src")
-			if subsubnode != nil && !RootClassNames.MatchString(GetAttr(subsubnode, "class")) {
+			if subsubnode != nil && !HasMatchingClass(subsubnode, RootClassNames) {
 				photo = getAttrPtr(subsubnode, "src")
 			}
 		}
@@ -169,7 +169,7 @@ func (p *Parser) getImpliedPhoto(node *html.Node) string {
 		subnode := getOnlyChild(node)
 		if subnode != nil {
 			subsubnode := getOnlyChildAtomWithAttr(subnode, atom.Object, "data")
-			if subsubnode != nil && !RootClassNames.MatchString(GetAttr(subsubnode, "class")) {
+			if subsubnode != nil && !HasMatchingClass(subsubnode, RootClassNames) {
 				photo = getAttrPtr(subsubnode, "data")
 			}
 		}
@@ -192,13 +192,13 @@ func (p *Parser) getImpliedURL(node *html.Node) string {
 	}
 	if urlVal == nil {
 		subnode := getOnlyChildAtomWithAttr(node, atom.A, "href")
-		if subnode != nil && !RootClassNames.MatchString(GetAttr(subnode, "class")) {
+		if subnode != nil && !HasMatchingClass(subnode, RootClassNames) {
 			urlVal = getAttrPtr(subnode, "href")
 		}
 	}
 	if urlVal == nil {
 		subnode := getOnlyChildAtomWithAttr(node, atom.Area, "href")
-		if subnode != nil && !RootClassNames.MatchString(GetAttr(subnode, "class")) {
+		if subnode != nil && !HasMatchingClass(subnode, RootClassNames) {
 			urlVal = getAttrPtr(subnode, "href")
 		}
 	}

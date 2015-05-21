@@ -14,8 +14,8 @@ import (
 )
 
 var (
-	RootClassNames     = regexp.MustCompile("\\bh-\\S*")
-	PropertyClassNames = regexp.MustCompile("\\b(p|u|dt|e)-(\\S*)")
+	RootClassNames     = regexp.MustCompile("^h-\\S*$")
+	PropertyClassNames = regexp.MustCompile("^(p|u|dt|e)-(\\S*)$")
 )
 
 type MicroFormat struct {
@@ -82,7 +82,13 @@ func (p *Parser) ParseNode(doc *html.Node, baseURL *url.URL) *Data {
 func (p *Parser) walk(node *html.Node) {
 	var curItem *MicroFormat
 	var priorItem *MicroFormat
-	rootclasses := RootClassNames.FindAllString(GetAttr(node, "class"), -1)
+	rootclasses := make([]string, 0)
+	classes := GetClasses(node)
+	for _, class := range classes {
+		if RootClassNames.MatchString(class) {
+			rootclasses = append(rootclasses, class)
+		}
+	}
 	if len(rootclasses) > 0 {
 		curItem = &MicroFormat{}
 		curItem.Type = rootclasses
@@ -170,8 +176,13 @@ func (p *Parser) walk(node *html.Node) {
 		}
 		p.curItem = priorItem
 	}
-
-	propertyclasses := PropertyClassNames.FindAllStringSubmatch(GetAttr(node, "class"), -1)
+	propertyclasses := make([][]string, 0)
+	for _, class := range classes {
+		match := PropertyClassNames.FindStringSubmatch(class)
+		if match != nil {
+			propertyclasses = append(propertyclasses, match)
+		}
+	}
 	if len(propertyclasses) > 0 {
 		for _, prop := range propertyclasses {
 
@@ -263,6 +274,25 @@ func (p *Parser) walk(node *html.Node) {
 			p.curItem.Children = append(p.curItem.Children, curItem)
 		}
 	}
+}
+
+func GetClasses(node *html.Node) []string {
+	for _, attr := range node.Attr {
+		if strings.EqualFold(attr.Key, "class") {
+			return strings.Split(attr.Val, " ")
+		}
+	}
+	return []string{}
+}
+
+func HasMatchingClass(node *html.Node, regex *regexp.Regexp) bool {
+	classes := GetClasses(node)
+	for _, class := range classes {
+		if regex.MatchString(class) {
+			return true
+		}
+	}
+	return false
 }
 
 func GetAttr(node *html.Node, name string) string {
