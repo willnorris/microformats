@@ -177,6 +177,11 @@ func (p *Parser) getImpliedPhoto(node *html.Node) string {
 	if photo == nil {
 		return ""
 	}
+	if p.base != nil {
+		urlParsed, _ := url.Parse(*photo)
+		urlParsed = p.base.ResolveReference(urlParsed)
+		*photo = urlParsed.String()
+	}
 	return *photo
 }
 
