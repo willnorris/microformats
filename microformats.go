@@ -95,7 +95,10 @@ func (p *Parser) walk(node *html.Node) {
 	}
 	if !p.baseFound && isAtom(node, atom.Base) {
 		if GetAttr(node, "href") != "" {
-			p.base, _ = url.Parse(GetAttr(node, "href"))
+			newbase, _ := url.Parse(GetAttr(node, "href"))
+			newbase = p.base.ResolveReference(newbase)
+			p.base = newbase
+			p.baseFound = true
 		}
 	}
 
