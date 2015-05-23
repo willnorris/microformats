@@ -37,7 +37,7 @@ type Parser struct {
 
 type Data struct {
 	Items      []*MicroFormat      `json:"items"`
-	Rels       map[string][]string `json:"rels,omitempty"`
+	Rels       map[string][]string `json:"rels"`
 	Alternates []*AlternateRel     `json:"alternates,omitempty"`
 	RelURLs    map[string]*RelURL  `json:"rel-urls,omitempty"`
 }
