@@ -27,11 +27,8 @@ func getTextContent(node *html.Node) string {
 	buf := make([]string, 0)
 	for c := node.FirstChild; c != nil; c = c.NextSibling {
 		buf = append(buf, getTextContent(c))
-		if isAtom(c, blockLevelTags...) {
-			buf = append(buf, " ")
-		}
 	}
-	return strings.TrimSpace(whiteSpaceRegex.ReplaceAllString(strings.Join(buf, ""), " "))
+	return strings.Join(buf, "")
 }
 
 func getOnlyChild(node *html.Node) *html.Node {
