@@ -19,16 +19,16 @@ var parser = microformats.New()
 func TestSuite(t *testing.T) {
 	passes := 0
 	count := 0
-	testsdir, _ := os.Open("tests")
+	testsdir, _ := os.Open("testdata")
 	suites, _ := testsdir.Readdir(0)
 	for _, suite := range suites {
 		if suite.IsDir() {
-			suitedir, _ := os.Open(path.Join("tests", suite.Name()))
+			suitedir, _ := os.Open(path.Join("testsdata", suite.Name()))
 			suitedirs, _ := suitedir.Readdir(0)
 			for _, test := range suitedirs {
 				if test.IsDir() {
 					count = count + 1
-					if runTest(path.Join("tests", suite.Name(), test.Name())) {
+					if runTest(path.Join("testsdata", suite.Name(), test.Name())) {
 						fmt.Printf("PASS: %s/%s\n", suite.Name(), test.Name())
 						passes = passes + 1
 					} else {
