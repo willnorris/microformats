@@ -17,6 +17,7 @@ import (
 var (
 	rootClassNames     = regexp.MustCompile(`^h-\S*$`)
 	propertyClassNames = regexp.MustCompile(`^(p|u|dt|e)-(\S*)$`)
+	whiteSpaceRegex    = regexp.MustCompile(`(\t|\n|\r|[ ]|&nbsp;)+`)
 )
 
 // Microformat specifies a single microformat object and its properties.  It
@@ -303,6 +304,223 @@ func isAtom(node *html.Node, atoms ...atom.Atom) bool {
 	return false
 }
 
-func parseValueClass(node *html.Node) string {
-	return ""
+func getTextContent(node *html.Node) string {
+	if node.Type == html.TextNode {
+		return node.Data
+	}
+	var buf []string
+	for c := node.FirstChild; c != nil; c = c.NextSibling {
+		buf = append(buf, getTextContent(c))
+	}
+	return strings.Join(buf, "")
+}
+
+func getOnlyChild(node *html.Node) *html.Node {
+	var n *html.Node
+	for c := node.FirstChild; c != nil; c = c.NextSibling {
+		if c.Type == html.ElementNode {
+			if n == nil {
+				n = c
+			} else {
+				return nil
+			}
+		}
+	}
+	return n
+}
+
+func getOnlyChildAtom(node *html.Node, atom atom.Atom) *html.Node {
+	var n *html.Node
+	for c := node.FirstChild; c != nil; c = c.NextSibling {
+		if c.Type == html.ElementNode && c.DataAtom == atom {
+			if n == nil {
+				n = c
+			} else {
+				return nil
+			}
+		}
+	}
+	return n
+}
+
+func getOnlyChildAtomWithAttr(node *html.Node, atom atom.Atom, attr string) *html.Node {
+	var n *html.Node
+	for c := node.FirstChild; c != nil; c = c.NextSibling {
+		if c.Type == html.ElementNode && c.DataAtom == atom && getAttrPtr(c, attr) != nil {
+			if n == nil {
+				n = c
+			} else {
+				return nil
+			}
+		}
+	}
+	return n
+}
+
+func (p *parser) getImpliedName(node *html.Node) string {
+	var name *string
+	if isAtom(node, atom.Img, atom.Area) {
+		name = getAttrPtr(node, "alt")
+	}
+	if name == nil && isAtom(node, atom.Abbr) {
+		name = getAttrPtr(node, "title")
+	}
+	if name == nil {
+		subnode := getOnlyChild(node)
+		if subnode != nil && subnode.DataAtom == atom.Img && !rootClassNames.MatchString(getAttr(subnode, "class")) {
+			name = getAttrPtr(subnode, "alt")
+		}
+	}
+	if name == nil {
+		subnode := getOnlyChild(node)
+		if subnode != nil && subnode.DataAtom == atom.Area && !rootClassNames.MatchString(getAttr(subnode, "class")) {
+			name = getAttrPtr(subnode, "alt")
+		}
+	}
+	if name == nil {
+		subnode := getOnlyChild(node)
+		if subnode != nil && subnode.DataAtom == atom.Abbr {
+			name = getAttrPtr(subnode, "title")
+		}
+	}
+	if name == nil {
+		subnode := getOnlyChild(node)
+		if subnode != nil {
+			subsubnode := getOnlyChild(node)
+			if subsubnode != nil && subnode.DataAtom == atom.Img && !rootClassNames.MatchString(getAttr(subsubnode, "class")) {
+				name = getAttrPtr(subsubnode, "alt")
+			}
+		}
+	}
+	if name == nil {
+		subnode := getOnlyChild(node)
+		if subnode != nil {
+			subsubnode := getOnlyChild(node)
+			if subsubnode != nil && subnode.DataAtom == atom.Area && !rootClassNames.MatchString(getAttr(subsubnode, "class")) {
+				name = getAttrPtr(subsubnode, "alt")
+			}
+		}
+	}
+	if name == nil {
+		subnode := getOnlyChild(node)
+		if subnode != nil {
+			subsubnode := getOnlyChild(node)
+			if subsubnode != nil && subnode.DataAtom == atom.Abbr {
+				name = getAttrPtr(subsubnode, "title")
+			}
+		}
+	}
+	if name == nil {
+		name = new(string)
+		*name = getTextContent(node)
+	}
+	return strings.TrimSpace(whiteSpaceRegex.ReplaceAllString(*name, " "))
+}
+
+func (p *parser) getImpliedPhoto(node *html.Node) string {
+	var photo *string
+	if photo == nil && isAtom(node, atom.Img) {
+		photo = getAttrPtr(node, "src")
+	}
+	if photo == nil && isAtom(node, atom.Object) {
+		photo = getAttrPtr(node, "data")
+	}
+	if photo == nil {
+		subnode := getOnlyChildAtomWithAttr(node, atom.Img, "src")
+		if subnode != nil && !hasMatchingClass(subnode, rootClassNames) {
+			photo = getAttrPtr(subnode, "src")
+		}
+	}
+	if photo == nil {
+		subnode := getOnlyChildAtomWithAttr(node, atom.Object, "data")
+		if subnode != nil && !hasMatchingClass(subnode, rootClassNames) {
+			photo = getAttrPtr(subnode, "data")
+		}
+	}
+	if photo == nil {
+		subnode := getOnlyChild(node)
+		if subnode != nil {
+			subsubnode := getOnlyChildAtomWithAttr(subnode, atom.Img, "src")
+			if subsubnode != nil && !hasMatchingClass(subsubnode, rootClassNames) {
+				photo = getAttrPtr(subsubnode, "src")
+			}
+		}
+	}
+	if photo == nil {
+		subnode := getOnlyChild(node)
+		if subnode != nil {
+			subsubnode := getOnlyChildAtomWithAttr(subnode, atom.Object, "data")
+			if subsubnode != nil && !hasMatchingClass(subsubnode, rootClassNames) {
+				photo = getAttrPtr(subsubnode, "data")
+			}
+		}
+	}
+	if photo == nil {
+		return ""
+	}
+	if p.base != nil {
+		urlParsed, _ := url.Parse(*photo)
+		urlParsed = p.base.ResolveReference(urlParsed)
+		*photo = urlParsed.String()
+	}
+	return *photo
+}
+
+func (p *parser) getImpliedURL(node *html.Node) string {
+	var urlVal *string
+	if urlVal == nil && isAtom(node, atom.A, atom.Area) {
+		urlVal = getAttrPtr(node, "href")
+	}
+	if urlVal == nil {
+		subnode := getOnlyChildAtomWithAttr(node, atom.A, "href")
+		if subnode != nil && !hasMatchingClass(subnode, rootClassNames) {
+			urlVal = getAttrPtr(subnode, "href")
+		}
+	}
+	if urlVal == nil {
+		subnode := getOnlyChildAtomWithAttr(node, atom.Area, "href")
+		if subnode != nil && !hasMatchingClass(subnode, rootClassNames) {
+			urlVal = getAttrPtr(subnode, "href")
+		}
+	}
+	if urlVal == nil {
+		return ""
+	}
+	if p.base != nil {
+		urlParsed, _ := url.Parse(*urlVal)
+		urlParsed = p.base.ResolveReference(urlParsed)
+		*urlVal = urlParsed.String()
+	}
+	return *urlVal
+}
+
+func (p *parser) getValueClassPattern(node *html.Node) *string {
+	var values []string
+	for c := node.FirstChild; c != nil; c = c.NextSibling {
+		classes := strings.Split(getAttr(c, "class"), " ")
+		valueclass := false
+		for _, class := range classes {
+			if class == "value" {
+				valueclass = true
+				break
+			}
+		}
+		if valueclass {
+			if isAtom(c, atom.Img, atom.Area) && getAttrPtr(c, "alt") != nil {
+				values = append(values, *getAttrPtr(c, "alt"))
+			} else if isAtom(c, atom.Data) && getAttrPtr(c, "value") != nil {
+				values = append(values, *getAttrPtr(c, "value"))
+			} else if isAtom(c, atom.Abbr) && getAttrPtr(c, "title") != nil {
+				values = append(values, *getAttrPtr(c, "title"))
+			} else {
+				values = append(values, getTextContent(c))
+			}
+		}
+	}
+	if len(values) > 0 {
+		var val string
+		val = strings.Join(values, "")
+		return &val
+	}
+	return nil
 }
