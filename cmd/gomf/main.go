@@ -11,14 +11,13 @@ import (
 )
 
 func main() {
-	parser := microformats.New()
 	resp, err := http.Get(os.Args[1])
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 	urlparsed, _ := url.Parse(os.Args[1])
-	data := parser.Parse(resp.Body, urlparsed)
+	data := microformats.Parse(resp.Body, urlparsed)
 
 	json, _ := json.MarshalIndent(data, "", "  ")
 

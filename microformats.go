@@ -1,46 +1,46 @@
-// microformats project microformats.go
-package microformats
+// Package microformats provides a microformats V2 parser.
+//
+// See also: http://microformats.org/wiki/microformats2
+package microformats // import "willnorris.com/go/microformats"
 
 import (
 	"bytes"
 	"io"
+	"net/url"
 	"regexp"
 	"strings"
-	//	"encoding/json"
-	"net/url"
 
 	"golang.org/x/net/html"
 	"golang.org/x/net/html/atom"
 )
 
 var (
-	RootClassNames     = regexp.MustCompile("^h-\\S*$")
-	PropertyClassNames = regexp.MustCompile("^(p|u|dt|e)-(\\S*)$")
+	rootClassNames     = regexp.MustCompile(`^h-\S*$`)
+	propertyClassNames = regexp.MustCompile(`^(p|u|dt|e)-(\S*)$`)
 )
 
-type MicroFormat struct {
+// Microformat specifies a single microformat object and its properties.  It
+// may represent a person, an address, a blog post, etc.
+type Microformat struct {
 	Value      string                   `json:"value,omitempty"`
 	HTML       string                   `json:"html,omitempty"`
 	Type       []string                 `json:"type"`
 	Properties map[string][]interface{} `json:"properties"`
 	Shape      string                   `json:"shape,omitempty"`
 	Coords     string                   `json:"coords,omitempty"`
-	Children   []*MicroFormat           `json:"children,omitempty"`
+	Children   []*Microformat           `json:"children,omitempty"`
 }
 
-type Parser struct {
-	curData   *Data
-	curItem   *MicroFormat
-	base      *url.URL
-	baseFound bool
-}
-
+// Data specifies all of the microformats and data parsed from a single HTML
+// page.
 type Data struct {
-	Items   []*MicroFormat      `json:"items"`
+	Items   []*Microformat      `json:"items"`
 	Rels    map[string][]string `json:"rels"`
 	RelURLs map[string]*RelURL  `json:"rel-urls"`
 }
 
+// RelURL represents the attributes of a URL.  The URL value itself is the map
+// key in the RelURLs field of the Data type.
 type RelURL struct {
 	Rels     []string `json:"rels,omitempty"`
 	Text     string   `json:"text,omitempty"`
@@ -49,18 +49,27 @@ type RelURL struct {
 	Type     string   `json:"type,omitempty"`
 }
 
-func New() *Parser {
-	return &Parser{}
+type parser struct {
+	curData   *Data
+	curItem   *Microformat
+	base      *url.URL
+	baseFound bool
 }
 
-func (p *Parser) Parse(r io.Reader, baseURL *url.URL) *Data {
+// Parse the microformats found in the HTML document read from r.  baseURL is
+// the URL this document was retrieved from which is used to resolve any
+// relative URLs.
+func Parse(r io.Reader, baseURL *url.URL) *Data {
 	doc, _ := html.Parse(r)
-	return p.ParseNode(doc, baseURL)
+	return ParseNode(doc, baseURL)
 }
 
-func (p *Parser) ParseNode(doc *html.Node, baseURL *url.URL) *Data {
+// ParseNode parses the microformats found in doc.  baseURL is the URL this
+// document was retrieved from which is used to resolve any relative URLs.
+func ParseNode(doc *html.Node, baseURL *url.URL) *Data {
+	p := new(parser)
 	p.curData = &Data{
-		Items:   make([]*MicroFormat, 0),
+		Items:   make([]*Microformat, 0),
 		Rels:    make(map[string][]string),
 		RelURLs: make(map[string]*RelURL),
 	}
@@ -70,18 +79,18 @@ func (p *Parser) ParseNode(doc *html.Node, baseURL *url.URL) *Data {
 	return p.curData
 }
 
-func (p *Parser) walk(node *html.Node) {
-	var curItem *MicroFormat
-	var priorItem *MicroFormat
-	rootclasses := make([]string, 0)
-	classes := GetClasses(node)
+func (p *parser) walk(node *html.Node) {
+	var curItem *Microformat
+	var priorItem *Microformat
+	var rootclasses []string
+	classes := getClasses(node)
 	for _, class := range classes {
-		if RootClassNames.MatchString(class) {
+		if rootClassNames.MatchString(class) {
 			rootclasses = append(rootclasses, class)
 		}
 	}
 	if len(rootclasses) > 0 {
-		curItem = &MicroFormat{}
+		curItem = &Microformat{}
 		curItem.Type = rootclasses
 		curItem.Properties = make(map[string][]interface{})
 		if p.curItem == nil {
@@ -91,8 +100,8 @@ func (p *Parser) walk(node *html.Node) {
 		p.curItem = curItem
 	}
 	if !p.baseFound && isAtom(node, atom.Base) {
-		if GetAttr(node, "href") != "" {
-			newbase, _ := url.Parse(GetAttr(node, "href"))
+		if getAttr(node, "href") != "" {
+			newbase, _ := url.Parse(getAttr(node, "href"))
 			newbase = p.base.ResolveReference(newbase)
 			p.base = newbase
 			p.baseFound = true
@@ -100,8 +109,8 @@ func (p *Parser) walk(node *html.Node) {
 	}
 
 	if isAtom(node, atom.A, atom.Link) {
-		if rel := GetAttr(node, "rel"); rel != "" {
-			urlVal := GetAttr(node, "href")
+		if rel := getAttr(node, "rel"); rel != "" {
+			urlVal := getAttr(node, "href")
 
 			if p.base != nil {
 				urlParsed, _ := url.Parse(urlVal)
@@ -116,9 +125,9 @@ func (p *Parser) walk(node *html.Node) {
 			p.curData.RelURLs[urlVal] = &RelURL{
 				Text:     getTextContent(node),
 				Rels:     rels,
-				Media:    GetAttr(node, "media"),
-				HrefLang: GetAttr(node, "hreflang"),
-				Type:     GetAttr(node, "type"),
+				Media:    getAttr(node, "media"),
+				HrefLang: getAttr(node, "hreflang"),
+				Type:     getAttr(node, "type"),
 			}
 		}
 	}
@@ -148,9 +157,9 @@ func (p *Parser) walk(node *html.Node) {
 		}
 		p.curItem = priorItem
 	}
-	propertyclasses := make([][]string, 0)
+	var propertyclasses [][]string
 	for _, class := range classes {
-		match := PropertyClassNames.FindStringSubmatch(class)
+		match := propertyClassNames.FindStringSubmatch(class)
 		if match != nil {
 			propertyclasses = append(propertyclasses, match)
 		}
@@ -225,7 +234,7 @@ func (p *Parser) walk(node *html.Node) {
 				}
 			}
 			if curItem != nil && p.curItem != nil {
-				p.curItem.Properties[prop[2]] = append(p.curItem.Properties[prop[2]], &MicroFormat{
+				p.curItem.Properties[prop[2]] = append(p.curItem.Properties[prop[2]], &Microformat{
 					Type:       curItem.Type,
 					Properties: curItem.Properties,
 					Coords:     curItem.Coords,
@@ -248,7 +257,7 @@ func (p *Parser) walk(node *html.Node) {
 	}
 }
 
-func GetClasses(node *html.Node) []string {
+func getClasses(node *html.Node) []string {
 	for _, attr := range node.Attr {
 		if strings.EqualFold(attr.Key, "class") {
 			return strings.Split(attr.Val, " ")
@@ -257,8 +266,8 @@ func GetClasses(node *html.Node) []string {
 	return []string{}
 }
 
-func HasMatchingClass(node *html.Node, regex *regexp.Regexp) bool {
-	classes := GetClasses(node)
+func hasMatchingClass(node *html.Node, regex *regexp.Regexp) bool {
+	classes := getClasses(node)
 	for _, class := range classes {
 		if regex.MatchString(class) {
 			return true
@@ -267,7 +276,7 @@ func HasMatchingClass(node *html.Node, regex *regexp.Regexp) bool {
 	return false
 }
 
-func GetAttr(node *html.Node, name string) string {
+func getAttr(node *html.Node, name string) string {
 	for _, attr := range node.Attr {
 		if strings.EqualFold(attr.Key, name) {
 			return attr.Val
@@ -294,7 +303,6 @@ func isAtom(node *html.Node, atoms ...atom.Atom) bool {
 	return false
 }
 
-func ParseValueClass(node *html.Node) string {
-
+func parseValueClass(node *html.Node) string {
 	return ""
 }

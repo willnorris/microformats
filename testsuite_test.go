@@ -13,8 +13,6 @@ import (
 	"willnorris.com/go/microformats"
 )
 
-var parser = microformats.New()
-
 var tests = []string{
 	// "microformats-v2/h-adr/geo",
 	// "microformats-v2/h-adr/geourl",
@@ -112,7 +110,7 @@ func runTest(t *testing.T, test string) bool {
 	}
 
 	URL, _ := url.Parse("http://tantek.com/")
-	data := parser.Parse(bytes.NewReader(input), URL)
+	data := microformats.Parse(bytes.NewReader(input), URL)
 
 	expectedJSON, err := ioutil.ReadFile(test + ".json")
 	if err != nil {

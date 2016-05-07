@@ -9,7 +9,7 @@ import (
 	"golang.org/x/net/html/atom"
 )
 
-var whiteSpaceRegex = regexp.MustCompile("(\t|\n|\r|[ ]|&nbsp;)+")
+var whiteSpaceRegex = regexp.MustCompile(`(\t|\n|\r|[ ]|&nbsp;)+`)
 
 var blockLevelTags = []atom.Atom{atom.H1, atom.H2, atom.H3, atom.H4, atom.H5,
 	atom.H6, atom.P, atom.Hr, atom.Pre, atom.Table, atom.Address, atom.Article,
@@ -24,7 +24,7 @@ func getTextContent(node *html.Node) string {
 	if node.Type == html.TextNode {
 		return node.Data
 	}
-	buf := make([]string, 0)
+	var buf []string
 	for c := node.FirstChild; c != nil; c = c.NextSibling {
 		buf = append(buf, getTextContent(c))
 	}
@@ -73,7 +73,7 @@ func getOnlyChildAtomWithAttr(node *html.Node, atom atom.Atom, attr string) *htm
 	return n
 }
 
-func (p *Parser) getImpliedName(node *html.Node) string {
+func (p *parser) getImpliedName(node *html.Node) string {
 	var name *string
 	if isAtom(node, atom.Img, atom.Area) {
 		name = getAttrPtr(node, "alt")
@@ -83,13 +83,13 @@ func (p *Parser) getImpliedName(node *html.Node) string {
 	}
 	if name == nil {
 		subnode := getOnlyChild(node)
-		if subnode != nil && subnode.DataAtom == atom.Img && !RootClassNames.MatchString(GetAttr(subnode, "class")) {
+		if subnode != nil && subnode.DataAtom == atom.Img && !rootClassNames.MatchString(getAttr(subnode, "class")) {
 			name = getAttrPtr(subnode, "alt")
 		}
 	}
 	if name == nil {
 		subnode := getOnlyChild(node)
-		if subnode != nil && subnode.DataAtom == atom.Area && !RootClassNames.MatchString(GetAttr(subnode, "class")) {
+		if subnode != nil && subnode.DataAtom == atom.Area && !rootClassNames.MatchString(getAttr(subnode, "class")) {
 			name = getAttrPtr(subnode, "alt")
 		}
 	}
@@ -103,7 +103,7 @@ func (p *Parser) getImpliedName(node *html.Node) string {
 		subnode := getOnlyChild(node)
 		if subnode != nil {
 			subsubnode := getOnlyChild(node)
-			if subsubnode != nil && subnode.DataAtom == atom.Img && !RootClassNames.MatchString(GetAttr(subsubnode, "class")) {
+			if subsubnode != nil && subnode.DataAtom == atom.Img && !rootClassNames.MatchString(getAttr(subsubnode, "class")) {
 				name = getAttrPtr(subsubnode, "alt")
 			}
 		}
@@ -112,7 +112,7 @@ func (p *Parser) getImpliedName(node *html.Node) string {
 		subnode := getOnlyChild(node)
 		if subnode != nil {
 			subsubnode := getOnlyChild(node)
-			if subsubnode != nil && subnode.DataAtom == atom.Area && !RootClassNames.MatchString(GetAttr(subsubnode, "class")) {
+			if subsubnode != nil && subnode.DataAtom == atom.Area && !rootClassNames.MatchString(getAttr(subsubnode, "class")) {
 				name = getAttrPtr(subsubnode, "alt")
 			}
 		}
@@ -133,7 +133,7 @@ func (p *Parser) getImpliedName(node *html.Node) string {
 	return strings.TrimSpace(whiteSpaceRegex.ReplaceAllString(*name, " "))
 }
 
-func (p *Parser) getImpliedPhoto(node *html.Node) string {
+func (p *parser) getImpliedPhoto(node *html.Node) string {
 	var photo *string
 	if photo == nil && isAtom(node, atom.Img) {
 		photo = getAttrPtr(node, "src")
@@ -143,13 +143,13 @@ func (p *Parser) getImpliedPhoto(node *html.Node) string {
 	}
 	if photo == nil {
 		subnode := getOnlyChildAtomWithAttr(node, atom.Img, "src")
-		if subnode != nil && !HasMatchingClass(subnode, RootClassNames) {
+		if subnode != nil && !hasMatchingClass(subnode, rootClassNames) {
 			photo = getAttrPtr(subnode, "src")
 		}
 	}
 	if photo == nil {
 		subnode := getOnlyChildAtomWithAttr(node, atom.Object, "data")
-		if subnode != nil && !HasMatchingClass(subnode, RootClassNames) {
+		if subnode != nil && !hasMatchingClass(subnode, rootClassNames) {
 			photo = getAttrPtr(subnode, "data")
 		}
 	}
@@ -157,7 +157,7 @@ func (p *Parser) getImpliedPhoto(node *html.Node) string {
 		subnode := getOnlyChild(node)
 		if subnode != nil {
 			subsubnode := getOnlyChildAtomWithAttr(subnode, atom.Img, "src")
-			if subsubnode != nil && !HasMatchingClass(subsubnode, RootClassNames) {
+			if subsubnode != nil && !hasMatchingClass(subsubnode, rootClassNames) {
 				photo = getAttrPtr(subsubnode, "src")
 			}
 		}
@@ -166,7 +166,7 @@ func (p *Parser) getImpliedPhoto(node *html.Node) string {
 		subnode := getOnlyChild(node)
 		if subnode != nil {
 			subsubnode := getOnlyChildAtomWithAttr(subnode, atom.Object, "data")
-			if subsubnode != nil && !HasMatchingClass(subsubnode, RootClassNames) {
+			if subsubnode != nil && !hasMatchingClass(subsubnode, rootClassNames) {
 				photo = getAttrPtr(subsubnode, "data")
 			}
 		}
@@ -182,20 +182,20 @@ func (p *Parser) getImpliedPhoto(node *html.Node) string {
 	return *photo
 }
 
-func (p *Parser) getImpliedURL(node *html.Node) string {
+func (p *parser) getImpliedURL(node *html.Node) string {
 	var urlVal *string
 	if urlVal == nil && isAtom(node, atom.A, atom.Area) {
 		urlVal = getAttrPtr(node, "href")
 	}
 	if urlVal == nil {
 		subnode := getOnlyChildAtomWithAttr(node, atom.A, "href")
-		if subnode != nil && !HasMatchingClass(subnode, RootClassNames) {
+		if subnode != nil && !hasMatchingClass(subnode, rootClassNames) {
 			urlVal = getAttrPtr(subnode, "href")
 		}
 	}
 	if urlVal == nil {
 		subnode := getOnlyChildAtomWithAttr(node, atom.Area, "href")
-		if subnode != nil && !HasMatchingClass(subnode, RootClassNames) {
+		if subnode != nil && !hasMatchingClass(subnode, rootClassNames) {
 			urlVal = getAttrPtr(subnode, "href")
 		}
 	}
@@ -210,10 +210,10 @@ func (p *Parser) getImpliedURL(node *html.Node) string {
 	return *urlVal
 }
 
-func (p *Parser) getValueClassPattern(node *html.Node) *string {
+func (p *parser) getValueClassPattern(node *html.Node) *string {
 	var values []string
 	for c := node.FirstChild; c != nil; c = c.NextSibling {
-		classes := strings.Split(GetAttr(c, "class"), " ")
+		classes := strings.Split(getAttr(c, "class"), " ")
 		valueclass := false
 		for _, class := range classes {
 			if class == "value" {

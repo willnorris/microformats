@@ -12,8 +12,6 @@ import (
 
 var indextemplate = template.Must(template.New("index").Parse(index))
 
-var parser = microformats.New()
-
 func main() {
 	http.Handle("/parse", http.HandlerFunc(Parse))
 	http.Handle("/", http.HandlerFunc(Index))
@@ -24,7 +22,7 @@ func Index(rw http.ResponseWriter, req *http.Request) {
 	mf := req.FormValue("html")
 	URL := req.FormValue("url")
 	urlparsed, _ := url.Parse(URL)
-	parsed := parser.Parse(strings.NewReader(mf), urlparsed)
+	parsed := microformats.Parse(strings.NewReader(mf), urlparsed)
 	parsedjson, _ := json.MarshalIndent(parsed, "", "    ")
 
 	data := struct {
@@ -57,7 +55,7 @@ func Parse(rw http.ResponseWriter, req *http.Request) {
 	mf := req.FormValue("html")
 	URL := req.FormValue("url")
 	urlparsed, _ := url.Parse(URL)
-	parsed := parser.Parse(strings.NewReader(mf), urlparsed)
+	parsed := microformats.Parse(strings.NewReader(mf), urlparsed)
 	parsedjson, _ := json.MarshalIndent(parsed, "", "    ")
 
 	rw.Write(parsedjson)
