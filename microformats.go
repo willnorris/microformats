@@ -36,18 +36,9 @@ type Parser struct {
 }
 
 type Data struct {
-	Items      []*MicroFormat      `json:"items"`
-	Rels       map[string][]string `json:"rels"`
-	Alternates []*AlternateRel     `json:"alternates,omitempty"`
-	RelURLs    map[string]*RelURL  `json:"rel-urls"`
-}
-
-type AlternateRel struct {
-	URL      string `json:"url,omitempty"`
-	Rel      string `json:"rel,omitempty"`
-	Media    string `json:"media,omitempty"`
-	HrefLang string `json:"hreflang,omitempty"`
-	Type     string `json:"type,omitempty"`
+	Items   []*MicroFormat      `json:"items"`
+	Rels    map[string][]string `json:"rels"`
+	RelURLs map[string]*RelURL  `json:"rel-urls"`
 }
 
 type RelURL struct {
@@ -119,34 +110,15 @@ func (p *Parser) walk(node *html.Node) {
 			}
 
 			rels := strings.Split(rel, " ")
-			alternate := false
-			for i, relval := range rels {
-				if relval == "alternate" {
-					alternate = true
-					rels = append(rels[:i], rels[i+1:]...)
-					break
-				}
+			for _, relval := range rels {
+				p.curData.Rels[relval] = append(p.curData.Rels[relval], urlVal)
 			}
-			if !alternate {
-				for _, relval := range rels {
-					p.curData.Rels[relval] = append(p.curData.Rels[relval], urlVal)
-				}
-				p.curData.RelURLs[urlVal] = &RelURL{
-					Text:     getTextContent(node),
-					Rels:     rels,
-					Media:    GetAttr(node, "media"),
-					HrefLang: GetAttr(node, "hreflang"),
-					Type:     GetAttr(node, "type"),
-				}
-			} else {
-				relstring := strings.Join(rels, " ")
-				p.curData.Alternates = append(p.curData.Alternates, &AlternateRel{
-					URL:      urlVal,
-					Rel:      relstring,
-					Media:    GetAttr(node, "media"),
-					HrefLang: GetAttr(node, "hreflang"),
-					Type:     GetAttr(node, "type"),
-				})
+			p.curData.RelURLs[urlVal] = &RelURL{
+				Text:     getTextContent(node),
+				Rels:     rels,
+				Media:    GetAttr(node, "media"),
+				HrefLang: GetAttr(node, "hreflang"),
+				Type:     GetAttr(node, "type"),
 			}
 		}
 	}
