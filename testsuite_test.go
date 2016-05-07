@@ -6,8 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/url"
-	"os"
-	"path"
+	"path/filepath"
 	"reflect"
 	"testing"
 
@@ -16,47 +15,135 @@ import (
 
 var parser = microformats.New()
 
+var tests = []string{
+	// "microformats-v2/h-adr/change-log",
+	// "microformats-v2/h-adr/geo",
+	// "microformats-v2/h-adr/geourl",
+	// "microformats-v2/h-adr/justaname",
+	// "microformats-v2/h-adr/simpleproperties",
+	// "microformats-v2/h-as-note/note",
+	// "microformats-v2/h-card/baseurl",
+	// "microformats-v2/h-card/change-log",
+	// "microformats-v2/h-card/childimplied",
+	// "microformats-v2/h-card/extendeddescription",
+	// "microformats-v2/h-card/hcard",
+	// "microformats-v2/h-card/horghcard",
+	// "microformats-v2/h-card/hyperlinkedphoto",
+	// "microformats-v2/h-card/impliedname",
+	// "microformats-v2/h-card/impliedphoto",
+	// "microformats-v2/h-card/impliedurl",
+	// "microformats-v2/h-card/justahyperlink",
+	// "microformats-v2/h-card/justaname",
+	// "microformats-v2/h-card/nested",
+	// "microformats-v2/h-card/p-property",
+	// "microformats-v2/h-card/relativeurls",
+	// "microformats-v2/h-entry/change-log",
+	// "microformats-v2/h-entry/impliedvalue-nested",
+	// "microformats-v2/h-entry/justahyperlink",
+	// "microformats-v2/h-entry/justaname",
+	// "microformats-v2/h-entry/summarycontent",
+	// "microformats-v2/h-entry/u-property",
+	// "microformats-v2/h-entry/urlincontent",
+	// "microformats-v2/h-event/ampm",
+	// "microformats-v2/h-event/attendees",
+	// "microformats-v2/h-event/change-log",
+	// "microformats-v2/h-event/combining",
+	// "microformats-v2/h-event/concatenate",
+	// "microformats-v2/h-event/dates",
+	// "microformats-v2/h-event/dt-property",
+	// "microformats-v2/h-event/justahyperlink",
+	// "microformats-v2/h-event/justaname",
+	// "microformats-v2/h-event/time",
+	// "microformats-v2/h-feed/implied-title",
+	// "microformats-v2/h-feed/simple",
+	// "microformats-v2/h-geo/abbrpattern",
+	// "microformats-v2/h-geo/altitude",
+	// "microformats-v2/h-geo/change-log",
+	// "microformats-v2/h-geo/hidden",
+	// "microformats-v2/h-geo/justaname",
+	// "microformats-v2/h-geo/simpleproperties",
+	// "microformats-v2/h-geo/valuetitleclass",
+	// "microformats-v2/h-news/all",
+	// "microformats-v2/h-news/change-log",
+	// "microformats-v2/h-news/minimum",
+	// "microformats-v2/h-org/change-log",
+	// "microformats-v2/h-org/hyperlink",
+	// "microformats-v2/h-org/simple",
+	// "microformats-v2/h-org/simpleproperties",
+	// "microformats-v2/h-product/aggregate",
+	// "microformats-v2/h-product/change-log",
+	// "microformats-v2/h-product/justahyperlink",
+	// "microformats-v2/h-product/justaname",
+	// "microformats-v2/h-product/simpleproperties",
+	// "microformats-v2/h-recipe/all",
+	// "microformats-v2/h-recipe/change-log",
+	// "microformats-v2/h-recipe/minimum",
+	// "microformats-v2/h-resume/affiliation",
+	// "microformats-v2/h-resume/change-log",
+	// "microformats-v2/h-resume/contact",
+	// "microformats-v2/h-resume/education",
+	// "microformats-v2/h-resume/justaname",
+	// "microformats-v2/h-resume/skill",
+	// "microformats-v2/h-resume/work",
+	// "microformats-v2/h-review/change-log",
+	// "microformats-v2/h-review/hyperlink",
+	// "microformats-v2/h-review/implieditem",
+	// "microformats-v2/h-review/item",
+	// "microformats-v2/h-review/justaname",
+	// "microformats-v2/h-review/photo",
+	// "microformats-v2/h-review/vcard",
+	// "microformats-v2/h-review-aggregate/change-log",
+	// "microformats-v2/h-review-aggregate/hevent",
+	// "microformats-v2/h-review-aggregate/justahyperlink",
+	// "microformats-v2/h-review-aggregate/simpleproperties",
+	// "microformats-v2/rel/change-log",
+	// "microformats-v2/rel/duplicate-rels",
+	"microformats-v2/rel/license",
+	"microformats-v2/rel/nofollow",
+	// "microformats-v2/rel/rel-urls",
+	// "microformats-v2/rel/varying-text-duplicate-rels",
+	"microformats-v2/rel/xfn-all",
+	"microformats-v2/rel/xfn-elsewhere",
+}
+
 func TestSuite(t *testing.T) {
 	passes := 0
 	count := 0
-	testsdir, _ := os.Open("testdata")
-	suites, _ := testsdir.Readdir(0)
-	for _, suite := range suites {
-		if suite.IsDir() {
-			suitedir, _ := os.Open(path.Join("testsdata", suite.Name()))
-			suitedirs, _ := suitedir.Readdir(0)
-			for _, test := range suitedirs {
-				if test.IsDir() {
-					count = count + 1
-					if runTest(path.Join("testsdata", suite.Name(), test.Name())) {
-						fmt.Printf("PASS: %s/%s\n", suite.Name(), test.Name())
-						passes = passes + 1
-					} else {
-						fmt.Printf("FAIL: %s/%s\n", suite.Name(), test.Name())
-						t.Fail()
-					}
-
-				}
-			}
+	for _, test := range tests {
+		count++
+		if runTest(t, filepath.Join("testdata", "tests", test)) {
+			passes++
 		}
 	}
 	fmt.Printf("PASSING %d OF %d\n", passes, count)
 }
 
-func runTest(test string) bool {
-	input, _ := ioutil.ReadFile(path.Join(test, "input.html"))
+func runTest(t *testing.T, test string) bool {
+	input, err := ioutil.ReadFile(test + ".html")
+	if err != nil {
+		t.Fatalf("error reading file %q: %v", test+".html", err)
+	}
 
 	URL, _ := url.Parse("http://tantek.com/")
-
 	data := parser.Parse(bytes.NewReader(input), URL)
 
-	expectedJson, _ := ioutil.ReadFile(path.Join(test, "output.json"))
-	expected := make(map[string]interface{})
-	json.Unmarshal(expectedJson, &expected)
+	expectedJSON, err := ioutil.ReadFile(test + ".json")
+	if err != nil {
+		t.Fatalf("error reading file %q: %v", test+".json", err)
+	}
+	want := make(map[string]interface{})
+	json.Unmarshal(expectedJSON, &want)
 
-	outputJson, _ := json.Marshal(data)
-	output := make(map[string]interface{})
-	json.Unmarshal(outputJson, &output)
+	outputJSON, _ := json.Marshal(data)
+	got := make(map[string]interface{})
+	json.Unmarshal(outputJSON, &got)
 
-	return reflect.DeepEqual(output, expected)
+	if reflect.DeepEqual(got, want) {
+		fmt.Printf("PASS: %s\n", test)
+		return true
+	}
+
+	fmt.Printf("FAIL: %s\ngot: %v\n\nwant: %v\n\n", test, got, want)
+	t.Fail()
+	return false
 }
