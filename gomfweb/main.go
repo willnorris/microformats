@@ -7,7 +7,7 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/andyleap/microformats"
+	"willnorris.com/go/microformats"
 )
 
 var indextemplate = template.Must(template.New("index").Parse(index))

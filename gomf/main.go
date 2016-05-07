@@ -7,7 +7,7 @@ import (
 	"net/url"
 	"os"
 
-	"github.com/andyleap/microformats"
+	"willnorris.com/go/microformats"
 )
 
 func main() {

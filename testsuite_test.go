@@ -10,7 +10,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/andyleap/microformats"
+	"willnorris.com/go/microformats"
 )
 
 var parser = microformats.New()
