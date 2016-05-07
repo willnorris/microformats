@@ -15,6 +15,8 @@ import (
 	"willnorris.com/go/microformats"
 )
 
+// list of tests built using:
+//     find testdata/tests/microformats-v2 -name "*.html" | grep -v change-log | sed -E 's/^testdata\/tests\/(.+)\.html$/\1/'
 var tests = []string{
 	// "microformats-v2/h-adr/geo",
 	"microformats-v2/h-adr/geourl",
