@@ -1,3 +1,5 @@
+// Run the shared test suite from https://github.com/microformats/tests
+
 package microformats_test
 
 import (
@@ -15,16 +17,16 @@ import (
 
 var tests = []string{
 	// "microformats-v2/h-adr/geo",
-	// "microformats-v2/h-adr/geourl",
+	"microformats-v2/h-adr/geourl",
 	"microformats-v2/h-adr/justaname",
 	// "microformats-v2/h-adr/simpleproperties",
 	// "microformats-v2/h-as-note/note",
-	// "microformats-v2/h-card/baseurl",
-	// "microformats-v2/h-card/childimplied",
-	// "microformats-v2/h-card/extendeddescription",
+	"microformats-v2/h-card/baseurl",
+	"microformats-v2/h-card/childimplied",
+	"microformats-v2/h-card/extendeddescription",
 	"microformats-v2/h-card/hcard",
 	"microformats-v2/h-card/horghcard",
-	// "microformats-v2/h-card/hyperlinkedphoto",
+	"microformats-v2/h-card/hyperlinkedphoto",
 	// "microformats-v2/h-card/impliedname",
 	// "microformats-v2/h-card/impliedphoto",
 	// "microformats-v2/h-card/impliedurl",
@@ -32,7 +34,7 @@ var tests = []string{
 	"microformats-v2/h-card/justaname",
 	// "microformats-v2/h-card/nested",
 	// "microformats-v2/h-card/p-property",
-	// "microformats-v2/h-card/relativeurls",
+	"microformats-v2/h-card/relativeurls",
 	// "microformats-v2/h-entry/impliedvalue-nested",
 	"microformats-v2/h-entry/justahyperlink",
 	"microformats-v2/h-entry/justaname",
@@ -40,7 +42,7 @@ var tests = []string{
 	// "microformats-v2/h-entry/u-property",
 	// "microformats-v2/h-entry/urlincontent",
 	// "microformats-v2/h-event/ampm",
-	// "microformats-v2/h-event/attendees",
+	"microformats-v2/h-event/attendees",
 	// "microformats-v2/h-event/combining",
 	// "microformats-v2/h-event/concatenate",
 	// "microformats-v2/h-event/dates",
@@ -51,15 +53,15 @@ var tests = []string{
 	// "microformats-v2/h-feed/implied-title",
 	// "microformats-v2/h-feed/simple",
 	// "microformats-v2/h-geo/abbrpattern",
-	// "microformats-v2/h-geo/altitude",
+	"microformats-v2/h-geo/altitude",
 	// "microformats-v2/h-geo/hidden",
 	"microformats-v2/h-geo/justaname",
 	"microformats-v2/h-geo/simpleproperties",
 	// "microformats-v2/h-geo/valuetitleclass",
 	// "microformats-v2/h-news/all",
 	// "microformats-v2/h-news/minimum",
-	// "microformats-v2/h-org/hyperlink",
-	// "microformats-v2/h-org/simple",
+	"microformats-v2/h-org/hyperlink",
+	"microformats-v2/h-org/simple",
 	// "microformats-v2/h-org/simpleproperties",
 	// "microformats-v2/h-product/aggregate",
 	"microformats-v2/h-product/justahyperlink",
@@ -71,13 +73,13 @@ var tests = []string{
 	// "microformats-v2/h-resume/contact",
 	// "microformats-v2/h-resume/education",
 	"microformats-v2/h-resume/justaname",
-	// "microformats-v2/h-resume/skill",
+	"microformats-v2/h-resume/skill",
 	// "microformats-v2/h-resume/work",
-	// "microformats-v2/h-review/hyperlink",
+	"microformats-v2/h-review/hyperlink",
 	// "microformats-v2/h-review/implieditem",
 	// "microformats-v2/h-review/item",
 	"microformats-v2/h-review/justaname",
-	// "microformats-v2/h-review/photo",
+	"microformats-v2/h-review/photo",
 	// "microformats-v2/h-review/vcard",
 	// "microformats-v2/h-review-aggregate/hevent",
 	// "microformats-v2/h-review-aggregate/justahyperlink",
@@ -85,7 +87,7 @@ var tests = []string{
 	// "microformats-v2/rel/duplicate-rels",
 	"microformats-v2/rel/license",
 	"microformats-v2/rel/nofollow",
-	// "microformats-v2/rel/rel-urls",
+	"microformats-v2/rel/rel-urls",
 	// "microformats-v2/rel/varying-text-duplicate-rels",
 	"microformats-v2/rel/xfn-all",
 	"microformats-v2/rel/xfn-elsewhere",
@@ -109,7 +111,7 @@ func runTest(t *testing.T, test string) bool {
 		t.Fatalf("error reading file %q: %v", test+".html", err)
 	}
 
-	URL, _ := url.Parse("http://tantek.com/")
+	URL, _ := url.Parse("http://example.com/")
 	data := microformats.Parse(bytes.NewReader(input), URL)
 
 	expectedJSON, err := ioutil.ReadFile(test + ".json")
