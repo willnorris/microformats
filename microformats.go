@@ -17,7 +17,6 @@ import (
 var (
 	rootClassNames     = regexp.MustCompile(`^h-\S*$`)
 	propertyClassNames = regexp.MustCompile(`^(p|u|dt|e)-(\S*)$`)
-	whiteSpaceRegex    = regexp.MustCompile(`(\t|\n|\r|[ ]|&nbsp;)+`)
 )
 
 // Microformat specifies a single microformat object and its properties.  It
@@ -414,7 +413,7 @@ func (p *parser) getImpliedName(node *html.Node) string {
 		name = new(string)
 		*name = getTextContent(node)
 	}
-	return strings.TrimSpace(whiteSpaceRegex.ReplaceAllString(*name, " "))
+	return strings.TrimSpace(*name)
 }
 
 func (p *parser) getImpliedPhoto(node *html.Node) string {

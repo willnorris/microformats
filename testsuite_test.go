@@ -21,7 +21,7 @@ var tests = []string{
 	// "microformats-v2/h-adr/geo",
 	"microformats-v2/h-adr/geourl",
 	"microformats-v2/h-adr/justaname",
-	// "microformats-v2/h-adr/simpleproperties",
+	"microformats-v2/h-adr/simpleproperties",
 	// "microformats-v2/h-as-note/note",
 	"microformats-v2/h-card/baseurl",
 	"microformats-v2/h-card/childimplied",
