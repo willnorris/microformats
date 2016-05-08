@@ -385,8 +385,8 @@ func (p *parser) getImpliedName(node *html.Node) string {
 	if name == nil {
 		subnode := getOnlyChild(node)
 		if subnode != nil {
-			subsubnode := getOnlyChild(node)
-			if subsubnode != nil && subnode.DataAtom == atom.Img && !rootClassNames.MatchString(getAttr(subsubnode, "class")) {
+			subsubnode := getOnlyChild(subnode)
+			if subsubnode != nil && subsubnode.DataAtom == atom.Img && !rootClassNames.MatchString(getAttr(subsubnode, "class")) {
 				name = getAttrPtr(subsubnode, "alt")
 			}
 		}
@@ -394,8 +394,8 @@ func (p *parser) getImpliedName(node *html.Node) string {
 	if name == nil {
 		subnode := getOnlyChild(node)
 		if subnode != nil {
-			subsubnode := getOnlyChild(node)
-			if subsubnode != nil && subnode.DataAtom == atom.Area && !rootClassNames.MatchString(getAttr(subsubnode, "class")) {
+			subsubnode := getOnlyChild(subnode)
+			if subsubnode != nil && subsubnode.DataAtom == atom.Area && !rootClassNames.MatchString(getAttr(subsubnode, "class")) {
 				name = getAttrPtr(subsubnode, "alt")
 			}
 		}
@@ -403,8 +403,8 @@ func (p *parser) getImpliedName(node *html.Node) string {
 	if name == nil {
 		subnode := getOnlyChild(node)
 		if subnode != nil {
-			subsubnode := getOnlyChild(node)
-			if subsubnode != nil && subnode.DataAtom == atom.Abbr {
+			subsubnode := getOnlyChild(subnode)
+			if subsubnode != nil && subsubnode.DataAtom == atom.Abbr {
 				name = getAttrPtr(subsubnode, "title")
 			}
 		}
