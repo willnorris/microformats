@@ -100,8 +100,8 @@ func (p *parser) walk(node *html.Node) {
 		p.curItem = curItem
 	}
 	if !p.baseFound && isAtom(node, atom.Base) {
-		if getAttr(node, "href") != "" {
-			newbase, _ := url.Parse(getAttr(node, "href"))
+		if href := getAttr(node, "href"); href != "" {
+			newbase, _ := url.Parse(href)
 			newbase = p.base.ResolveReference(newbase)
 			p.base = newbase
 			p.baseFound = true
@@ -138,19 +138,19 @@ func (p *parser) walk(node *html.Node) {
 
 	if curItem != nil {
 		if _, ok := curItem.Properties["name"]; !ok {
-			name := p.getImpliedName(node)
+			name := getImpliedName(node)
 			if name != "" {
 				curItem.Properties["name"] = append(curItem.Properties["name"], name)
 			}
 		}
 		if _, ok := curItem.Properties["photo"]; !ok {
-			photo := p.getImpliedPhoto(node)
+			photo := getImpliedPhoto(node, p.base)
 			if photo != "" {
 				curItem.Properties["photo"] = append(curItem.Properties["photo"], photo)
 			}
 		}
 		if _, ok := curItem.Properties["url"]; !ok {
-			url := p.getImpliedURL(node)
+			url := getImpliedURL(node, p.base)
 			if url != "" {
 				curItem.Properties["url"] = append(curItem.Properties["url"], url)
 			}
@@ -166,12 +166,13 @@ func (p *parser) walk(node *html.Node) {
 	}
 	if len(propertyclasses) > 0 {
 		for _, prop := range propertyclasses {
+			prefix, name := prop[1], prop[2]
 
 			var value *string
 			var htmlbody string
-			switch prop[1] {
+			switch prefix {
 			case "p":
-				value = p.getValueClassPattern(node)
+				value = getValueClassPattern(node)
 				if value == nil && isAtom(node, atom.Abbr) {
 					value = getAttrPtr(node, "title")
 				}
@@ -214,14 +215,14 @@ func (p *parser) walk(node *html.Node) {
 			case "e":
 				value = new(string)
 				*value = getTextContent(node)
-				buf := &bytes.Buffer{}
+				var buf bytes.Buffer
 				for c := node.FirstChild; c != nil; c = c.NextSibling {
-					html.Render(buf, c)
+					html.Render(&buf, c)
 				}
 				htmlbody = buf.String()
 			case "dt":
 				if value == nil {
-					value = p.getValueClassPattern(node)
+					value = getValueClassPattern(node)
 				}
 				if value == nil && isAtom(node, atom.Time, atom.Ins, atom.Del) {
 					value = getAttrPtr(node, "datetime")
@@ -244,9 +245,9 @@ func (p *parser) walk(node *html.Node) {
 				})
 			} else if value != nil && *value != "" && p.curItem != nil {
 				if htmlbody != "" {
-					p.curItem.Properties[prop[2]] = append(p.curItem.Properties[prop[2]], map[string]interface{}{"value": *value, "html": htmlbody})
+					p.curItem.Properties[name] = append(p.curItem.Properties[name], map[string]interface{}{"value": *value, "html": htmlbody})
 				} else {
-					p.curItem.Properties[prop[2]] = append(p.curItem.Properties[prop[2]], *value)
+					p.curItem.Properties[name] = append(p.curItem.Properties[name], *value)
 				}
 			}
 		}
@@ -356,7 +357,7 @@ func getOnlyChildAtomWithAttr(node *html.Node, atom atom.Atom, attr string) *htm
 	return n
 }
 
-func (p *parser) getImpliedName(node *html.Node) string {
+func getImpliedName(node *html.Node) string {
 	var name *string
 	if isAtom(node, atom.Img, atom.Area) {
 		name = getAttrPtr(node, "alt")
@@ -416,7 +417,7 @@ func (p *parser) getImpliedName(node *html.Node) string {
 	return strings.TrimSpace(*name)
 }
 
-func (p *parser) getImpliedPhoto(node *html.Node) string {
+func getImpliedPhoto(node *html.Node, baseURL *url.URL) string {
 	var photo *string
 	if photo == nil && isAtom(node, atom.Img) {
 		photo = getAttrPtr(node, "src")
@@ -457,15 +458,15 @@ func (p *parser) getImpliedPhoto(node *html.Node) string {
 	if photo == nil {
 		return ""
 	}
-	if p.base != nil {
+	if baseURL != nil {
 		urlParsed, _ := url.Parse(*photo)
-		urlParsed = p.base.ResolveReference(urlParsed)
+		urlParsed = baseURL.ResolveReference(urlParsed)
 		*photo = urlParsed.String()
 	}
 	return *photo
 }
 
-func (p *parser) getImpliedURL(node *html.Node) string {
+func getImpliedURL(node *html.Node, baseURL *url.URL) string {
 	var urlVal *string
 	if urlVal == nil && isAtom(node, atom.A, atom.Area) {
 		urlVal = getAttrPtr(node, "href")
@@ -485,15 +486,15 @@ func (p *parser) getImpliedURL(node *html.Node) string {
 	if urlVal == nil {
 		return ""
 	}
-	if p.base != nil {
+	if baseURL != nil {
 		urlParsed, _ := url.Parse(*urlVal)
-		urlParsed = p.base.ResolveReference(urlParsed)
+		urlParsed = baseURL.ResolveReference(urlParsed)
 		*urlVal = urlParsed.String()
 	}
 	return *urlVal
 }
 
-func (p *parser) getValueClassPattern(node *html.Node) *string {
+func getValueClassPattern(node *html.Node) *string {
 	var values []string
 	for c := node.FirstChild; c != nil; c = c.NextSibling {
 		classes := strings.Split(getAttr(c, "class"), " ")
