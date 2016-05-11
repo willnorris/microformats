@@ -2,6 +2,8 @@ package main
 
 import (
 	"encoding/json"
+	"flag"
+	"fmt"
 	"html/template"
 	"net/http"
 	"net/url"
@@ -10,70 +12,87 @@ import (
 	"willnorris.com/go/microformats"
 )
 
-var indextemplate = template.Must(template.New("index").Parse(index))
+var addr = flag.String("addr", ":4001", "Address and port to listen on")
 
 func main() {
-	http.Handle("/parse", http.HandlerFunc(Parse))
-	http.Handle("/", http.HandlerFunc(Index))
-	http.ListenAndServe(":4001", nil)
+	http.Handle("/", http.HandlerFunc(index))
+	http.ListenAndServe(*addr, nil)
 }
 
-func Index(rw http.ResponseWriter, req *http.Request) {
-	mf := req.FormValue("html")
-	URL := req.FormValue("url")
-	urlparsed, _ := url.Parse(URL)
-	parsed := microformats.Parse(strings.NewReader(mf), urlparsed)
-	parsedjson, _ := json.MarshalIndent(parsed, "", "    ")
+func index(w http.ResponseWriter, r *http.Request) {
+	var parsedURL *url.URL
+	var err error
 
-	data := struct {
-		MF     string
-		URL    string
-		Parsed string
-	}{
-		mf,
-		URL,
-		string(parsedjson),
+	u := r.FormValue("url")
+	if u != "" {
+		parsedURL, err = url.Parse(u)
+		if err != nil {
+			http.Error(w, fmt.Sprintf("error parsing url: %v", err), http.StatusBadRequest)
+		}
 	}
 
-	indextemplate.Execute(rw, data)
-}
-
-func Parse(rw http.ResponseWriter, req *http.Request) {
-	if req.Method == "GET" {
-		data := struct {
-			MF     string
-			URL    string
-			Parsed string
-		}{
-			"",
-			"",
-			"",
+	if r.Method == "GET" && parsedURL != nil {
+		resp, err := http.Get(parsedURL.String())
+		if err != nil {
+			http.Error(w, fmt.Sprintf("error fetching url content: %v", err), http.StatusInternalServerError)
 		}
-		indextemplate.Execute(rw, data)
+		defer resp.Body.Close()
+
+		mf := microformats.Parse(resp.Body, parsedURL)
+		j, err := json.MarshalIndent(mf, "", "    ")
+		if err != nil {
+			http.Error(w, fmt.Sprintf("error marshaling json: %v", err), http.StatusInternalServerError)
+		}
+
+		w.Write(j)
 		return
 	}
-	mf := req.FormValue("html")
-	URL := req.FormValue("url")
-	urlparsed, _ := url.Parse(URL)
-	parsed := microformats.Parse(strings.NewReader(mf), urlparsed)
-	parsedjson, _ := json.MarshalIndent(parsed, "", "    ")
 
-	rw.Write(parsedjson)
+	html := r.FormValue("html")
+	var j []byte
+	if html != "" {
+		mf := microformats.Parse(strings.NewReader(html), parsedURL)
+		j, err = json.MarshalIndent(mf, "", "    ")
+		if err != nil {
+			http.Error(w, fmt.Sprintf("error marshaling json: %v", err), http.StatusInternalServerError)
+		}
+	}
+
+	data := struct {
+		HTML string
+		URL  string
+		JSON string
+	}{
+		html,
+		u,
+		string(j),
+	}
+
+	tpl.Execute(w, data)
 }
 
-var index = `<html>
+var tpl = template.Must(template.New("").Parse(`<!doctype html>
+<html>
 <head>
 </head>
 <body>
-<form method="POST">
-<textarea name="html" style="width: 100%;" rows="15">{{.MF}}</textarea>
-<br>
-<input name="url" type="text" style="width: 100%;" value="{{.URL}}"></input>
-<br>
-<input type="submit" value="Parse"/>
-</form><br>
-<code><pre>
-{{.Parsed}}
-</pre></code>
+  <h2>Parse a URL</h2>
+  <form method="GET">
+    <input name="url" type="url" />
+    <input type="submit" value="Parse" />
+  </form>
+
+  <h2>Parse HTML</h2>
+  <form method="POST">
+    <textarea name="html" style="width: 100%;" rows="15">{{ .HTML }}</textarea>
+    <br>
+    <input name="url" type="text" style="width: 100%;" value="{{ .URL }}"></input>
+    <br>
+    <input type="submit" value="Parse"/>
+  </form><br>
+
+  <pre><code>
+{{ .JSON }}
+</code></pre>
 </body>
-</html>`
+</html>`))
