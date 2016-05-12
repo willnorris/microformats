@@ -279,12 +279,10 @@ func (p *parser) walk(node *html.Node) {
 }
 
 func getClasses(node *html.Node) []string {
-	for _, attr := range node.Attr {
-		if strings.EqualFold(attr.Key, "class") {
-			return strings.Split(attr.Val, " ")
-		}
+	if c := getAttrPtr(node, "class"); c != nil {
+		return strings.Split(*c, " ")
 	}
-	return []string{}
+	return nil
 }
 
 func hasMatchingClass(node *html.Node, regex *regexp.Regexp) bool {
@@ -298,15 +296,16 @@ func hasMatchingClass(node *html.Node, regex *regexp.Regexp) bool {
 }
 
 func getAttr(node *html.Node, name string) string {
-	for _, attr := range node.Attr {
-		if strings.EqualFold(attr.Key, name) {
-			return attr.Val
-		}
+	if v := getAttrPtr(node, name); v != nil {
+		return *v
 	}
 	return ""
 }
 
 func getAttrPtr(node *html.Node, name string) *string {
+	if node == nil {
+		return nil
+	}
 	for _, attr := range node.Attr {
 		if strings.EqualFold(attr.Key, name) {
 			return &attr.Val
@@ -316,6 +315,9 @@ func getAttrPtr(node *html.Node, name string) *string {
 }
 
 func isAtom(node *html.Node, atoms ...atom.Atom) bool {
+	if node == nil {
+		return false
+	}
 	for _, atom := range atoms {
 		if atom == node.DataAtom {
 			return true
@@ -325,17 +327,25 @@ func isAtom(node *html.Node, atoms ...atom.Atom) bool {
 }
 
 func getTextContent(node *html.Node) string {
+	if node == nil {
+		return ""
+	}
 	if node.Type == html.TextNode {
 		return node.Data
 	}
-	var buf []string
+	var buf bytes.Buffer
 	for c := node.FirstChild; c != nil; c = c.NextSibling {
-		buf = append(buf, getTextContent(c))
+		buf.WriteString(getTextContent(c))
 	}
-	return strings.Join(buf, "")
+	return buf.String()
 }
 
+// getOnlyChild returns the sole child of node.  Returns nil if node has zero
+// or more than one child.
 func getOnlyChild(node *html.Node) *html.Node {
+	if node == nil {
+		return nil
+	}
 	var n *html.Node
 	for c := node.FirstChild; c != nil; c = c.NextSibling {
 		if c.Type == html.ElementNode {
@@ -349,7 +359,12 @@ func getOnlyChild(node *html.Node) *html.Node {
 	return n
 }
 
+// getOnlyChild returns the sole child of node with the specified atom.
+// Returns nil if node has zero or more than one child with that atom.
 func getOnlyChildAtom(node *html.Node, atom atom.Atom) *html.Node {
+	if node == nil {
+		return nil
+	}
 	var n *html.Node
 	for c := node.FirstChild; c != nil; c = c.NextSibling {
 		if c.Type == html.ElementNode && c.DataAtom == atom {
@@ -363,7 +378,13 @@ func getOnlyChildAtom(node *html.Node, atom atom.Atom) *html.Node {
 	return n
 }
 
+// getOnlyChild returns the sole child of node with the specified atom and
+// attribute.  Returns nil if node has zero or more than one child with that
+// atom and attribute.
 func getOnlyChildAtomWithAttr(node *html.Node, atom atom.Atom, attr string) *html.Node {
+	if node == nil {
+		return nil
+	}
 	var n *html.Node
 	for c := node.FirstChild; c != nil; c = c.NextSibling {
 		if c.Type == html.ElementNode && c.DataAtom == atom && getAttrPtr(c, attr) != nil {
@@ -515,6 +536,9 @@ func getImpliedURL(node *html.Node, baseURL *url.URL) string {
 }
 
 func getValueClassPattern(node *html.Node) *string {
+	if node == nil {
+		return nil
+	}
 	var values []string
 	for c := node.FirstChild; c != nil; c = c.NextSibling {
 		classes := strings.Split(getAttr(c, "class"), " ")
