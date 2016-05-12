@@ -188,7 +188,7 @@ func (p *parser) walk(node *html.Node) {
 		for _, prop := range propertyclasses {
 			prefix, name := prop[1], prop[2]
 
-			var value *string
+			var value, embedValue *string
 			var htmlbody string
 			switch prefix {
 			case "p":
@@ -204,7 +204,10 @@ func (p *parser) walk(node *html.Node) {
 				}
 				if value == nil {
 					value = new(string)
-					*value = getTextContent(node)
+					*value = strings.TrimSpace(getTextContent(node))
+				}
+				if curItem != nil && p.curItem != nil {
+					embedValue = getFirstPropValue(curItem, "name")
 				}
 			case "u":
 				if value == nil && isAtom(node, atom.A, atom.Area) {
@@ -232,7 +235,10 @@ func (p *parser) walk(node *html.Node) {
 				}
 				if value == nil {
 					value = new(string)
-					*value = getTextContent(node)
+					*value = strings.TrimSpace(getTextContent(node))
+				}
+				if curItem != nil && p.curItem != nil {
+					embedValue = getFirstPropValue(curItem, "url")
 				}
 			case "e":
 				value = new(string)
@@ -241,7 +247,7 @@ func (p *parser) walk(node *html.Node) {
 				for c := node.FirstChild; c != nil; c = c.NextSibling {
 					html.Render(&buf, c)
 				}
-				htmlbody = buf.String()
+				htmlbody = strings.TrimSpace(buf.String())
 			case "dt":
 				if value == nil {
 					value = getValueClassPattern(node)
@@ -255,14 +261,21 @@ func (p *parser) walk(node *html.Node) {
 				if value == nil && isAtom(node, atom.Data, atom.Input) {
 					value = getAttrPtr(node, "value")
 				}
+				if value == nil {
+					value = new(string)
+					*value = strings.TrimSpace(getTextContent(node))
+				}
 			}
 			if curItem != nil && p.curItem != nil {
-				p.curItem.Properties[prop[2]] = append(p.curItem.Properties[prop[2]], &Microformat{
+				if embedValue == nil {
+					embedValue = value
+				}
+				p.curItem.Properties[name] = append(p.curItem.Properties[name], &Microformat{
 					Type:       curItem.Type,
 					Properties: curItem.Properties,
 					Coords:     curItem.Coords,
 					Shape:      curItem.Shape,
-					Value:      *value,
+					Value:      *embedValue,
 					HTML:       htmlbody,
 				})
 			} else if value != nil && *value != "" && p.curItem != nil {
@@ -574,6 +587,16 @@ func getValueClassPattern(node *html.Node) *string {
 		var val string
 		val = strings.Join(values, "")
 		return &val
+	}
+	return nil
+}
+
+func getFirstPropValue(item *Microformat, prop string) *string {
+	values := item.Properties[prop]
+	if len(values) > 0 {
+		if v, ok := values[0].(string); ok {
+			return &v
+		}
 	}
 	return nil
 }

@@ -42,6 +42,8 @@ func parseNode(s string) (n *html.Node, err error) {
 	return n, err
 }
 
+func ptr(s string) *string { return &s }
+
 func Test_GetClasses(t *testing.T) {
 	tests := []struct {
 		html    string
@@ -121,8 +123,6 @@ func Test_HasMatchingClass(t *testing.T) {
 
 // test both getAttr and getAttrPtr
 func Test_GetAttr(t *testing.T) {
-	ptr := func(s string) *string { return &s }
-
 	tests := []struct {
 		html, attr string
 		value      string  // string valuer returned by getAttr
@@ -456,9 +456,6 @@ func Test_GetImpliedURL(t *testing.T) {
 }
 
 func Test_GetValueClassPattern(t *testing.T) {
-	ptr := func(s string) *string { return &s }
-	_ = ptr
-
 	tests := []struct {
 		html  string
 		value *string
@@ -497,6 +494,31 @@ func Test_GetValueClassPattern(t *testing.T) {
 
 		if got, want := getValueClassPattern(n), tt.value; !reflect.DeepEqual(got, want) {
 			t.Errorf("getValueClassPattern(%q) returned %v, want %v", tt.html, got, want)
+		}
+	}
+}
+
+func Test_GetFirstPropValue(t *testing.T) {
+	tests := []struct {
+		properties map[string][]interface{}
+		prop       string
+		value      *string
+	}{
+		{nil, "", nil},
+		{nil, "name", nil},
+		{map[string][]interface{}{"name": {"n"}}, "", nil},
+
+		{map[string][]interface{}{"name": {"n"}}, "name", ptr("n")},
+		{map[string][]interface{}{"name": {"a", "b"}}, "name", ptr("a")},
+		{map[string][]interface{}{"name": {"a", "b"}}, "url", nil},
+		{map[string][]interface{}{"name": {1, 2}}, "name", nil},
+		{map[string][]interface{}{"name": {"n"}, "url": {"u"}}, "url", ptr("u")},
+	}
+
+	for _, tt := range tests {
+		mf := &Microformat{Properties: tt.properties}
+		if got, want := getFirstPropValue(mf, tt.prop), tt.value; !reflect.DeepEqual(got, want) {
+			t.Errorf("getFirstPropValue(%v, %q) returned %v, want %v", tt.properties, tt.prop, got, want)
 		}
 	}
 }
