@@ -221,7 +221,9 @@ func (p *parser) walk(node *html.Node) {
 					urlParsed = p.base.ResolveReference(urlParsed)
 					*value = urlParsed.String()
 				}
-				// TODO: value-class-pattern
+				if value == nil {
+					value = getValueClassPattern(node)
+				}
 				if value == nil && isAtom(node, atom.Abbr) {
 					value = getAttrPtr(node, "title")
 				}
@@ -542,14 +544,18 @@ func getValueClassPattern(node *html.Node) *string {
 	var values []string
 	for c := node.FirstChild; c != nil; c = c.NextSibling {
 		classes := getClasses(c)
-		valueclass := false
+		var valueClass, valueTitleClass bool
 		for _, class := range classes {
 			if class == "value" {
-				valueclass = true
-				break
+				valueClass = true
+			}
+			if class == "value-title" {
+				valueTitleClass = true
 			}
 		}
-		if valueclass {
+		if valueTitleClass {
+			values = append(values, *getAttrPtr(c, "title"))
+		} else if valueClass {
 			if isAtom(c, atom.Img, atom.Area) && getAttrPtr(c, "alt") != nil {
 				values = append(values, *getAttrPtr(c, "alt"))
 			} else if isAtom(c, atom.Data) && getAttrPtr(c, "value") != nil {

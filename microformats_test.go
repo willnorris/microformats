@@ -483,6 +483,10 @@ func Test_GetValueClassPattern(t *testing.T) {
 		// concatenation
 		{`<p><b class="value">a</b><b class="value">b</b></p>`, ptr("ab")},
 		{`<p><img class="value" alt="a"><b>b</b><b class="value">c</b></p>`, ptr("ac")},
+
+		// value-title
+		{`<p><img alt="v" class="value-title" title="t"></p>`, ptr("t")},
+		{`<p><img alt="v" class="value" title="t"><img alt="v" class="value-title" title="t"></p>`, ptr("vt")},
 	}
 
 	for _, tt := range tests {

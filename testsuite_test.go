@@ -61,7 +61,7 @@ var tests = []string{
 	"microformats-v2/h-entry/justahyperlink",
 	"microformats-v2/h-entry/justaname",
 	// "microformats-v2/h-entry/summarycontent",
-	// "microformats-v2/h-entry/u-property",
+	"microformats-v2/h-entry/u-property",
 	// "microformats-v2/h-entry/urlincontent",
 	// "microformats-v2/h-event/ampm",
 	"microformats-v2/h-event/attendees",
