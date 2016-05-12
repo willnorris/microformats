@@ -561,6 +561,9 @@ func getValueClassPattern(node *html.Node) *string {
 			}
 		}
 	}
+
+	// TODO(willnorris): handle datetime values
+
 	if len(values) > 0 {
 		var val string
 		val = strings.Join(values, "")

@@ -21,6 +21,7 @@
 package microformats
 
 import (
+	"net/url"
 	"reflect"
 	"regexp"
 	"strings"
@@ -333,6 +334,161 @@ func Test_GetOnlyChildAtomWithAttr(t *testing.T) {
 		}
 		if !reflect.DeepEqual(got, want) {
 			t.Errorf("getOnlyChildAtomWithAttr(%q, %q, %q) returned %#v, want %#v", tt.html, tt.atom, tt.attr, got, want)
+		}
+	}
+}
+
+func Test_GetImpliedName(t *testing.T) {
+	tests := []struct {
+		html, name string
+	}{
+		{"", ""},
+
+		{`<img alt="name">`, "name"},
+		{`<area alt="name">`, "name"},
+		{`<abbr title="name">`, "name"},
+
+		{`<span><img alt="name"></span>`, "name"},
+		{`<span><img alt="name" class="h-card"></span>`, ""},
+		{`<span><area alt="name"></span>`, "name"},
+		{`<span><area alt="name" class="h-card"></span>`, ""},
+		{`<span><abbr title="name"></span>`, "name"},
+
+		{`<p><span><img alt="name"></span></p>`, "name"},
+		{`<p><span><img alt="name" class="h-card"></span></p>`, ""},
+		{`<p><span><area alt="name"></span></p>`, "name"},
+		{`<p><span><area alt="name" class="h-card"></span></p>`, ""},
+		{`<p><span><abbr title="name"></span></p>`, "name"},
+
+		{`<p><span>name</span></p>`, "name"},
+	}
+
+	for _, tt := range tests {
+		n, err := parseNode(tt.html)
+		if err != nil {
+			t.Fatalf("Error parsing HTML: %v", err)
+		}
+
+		if got, want := getImpliedName(n), tt.name; got != want {
+			t.Errorf("getImpliedName(%q) returned %v, want %v", tt.html, got, want)
+		}
+	}
+}
+
+func Test_GetImpliedPhoto(t *testing.T) {
+	base, _ := url.Parse("http://example.com/")
+
+	tests := []struct {
+		html string
+		base *url.URL
+		url  string
+	}{
+		{"", nil, ""},
+
+		{`<img src="p">`, nil, "p"},
+		{`<img src="p">`, base, "http://example.com/p"},
+
+		{`<object data="p">`, nil, "p"},
+		{`<object data="p">`, base, "http://example.com/p"},
+
+		{`<p><img src="p"></p>`, nil, "p"},
+		{`<p><img src="p"></p>`, base, "http://example.com/p"},
+		{`<p><img src="p"><img src="q"></p>`, nil, ""},
+		{`<p><img src="p" class="h-entry"></p>`, nil, ""},
+
+		{`<p><object data="p"></p>`, nil, "p"},
+		{`<p><object data="p"></p>`, base, "http://example.com/p"},
+		{`<p><object data="p"></object><object data="p"></object></p>`, nil, ""},
+		{`<p><object data="p" class="h-entry"></p>`, nil, ""},
+
+		{`<p><span><object data="p"></span></p>`, nil, "p"},
+		{`<p><span><object data="p"></span></p>`, base, "http://example.com/p"},
+		{`<p><span><object data="p" class="h-entry"></span></p>`, nil, ""},
+	}
+
+	for _, tt := range tests {
+		n, err := parseNode(tt.html)
+		if err != nil {
+			t.Fatalf("Error parsing HTML: %v", err)
+		}
+
+		if got, want := getImpliedPhoto(n, tt.base), tt.url; got != want {
+			t.Errorf("getImpliedPhoto(%q, %s) returned %v, want %v", tt.html, tt.base, got, want)
+		}
+	}
+}
+
+func Test_GetImpliedURL(t *testing.T) {
+	base, _ := url.Parse("http://example.com/")
+
+	tests := []struct {
+		html string
+		base *url.URL
+		url  string
+	}{
+		{"", nil, ""},
+
+		{`<a href="p">`, nil, "p"},
+		{`<a href="p">`, base, "http://example.com/p"},
+
+		{`<area href="p">`, nil, "p"},
+		{`<area href="p">`, base, "http://example.com/p"},
+
+		{`<p><a href="p"></p>`, nil, "p"},
+		{`<p><a href="p"></p>`, base, "http://example.com/p"},
+		{`<p><a href="p" class="h-entry"></p>`, nil, ""},
+
+		{`<p><area href="p"></p>`, nil, "p"},
+		{`<p><area href="p"></p>`, base, "http://example.com/p"},
+		{`<p><area href="p" class="h-entry"></p>`, nil, ""},
+	}
+
+	for _, tt := range tests {
+		n, err := parseNode(tt.html)
+		if err != nil {
+			t.Fatalf("Error parsing HTML: %v", err)
+		}
+
+		if got, want := getImpliedURL(n, tt.base), tt.url; got != want {
+			t.Errorf("getImpliedURL(%q, %s) returned %v, want %v", tt.html, tt.base, got, want)
+		}
+	}
+}
+
+func Test_GetValueClassPattern(t *testing.T) {
+	ptr := func(s string) *string { return &s }
+	_ = ptr
+
+	tests := []struct {
+		html  string
+		value *string
+	}{
+		{"", nil},
+
+		{`<p><img alt="v" class="value"></p>`, ptr("v")},
+		{`<p><area alt="v" class="value"></p>`, ptr("v")},
+
+		{`<p><data value="v" class="value"></data></p>`, ptr("v")},
+		{`<p><data class="value">v</data></p>`, ptr("v")},
+
+		{`<p><abbr title="v" class="value"></abbr></p>`, ptr("v")},
+		{`<p><abbr class="value">v</abbr></p>`, ptr("v")},
+
+		{`<p><span class="value">v</span></p>`, ptr("v")},
+
+		// concatenation
+		{`<p><b class="value">a</b><b class="value">b</b></p>`, ptr("ab")},
+		{`<p><img class="value" alt="a"><b>b</b><b class="value">c</b></p>`, ptr("ac")},
+	}
+
+	for _, tt := range tests {
+		n, err := parseNode(tt.html)
+		if err != nil {
+			t.Fatalf("Error parsing HTML: %v", err)
+		}
+
+		if got, want := getValueClassPattern(n), tt.value; !reflect.DeepEqual(got, want) {
+			t.Errorf("getValueClassPattern(%q) returned %v, want %v", tt.html, got, want)
 		}
 	}
 }
