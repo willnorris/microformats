@@ -408,13 +408,13 @@ func getImpliedName(node *html.Node) string {
 	}
 	if name == nil {
 		subnode := getOnlyChild(node)
-		if subnode != nil && subnode.DataAtom == atom.Img && !rootClassNames.MatchString(getAttr(subnode, "class")) {
+		if subnode != nil && subnode.DataAtom == atom.Img && !hasMatchingClass(subnode, rootClassNames) {
 			name = getAttrPtr(subnode, "alt")
 		}
 	}
 	if name == nil {
 		subnode := getOnlyChild(node)
-		if subnode != nil && subnode.DataAtom == atom.Area && !rootClassNames.MatchString(getAttr(subnode, "class")) {
+		if subnode != nil && subnode.DataAtom == atom.Area && !hasMatchingClass(subnode, rootClassNames) {
 			name = getAttrPtr(subnode, "alt")
 		}
 	}
@@ -428,7 +428,7 @@ func getImpliedName(node *html.Node) string {
 		subnode := getOnlyChild(node)
 		if subnode != nil {
 			subsubnode := getOnlyChild(subnode)
-			if subsubnode != nil && subsubnode.DataAtom == atom.Img && !rootClassNames.MatchString(getAttr(subsubnode, "class")) {
+			if subsubnode != nil && subsubnode.DataAtom == atom.Img && !hasMatchingClass(subsubnode, rootClassNames) {
 				name = getAttrPtr(subsubnode, "alt")
 			}
 		}
@@ -437,7 +437,7 @@ func getImpliedName(node *html.Node) string {
 		subnode := getOnlyChild(node)
 		if subnode != nil {
 			subsubnode := getOnlyChild(subnode)
-			if subsubnode != nil && subsubnode.DataAtom == atom.Area && !rootClassNames.MatchString(getAttr(subsubnode, "class")) {
+			if subsubnode != nil && subsubnode.DataAtom == atom.Area && !hasMatchingClass(subsubnode, rootClassNames) {
 				name = getAttrPtr(subsubnode, "alt")
 			}
 		}
@@ -508,31 +508,31 @@ func getImpliedPhoto(node *html.Node, baseURL *url.URL) string {
 }
 
 func getImpliedURL(node *html.Node, baseURL *url.URL) string {
-	var urlVal *string
-	if urlVal == nil && isAtom(node, atom.A, atom.Area) {
-		urlVal = getAttrPtr(node, "href")
+	var value *string
+	if value == nil && isAtom(node, atom.A, atom.Area) {
+		value = getAttrPtr(node, "href")
 	}
-	if urlVal == nil {
+	if value == nil {
 		subnode := getOnlyChildAtomWithAttr(node, atom.A, "href")
 		if subnode != nil && !hasMatchingClass(subnode, rootClassNames) {
-			urlVal = getAttrPtr(subnode, "href")
+			value = getAttrPtr(subnode, "href")
 		}
 	}
-	if urlVal == nil {
+	if value == nil {
 		subnode := getOnlyChildAtomWithAttr(node, atom.Area, "href")
 		if subnode != nil && !hasMatchingClass(subnode, rootClassNames) {
-			urlVal = getAttrPtr(subnode, "href")
+			value = getAttrPtr(subnode, "href")
 		}
 	}
-	if urlVal == nil {
+	if value == nil {
 		return ""
 	}
 	if baseURL != nil {
-		urlParsed, _ := url.Parse(*urlVal)
+		urlParsed, _ := url.Parse(*value)
 		urlParsed = baseURL.ResolveReference(urlParsed)
-		*urlVal = urlParsed.String()
+		*value = urlParsed.String()
 	}
-	return *urlVal
+	return *value
 }
 
 func getValueClassPattern(node *html.Node) *string {
@@ -541,7 +541,7 @@ func getValueClassPattern(node *html.Node) *string {
 	}
 	var values []string
 	for c := node.FirstChild; c != nil; c = c.NextSibling {
-		classes := strings.Split(getAttr(c, "class"), " ")
+		classes := getClasses(c)
 		valueclass := false
 		for _, class := range classes {
 			if class == "value" {

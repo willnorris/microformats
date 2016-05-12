@@ -465,15 +465,19 @@ func Test_GetValueClassPattern(t *testing.T) {
 	}{
 		{"", nil},
 
+		{`<p><img alt="v"></p>`, nil},
 		{`<p><img alt="v" class="value"></p>`, ptr("v")},
 		{`<p><area alt="v" class="value"></p>`, ptr("v")},
 
+		{`<p><data value="v"></data></p>`, nil},
 		{`<p><data value="v" class="value"></data></p>`, ptr("v")},
 		{`<p><data class="value">v</data></p>`, ptr("v")},
 
+		{`<p><abbr title="v"></abbr></p>`, nil},
 		{`<p><abbr title="v" class="value"></abbr></p>`, ptr("v")},
 		{`<p><abbr class="value">v</abbr></p>`, ptr("v")},
 
+		{`<p><span>v</span></p>`, nil},
 		{`<p><span class="value">v</span></p>`, ptr("v")},
 
 		// concatenation
