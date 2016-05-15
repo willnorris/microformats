@@ -15,6 +15,8 @@ import (
 var addr = flag.String("addr", ":4001", "Address and port to listen on")
 
 func main() {
+	flag.Parse()
+
 	http.Handle("/", http.HandlerFunc(index))
 	http.ListenAndServe(*addr, nil)
 }
