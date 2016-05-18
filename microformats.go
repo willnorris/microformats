@@ -250,7 +250,7 @@ func (p *parser) walk(node *html.Node) {
 				htmlbody = strings.TrimSpace(buf.String())
 			case "dt":
 				if value == nil {
-					value = getValueClassPattern(node)
+					value = getDateTimeValue(node)
 				}
 				if value == nil && isAtom(node, atom.Time, atom.Ins, atom.Del) {
 					value = getAttrPtr(node, "datetime")
@@ -551,6 +551,15 @@ func getImpliedURL(node *html.Node, baseURL *url.URL) string {
 }
 
 func getValueClassPattern(node *html.Node) *string {
+	values := parseValueClassPattern(node, false)
+	if len(values) > 0 {
+		val := strings.Join(values, "")
+		return &val
+	}
+	return nil
+}
+
+func parseValueClassPattern(node *html.Node, dt bool) []string {
 	if node == nil {
 		return nil
 	}
@@ -575,20 +584,15 @@ func getValueClassPattern(node *html.Node) *string {
 				values = append(values, *getAttrPtr(c, "value"))
 			} else if isAtom(c, atom.Abbr) && getAttrPtr(c, "title") != nil {
 				values = append(values, *getAttrPtr(c, "title"))
+			} else if dt && isAtom(c, atom.Del, atom.Ins, atom.Time) && getAttrPtr(c, "datetime") != nil {
+				values = append(values, *getAttrPtr(c, "datetime"))
 			} else {
 				values = append(values, getTextContent(c))
 			}
 		}
 	}
 
-	// TODO(willnorris): handle datetime values
-
-	if len(values) > 0 {
-		var val string
-		val = strings.Join(values, "")
-		return &val
-	}
-	return nil
+	return values
 }
 
 func getFirstPropValue(item *Microformat, prop string) *string {
