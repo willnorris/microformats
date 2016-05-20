@@ -1,3 +1,6 @@
+// The gomfweb command runs a simple web server that demonstrates the use of
+// the go microformats library.  It can parse the microformats found at a URL
+// or in a provided snippet of HTML.
 package main
 
 import (
@@ -18,6 +21,8 @@ func main() {
 	flag.Parse()
 
 	http.Handle("/", http.HandlerFunc(index))
+
+	fmt.Printf("gomfweb listening on %s\n", *addr)
 	http.ListenAndServe(*addr, nil)
 }
 
@@ -46,7 +51,11 @@ func index(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, fmt.Sprintf("error marshaling json: %v", err), http.StatusInternalServerError)
 		}
 
-		w.Write(j)
+		if callback := r.FormValue("callback"); callback != "" {
+			fmt.Fprintf(w, "%s(%s)", callback, j)
+		} else {
+			w.Write(j)
+		}
 		return
 	}
 
