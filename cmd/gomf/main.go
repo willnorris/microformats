@@ -1,3 +1,5 @@
+// The gomf tool is a command line tool which parses microformats from the
+// specified URL.
 package main
 
 import (
