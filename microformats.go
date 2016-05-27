@@ -219,6 +219,9 @@ func (p *parser) walk(node *html.Node) {
 				if value == nil && isAtom(node, atom.Object) {
 					value = getAttrPtr(node, "data")
 				}
+				if value == nil && isAtom(node, atom.Video) {
+					value = getAttrPtr(node, "poster")
+				}
 				if p.base != nil && value != nil {
 					urlParsed, _ := url.Parse(*value)
 					urlParsed = p.base.ResolveReference(urlParsed)
