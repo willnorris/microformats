@@ -141,11 +141,17 @@ func runTest(t *testing.T, test string) bool {
 		t.Fatalf("error reading file %q: %v", test+".json", err)
 	}
 	want := make(map[string]interface{})
-	json.Unmarshal(expectedJSON, &want)
+	err = json.Unmarshal(expectedJSON, &want)
+	if err != nil {
+		t.Fatalf("error unmarshaling json in file %q: %v", test+".json", err)
+	}
 
 	outputJSON, _ := json.Marshal(data)
 	got := make(map[string]interface{})
-	json.Unmarshal(outputJSON, &got)
+	err = json.Unmarshal(outputJSON, &got)
+	if err != nil {
+		t.Fatalf("error unmarshaling json: %v", err)
+	}
 
 	if reflect.DeepEqual(got, want) {
 		fmt.Printf("PASS: %s\n", test)
