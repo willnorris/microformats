@@ -76,6 +76,17 @@ const (
 	formatDateTimeSecondsTZ = "2006-01-02 15:04:05-0700"
 )
 
+// String returns a string representation of d, using the format of
+// "YYYY-MM-DD HH:MM:SS+XXYY", but omitting certain values not specified in the
+// creation of d.  For example:
+//
+//     - if no date was specified, d is invalid and an empty string is returned
+//     - if no time was specified, time and timezone are omitted
+//     - if no timezone was specified, timezone is omitted
+//     - if no seconds were specified, seconds are omitted
+//     - if no minutes were specified, 00 is implied
+//
+// Microformat docs: http://microformats.org/wiki/value-class-pattern#Date_and_time_parsing
 func (d *datetime) String() string {
 	if !d.hasDate {
 		return ""
@@ -163,6 +174,7 @@ func (d *datetime) Parse(s string) {
 	s = strings.Replace(s, " ", "T", -1)
 	s = reAMPM.ReplaceAllString(s, "$1$2")
 
+	// datetime formats
 	for _, f := range datetimeFormats {
 		if t, err := time.Parse(f.format, s); err == nil {
 			d.setDate(t.Year(), t.Month(), t.Day())
