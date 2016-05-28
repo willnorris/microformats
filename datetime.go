@@ -108,8 +108,10 @@ var (
 	// regex to match ordinal dates of the form YYYY-DDD
 	reOrdinalDate = regexp.MustCompile(`(\d{4})-(\d{3})`)
 
-	// regex to match various permutations of am/pm indicator.  Supports the forms:
-	// "am", "AM", "a.m.".
+	// regex to match various permutations of am/pm indicator.  Supports
+	// the forms: "AM" and "A.M.".  This assumes that the string has been
+	// converted to uppercase before comparison.  Contains two capture
+	// groups, one for each letter matched.
 	reAMPM = regexp.MustCompile(`(A|P)\.?(M)\.?$`)
 )
 
