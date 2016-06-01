@@ -61,26 +61,27 @@ var skipTests = []string{
 }
 
 func TestSuite(t *testing.T) {
-	t.Run("microformats-v2", func(t *testing.T) {
-		version := "microformats-v2"
-		base := filepath.Join("testdata", "tests", version)
-		tests, err := listTests(base)
-		if err != nil {
-			t.Fatalf("error reading test cases: %v", err)
-		}
+	for _, version := range []string{"microformats-v2"} {
+		t.Run(version, func(t *testing.T) {
+			base := filepath.Join("testdata", "tests", version)
+			tests, err := listTests(base)
+			if err != nil {
+				t.Fatalf("error reading test cases: %v", err)
+			}
 
-		for _, test := range tests {
-			t.Run(test, func(t *testing.T) {
-				for _, skip := range skipTests {
-					if path.Join(version, test) == skip {
-						t.Skip()
+			for _, test := range tests {
+				t.Run(test, func(t *testing.T) {
+					for _, skip := range skipTests {
+						if path.Join(version, test) == skip {
+							t.Skip()
+						}
 					}
-				}
 
-				runTest(t, filepath.Join(base, test))
-			})
-		}
-	})
+					runTest(t, filepath.Join(base, test))
+				})
+			}
+		})
+	}
 }
 
 // listTests recursively lists microformat tests in the specified root
