@@ -28,103 +28,98 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/url"
+	"os"
+	"path"
 	"path/filepath"
 	"reflect"
+	"strings"
 	"testing"
 
 	"willnorris.com/go/microformats"
 )
 
-// list of tests built using:
-//     find testdata/tests/microformats-v2 -name "*.html" | grep -v change-log | sed -E 's/^testdata\/tests\/(.+)\.html$/\1/'
-var tests = []string{
-	"microformats-v2/h-adr/geo",
-	"microformats-v2/h-adr/geourl",
-	"microformats-v2/h-adr/justaname",
-	"microformats-v2/h-adr/simpleproperties",
-	// "microformats-v2/h-as-note/note",
-	"microformats-v2/h-card/baseurl",
-	"microformats-v2/h-card/childimplied",
-	"microformats-v2/h-card/extendeddescription",
-	"microformats-v2/h-card/hcard",
-	"microformats-v2/h-card/horghcard",
-	"microformats-v2/h-card/hyperlinkedphoto",
-	// "microformats-v2/h-card/impliedname",
-	// "microformats-v2/h-card/impliedphoto",
-	// "microformats-v2/h-card/impliedurl",
-	"microformats-v2/h-card/justahyperlink",
-	"microformats-v2/h-card/justaname",
-	// "microformats-v2/h-card/nested",
-	"microformats-v2/h-card/p-property",
-	"microformats-v2/h-card/relativeurls",
-	"microformats-v2/h-entry/impliedvalue-nested",
-	"microformats-v2/h-entry/justahyperlink",
-	"microformats-v2/h-entry/justaname",
-	// "microformats-v2/h-entry/summarycontent",
-	"microformats-v2/h-entry/u-property",
-	// "microformats-v2/h-entry/urlincontent",
-	"microformats-v2/h-event/ampm",
-	"microformats-v2/h-event/attendees",
-	"microformats-v2/h-event/combining",
-	// "microformats-v2/h-event/concatenate",
-	// "microformats-v2/h-event/dates",
-	"microformats-v2/h-event/dt-property",
-	"microformats-v2/h-event/justahyperlink",
-	"microformats-v2/h-event/justaname",
-	// "microformats-v2/h-event/time",
-	// "microformats-v2/h-feed/implied-title",
-	// "microformats-v2/h-feed/simple",
-	"microformats-v2/h-geo/abbrpattern",
-	"microformats-v2/h-geo/altitude",
-	"microformats-v2/h-geo/hidden",
-	"microformats-v2/h-geo/justaname",
-	"microformats-v2/h-geo/simpleproperties",
-	"microformats-v2/h-geo/valuetitleclass",
-	// "microformats-v2/h-news/all",
-	// "microformats-v2/h-news/minimum",
-	"microformats-v2/h-org/hyperlink",
-	"microformats-v2/h-org/simple",
-	"microformats-v2/h-org/simpleproperties",
-	"microformats-v2/h-product/aggregate",
-	"microformats-v2/h-product/justahyperlink",
-	"microformats-v2/h-product/justaname",
-	"microformats-v2/h-product/simpleproperties",
-	// "microformats-v2/h-recipe/all",
-	"microformats-v2/h-recipe/minimum",
-	// "microformats-v2/h-resume/affiliation",
-	"microformats-v2/h-resume/contact",
-	"microformats-v2/h-resume/education",
-	"microformats-v2/h-resume/justaname",
-	"microformats-v2/h-resume/skill",
-	"microformats-v2/h-resume/work",
-	"microformats-v2/h-review/hyperlink",
-	"microformats-v2/h-review/implieditem",
-	"microformats-v2/h-review/item",
-	"microformats-v2/h-review/justaname",
-	"microformats-v2/h-review/photo",
-	// "microformats-v2/h-review/vcard",
-	"microformats-v2/h-review-aggregate/hevent",
-	"microformats-v2/h-review-aggregate/justahyperlink",
-	"microformats-v2/h-review-aggregate/simpleproperties",
-	// "microformats-v2/rel/duplicate-rels",
-	"microformats-v2/rel/license",
-	"microformats-v2/rel/nofollow",
-	"microformats-v2/rel/rel-urls",
-	// "microformats-v2/rel/varying-text-duplicate-rels",
-	"microformats-v2/rel/xfn-all",
-	"microformats-v2/rel/xfn-elsewhere",
+// skip the tests which we don't pass yet
+var skipTests = []string{
+	"microformats-v2/h-adr/lettercase",
+	"microformats-v2/h-as-note/note",
+	"microformats-v2/h-card/impliedname",
+	"microformats-v2/h-card/impliedphoto",
+	"microformats-v2/h-card/impliedurl",
+	"microformats-v2/h-card/nested",
+	"microformats-v2/h-entry/scriptstyletags",
+	"microformats-v2/h-entry/summarycontent",
+	"microformats-v2/h-entry/urlincontent",
+	"microformats-v2/h-event/concatenate",
+	"microformats-v2/h-event/dates",
+	"microformats-v2/h-event/time",
+	"microformats-v2/h-feed/implied-title",
+	"microformats-v2/h-feed/simple",
+	"microformats-v2/h-news/all",
+	"microformats-v2/h-news/minimum",
+	"microformats-v2/h-recipe/all",
+	"microformats-v2/h-resume/affiliation",
+	"microformats-v2/h-review/vcard",
+	"microformats-v2/rel/duplicate-rels",
+	"microformats-v2/rel/varying-text-duplicate-rels",
 }
 
 func TestSuite(t *testing.T) {
 	passes := 0
 	count := 0
+
+	version := "microformats-v2"
+	base := filepath.Join("testdata", "tests", version)
+	tests, err := listTests(base)
+	if err != nil {
+		t.Fatalf("error reading test cases: %v", err)
+	}
+
+Tests:
 	for _, test := range tests {
+		for _, skip := range skipTests {
+			if path.Join(version, test) == skip {
+				continue Tests
+			}
+		}
+
 		count++
-		if runTest(t, filepath.Join("testdata", "tests", test)) {
+		if runTest(t, filepath.Join(base, test)) {
 			passes++
 		}
 	}
+
 	fmt.Printf("PASSING %d OF %d\n", passes, count)
+}
+
+// listTests recursively lists microformat tests in the specified root
+// directory.  A test is identified as pair of matching .html and .json files
+// in the same directory.  Returns a slice of named tests, where the test name
+// is the path to the html and json files relative to root, excluding any file
+// extension.
+func listTests(root string) ([]string, error) {
+	tests := []string{}
+	err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if info.IsDir() {
+			return nil
+		}
+		if ext := filepath.Ext(path); ext == ".json" {
+			test := strings.TrimSuffix(path, ext)
+			// ensure .html file exists with the same name
+			if _, err := os.Stat(test + ".html"); os.IsNotExist(err) {
+				return nil
+			}
+			test, err = filepath.Rel(root, test)
+			if err != nil {
+				return err
+			}
+			tests = append(tests, test)
+		}
+		return nil
+	})
+	return tests, err
 }
 
 func runTest(t *testing.T, test string) bool {
@@ -153,12 +148,10 @@ func runTest(t *testing.T, test string) bool {
 		t.Fatalf("error unmarshaling json: %v", err)
 	}
 
-	if reflect.DeepEqual(got, want) {
-		fmt.Printf("PASS: %s\n", test)
-		return true
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("Parse(%q) returned %v\n\nwant: %v\n\n", test, got, want)
+		return false
 	}
 
-	fmt.Printf("FAIL: %s\ngot: %v\n\nwant: %v\n\n", test, got, want)
-	t.Fail()
-	return false
+	return true
 }
