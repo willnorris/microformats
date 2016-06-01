@@ -25,7 +25,6 @@ package microformats_test
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/url"
 	"os"
@@ -62,31 +61,26 @@ var skipTests = []string{
 }
 
 func TestSuite(t *testing.T) {
-	passes := 0
-	count := 0
-
-	version := "microformats-v2"
-	base := filepath.Join("testdata", "tests", version)
-	tests, err := listTests(base)
-	if err != nil {
-		t.Fatalf("error reading test cases: %v", err)
-	}
-
-Tests:
-	for _, test := range tests {
-		for _, skip := range skipTests {
-			if path.Join(version, test) == skip {
-				continue Tests
-			}
+	t.Run("microformats-v2", func(t *testing.T) {
+		version := "microformats-v2"
+		base := filepath.Join("testdata", "tests", version)
+		tests, err := listTests(base)
+		if err != nil {
+			t.Fatalf("error reading test cases: %v", err)
 		}
 
-		count++
-		if runTest(t, filepath.Join(base, test)) {
-			passes++
-		}
-	}
+		for _, test := range tests {
+			t.Run(test, func(t *testing.T) {
+				for _, skip := range skipTests {
+					if path.Join(version, test) == skip {
+						t.Skip()
+					}
+				}
 
-	fmt.Printf("PASSING %d OF %d\n", passes, count)
+				runTest(t, filepath.Join(base, test))
+			})
+		}
+	})
 }
 
 // listTests recursively lists microformat tests in the specified root
@@ -120,7 +114,7 @@ func listTests(root string) ([]string, error) {
 	return tests, err
 }
 
-func runTest(t *testing.T, test string) bool {
+func runTest(t *testing.T, test string) {
 	input, err := ioutil.ReadFile(test + ".html")
 	if err != nil {
 		t.Fatalf("error reading file %q: %v", test+".html", err)
@@ -147,9 +141,6 @@ func runTest(t *testing.T, test string) bool {
 	}
 
 	if !reflect.DeepEqual(got, want) {
-		t.Errorf("Parse(%q) returned %v\n\nwant: %v\n\n", test, got, want)
-		return false
+		t.Fatalf("Parse returned %v\n\nwant: %v\n\n", got, want)
 	}
-
-	return true
 }
