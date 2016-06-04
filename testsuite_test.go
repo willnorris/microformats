@@ -45,7 +45,6 @@ var skipTests = []string{
 	"microformats-v2/h-card/impliedphoto",
 	"microformats-v2/h-card/impliedurl",
 	"microformats-v2/h-card/nested",
-	"microformats-v2/h-entry/scriptstyletags",
 	"microformats-v2/h-entry/summarycontent",
 	"microformats-v2/h-entry/urlincontent",
 	"microformats-v2/h-event/concatenate",

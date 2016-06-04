@@ -348,6 +348,9 @@ func getTextContent(node *html.Node) string {
 	if node == nil {
 		return ""
 	}
+	if isAtom(node, atom.Script, atom.Style) {
+		return ""
+	}
 	if node.Type == html.TextNode {
 		return node.Data
 	}
