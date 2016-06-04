@@ -40,7 +40,6 @@ import (
 
 // skip the tests which we don't pass yet
 var skipTests = []string{
-	"microformats-v2/h-adr/lettercase",
 	"microformats-v2/h-as-note/note",
 	"microformats-v2/h-card/impliedname",
 	"microformats-v2/h-card/impliedphoto",
