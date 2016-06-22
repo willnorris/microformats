@@ -427,6 +427,7 @@ func getImpliedName(node *html.Node) string {
 	if name == nil && isAtom(node, atom.Abbr) {
 		name = getAttrPtr(node, "title")
 	}
+
 	if name == nil {
 		subnode := getOnlyChild(node)
 		if subnode != nil && subnode.DataAtom == atom.Img && !hasMatchingClass(subnode, rootClassNames) {
@@ -441,13 +442,14 @@ func getImpliedName(node *html.Node) string {
 	}
 	if name == nil {
 		subnode := getOnlyChild(node)
-		if subnode != nil && subnode.DataAtom == atom.Abbr {
+		if subnode != nil && subnode.DataAtom == atom.Abbr && !hasMatchingClass(subnode, rootClassNames) {
 			name = getAttrPtr(subnode, "title")
 		}
 	}
+
 	if name == nil {
 		subnode := getOnlyChild(node)
-		if subnode != nil {
+		if subnode != nil && !hasMatchingClass(subnode, rootClassNames) {
 			subsubnode := getOnlyChild(subnode)
 			if subsubnode != nil && subsubnode.DataAtom == atom.Img && !hasMatchingClass(subsubnode, rootClassNames) {
 				name = getAttrPtr(subsubnode, "alt")
@@ -456,7 +458,7 @@ func getImpliedName(node *html.Node) string {
 	}
 	if name == nil {
 		subnode := getOnlyChild(node)
-		if subnode != nil {
+		if subnode != nil && !hasMatchingClass(subnode, rootClassNames) {
 			subsubnode := getOnlyChild(subnode)
 			if subsubnode != nil && subsubnode.DataAtom == atom.Area && !hasMatchingClass(subsubnode, rootClassNames) {
 				name = getAttrPtr(subsubnode, "alt")
@@ -465,13 +467,14 @@ func getImpliedName(node *html.Node) string {
 	}
 	if name == nil {
 		subnode := getOnlyChild(node)
-		if subnode != nil {
+		if subnode != nil && !hasMatchingClass(subnode, rootClassNames) {
 			subsubnode := getOnlyChild(subnode)
 			if subsubnode != nil && subsubnode.DataAtom == atom.Abbr {
 				name = getAttrPtr(subsubnode, "title")
 			}
 		}
 	}
+
 	if name == nil {
 		name = new(string)
 		*name = getTextContent(node)
@@ -487,6 +490,7 @@ func getImpliedPhoto(node *html.Node, baseURL *url.URL) string {
 	if photo == nil && isAtom(node, atom.Object) {
 		photo = getAttrPtr(node, "data")
 	}
+
 	if photo == nil {
 		subnode := getOnlyChildAtomWithAttr(node, atom.Img, "src")
 		if subnode != nil && !hasMatchingClass(subnode, rootClassNames) {
@@ -499,9 +503,10 @@ func getImpliedPhoto(node *html.Node, baseURL *url.URL) string {
 			photo = getAttrPtr(subnode, "data")
 		}
 	}
+
 	if photo == nil {
 		subnode := getOnlyChild(node)
-		if subnode != nil {
+		if subnode != nil && !hasMatchingClass(subnode, rootClassNames) {
 			subsubnode := getOnlyChildAtomWithAttr(subnode, atom.Img, "src")
 			if subsubnode != nil && !hasMatchingClass(subsubnode, rootClassNames) {
 				photo = getAttrPtr(subsubnode, "src")
@@ -510,13 +515,14 @@ func getImpliedPhoto(node *html.Node, baseURL *url.URL) string {
 	}
 	if photo == nil {
 		subnode := getOnlyChild(node)
-		if subnode != nil {
+		if subnode != nil && !hasMatchingClass(subnode, rootClassNames) {
 			subsubnode := getOnlyChildAtomWithAttr(subnode, atom.Object, "data")
 			if subsubnode != nil && !hasMatchingClass(subsubnode, rootClassNames) {
 				photo = getAttrPtr(subsubnode, "data")
 			}
 		}
 	}
+
 	if photo == nil {
 		return ""
 	}
@@ -533,6 +539,7 @@ func getImpliedURL(node *html.Node, baseURL *url.URL) string {
 	if value == nil && isAtom(node, atom.A, atom.Area) {
 		value = getAttrPtr(node, "href")
 	}
+
 	if value == nil {
 		subnode := getOnlyChildAtomWithAttr(node, atom.A, "href")
 		if subnode != nil && !hasMatchingClass(subnode, rootClassNames) {
@@ -545,9 +552,10 @@ func getImpliedURL(node *html.Node, baseURL *url.URL) string {
 			value = getAttrPtr(subnode, "href")
 		}
 	}
+
 	if value == nil {
 		subnode := getOnlyChild(node)
-		if subnode != nil {
+		if subnode != nil && !hasMatchingClass(subnode, rootClassNames) {
 			subsubnode := getOnlyChildAtomWithAttr(subnode, atom.A, "href")
 			if subsubnode != nil && !hasMatchingClass(subsubnode, rootClassNames) {
 				value = getAttrPtr(subsubnode, "href")
@@ -556,13 +564,14 @@ func getImpliedURL(node *html.Node, baseURL *url.URL) string {
 	}
 	if value == nil {
 		subnode := getOnlyChild(node)
-		if subnode != nil {
+		if subnode != nil && !hasMatchingClass(subnode, rootClassNames) {
 			subsubnode := getOnlyChildAtomWithAttr(subnode, atom.Area, "href")
 			if subsubnode != nil && !hasMatchingClass(subsubnode, rootClassNames) {
 				value = getAttrPtr(subsubnode, "href")
 			}
 		}
 	}
+
 	if value == nil {
 		return ""
 	}
