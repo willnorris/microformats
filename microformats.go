@@ -546,6 +546,24 @@ func getImpliedURL(node *html.Node, baseURL *url.URL) string {
 		}
 	}
 	if value == nil {
+		subnode := getOnlyChild(node)
+		if subnode != nil {
+			subsubnode := getOnlyChildAtomWithAttr(subnode, atom.A, "href")
+			if subsubnode != nil && !hasMatchingClass(subsubnode, rootClassNames) {
+				value = getAttrPtr(subsubnode, "href")
+			}
+		}
+	}
+	if value == nil {
+		subnode := getOnlyChild(node)
+		if subnode != nil {
+			subsubnode := getOnlyChildAtomWithAttr(subnode, atom.Area, "href")
+			if subsubnode != nil && !hasMatchingClass(subsubnode, rootClassNames) {
+				value = getAttrPtr(subsubnode, "href")
+			}
+		}
+	}
+	if value == nil {
 		return ""
 	}
 	if baseURL != nil {
