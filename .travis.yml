@@ -1,3 +1,5 @@
 sudo: false
 language: go
+go:
+  - 1.7
 go_import_path: willnorris.com/go/microformats
