@@ -63,7 +63,6 @@ var skipTests = []string{
 func TestSuite(t *testing.T) {
 	for _, version := range []string{"microformats-v2"} {
 		t.Run(version, func(t *testing.T) {
-			t.Parallel()
 			base := filepath.Join("testdata", "tests", version)
 			tests, err := listTests(base)
 			if err != nil {
@@ -72,7 +71,6 @@ func TestSuite(t *testing.T) {
 
 			for _, test := range tests {
 				t.Run(test, func(t *testing.T) {
-					t.Parallel()
 					for _, skip := range skipTests {
 						if path.Join(version, test) == skip {
 							t.Skip()
