@@ -40,10 +40,6 @@ import (
 // skip the tests which we don't pass yet
 var skipTests = []string{
 	"microformats-v2/h-as-note/note",
-	"microformats-v2/h-card/impliedname",
-	"microformats-v2/h-card/impliedphoto",
-	"microformats-v2/h-card/impliedurl",
-	"microformats-v2/h-card/nested",
 	"microformats-v2/h-entry/summarycontent",
 	"microformats-v2/h-entry/urlincontent",
 	"microformats-v2/h-event/concatenate",
@@ -54,7 +50,6 @@ var skipTests = []string{
 	"microformats-v2/h-news/all",
 	"microformats-v2/h-news/minimum",
 	"microformats-v2/h-recipe/all",
-	"microformats-v2/h-resume/affiliation",
 	"microformats-v2/h-review/vcard",
 	"microformats-v2/rel/duplicate-rels",
 	"microformats-v2/rel/varying-text-duplicate-rels",
