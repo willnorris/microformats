@@ -68,7 +68,7 @@ func index(w http.ResponseWriter, r *http.Request) {
 	var j []byte
 	if html != "" {
 		mf := microformats.Parse(strings.NewReader(html), parsedURL)
-		j, err = json.MarshalIndent(mf, "", "    ")
+		j, err = json.MarshalIndent(mf, "", "  ")
 		if err != nil {
 			http.Error(w, fmt.Sprintf("error marshaling json: %v", err), http.StatusInternalServerError)
 		}
@@ -90,25 +90,41 @@ func index(w http.ResponseWriter, r *http.Request) {
 var tpl = template.Must(template.New("").Parse(`<!doctype html>
 <html>
 <head>
+<style>
+  input, textarea { font-size: 1rem; }
+  input[type=url], textarea { width: calc(100% - 1rem); }
+  input[type=url], textarea, pre { border: 1px solid #999; border-radius: 2px; padding: 0.5rem; }
+  label, input { display: block; }
+  input[type=submit] { margin: 0.5em 0; }
+  pre { background: #eee; }
+</style>
 </head>
 <body>
+  <h1>go microformats parser</h1>
   <h2>Parse a URL</h2>
   <form method="GET">
-    <input name="url" type="url" />
+    <input name="url" type="url" placeholder="https://indieweb.org/" />
     <input type="submit" value="Parse" />
   </form>
 
   <h2>Parse HTML</h2>
   <form method="POST">
-    <textarea name="html" style="width: 100%;" rows="15">{{ .HTML }}</textarea>
-    <br>
-    <input name="url" type="text" style="width: 100%;" value="{{ .URL }}"></input>
-    <br>
+    <label for="html">HTML</label>
+    <textarea id="html" name="html" rows="15">{{ .HTML }}</textarea>
+    <label for="url">Base URL</label>
+    <input id="url" name="url" type="url" value="{{ .URL }}" placeholder="https://indieweb.org/" />
     <input type="submit" value="Parse"/>
   </form><br>
 
-  <pre><code>
-{{ .JSON }}
+{{ with .JSON }}
+  <h2>JSON</h2>
+  <pre><code>{{ . }}
 </code></pre>
+{{ end }}
+<ul>
+  <li><a href="http://microformats.org/wiki/about">About microformats</a></li>
+  <li><a href="https://github.com/willnorris/microformats/tree/master/cmd/gomfweb">Source code for this site</a></li>
+  <li><a href="http://microformats.org/wiki/microformats2#Parsers">Other microformats parsers</a></li>
+</ul>
 </body>
 </html>`))
