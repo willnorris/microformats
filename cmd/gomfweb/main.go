@@ -10,6 +10,7 @@ import (
 	"html/template"
 	"net/http"
 	"net/url"
+	"os"
 	"strings"
 
 	"willnorris.com/go/microformats"
@@ -21,6 +22,10 @@ func main() {
 	flag.Parse()
 
 	http.Handle("/", http.HandlerFunc(index))
+
+	if port := os.Getenv("PORT"); port != "" {
+		*addr = ":" + port
+	}
 
 	fmt.Printf("gomfweb listening on %s\n", *addr)
 	http.ListenAndServe(*addr, nil)
