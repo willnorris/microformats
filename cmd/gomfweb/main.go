@@ -145,9 +145,9 @@ var tpl = template.Must(template.New("").Parse(`<!DOCTYPE html>
         <li><a href="https://github.com/willnorris/microformats">Source code for the Microformats Go Parser</a></li>
         <li>
           Other Microformats Parser websites:
-          <a href="https://node.microformats.io">Node</a>,
+          <a href="http://node.microformats.io">Node</a>,
           <a href="https://php.microformats.io">PHP</a>,
-          <a href="https://python.microformats.io">Python</a>, and
+          <a href="http://python.microformats.io">Python</a>, and
           <a href="https://ruby.microformats.io">Ruby</a>.
         </li>
       </ul>
