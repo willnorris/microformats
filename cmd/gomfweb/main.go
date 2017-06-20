@@ -150,6 +150,7 @@ var tpl = template.Must(template.New("").Parse(`<!DOCTYPE html>
           <a href="http://python.microformats.io">Python</a>, and
           <a href="https://ruby.microformats.io">Ruby</a>.
         </li>
+	<li><a href="http://microformats.org/wiki/microformats2#Parsers">More Microformats parsers</a></li>
       </ul>
     </footer>
   </main>
