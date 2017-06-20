@@ -108,7 +108,7 @@ var tpl = template.Must(template.New("").Parse(`<!DOCTYPE html>
 
     <form method="get">
       <div class="form-group">
-        <label for"url">Enter a URL</label>
+        <label for="url">Enter a URL</label>
         <input name="url" type="url" placeholder="https://indieweb.org" class="form-control form-control-lg" />
       </div>
 
