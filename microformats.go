@@ -193,7 +193,7 @@ func (p *parser) walk(node *html.Node) {
 			switch prefix {
 			case "p":
 				value = getValueClassPattern(node)
-				if value == nil && isAtom(node, atom.Abbr) {
+				if value == nil && isAtom(node, atom.Abbr, atom.Link) {
 					value = getAttrPtr(node, "title")
 				}
 				if value == nil && isAtom(node, atom.Data, atom.Input) {
@@ -210,7 +210,7 @@ func (p *parser) walk(node *html.Node) {
 					embedValue = getFirstPropValue(curItem, "name")
 				}
 			case "u":
-				if value == nil && isAtom(node, atom.A, atom.Area) {
+				if value == nil && isAtom(node, atom.A, atom.Area, atom.Link) {
 					value = getAttrPtr(node, "href")
 				}
 				if value == nil && isAtom(node, atom.Img, atom.Audio, atom.Video, atom.Source) {
