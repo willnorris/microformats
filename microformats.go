@@ -121,10 +121,11 @@ func (p *parser) walk(node *html.Node) {
 	}
 	if !p.baseFound && isAtom(node, atom.Base) {
 		if href := getAttr(node, "href"); href != "" {
-			newbase, _ := url.Parse(href)
-			newbase = p.base.ResolveReference(newbase)
-			p.base = newbase
-			p.baseFound = true
+			if newbase, err := url.Parse(href); err == nil {
+				newbase = p.base.ResolveReference(newbase)
+				p.base = newbase
+				p.baseFound = true
+			}
 		}
 	}
 
@@ -133,9 +134,10 @@ func (p *parser) walk(node *html.Node) {
 			urlVal := getAttr(node, "href")
 
 			if p.base != nil {
-				urlParsed, _ := url.Parse(urlVal)
-				urlParsed = p.base.ResolveReference(urlParsed)
-				urlVal = urlParsed.String()
+				if urlParsed, err := url.Parse(urlVal); err == nil {
+					urlParsed = p.base.ResolveReference(urlParsed)
+					urlVal = urlParsed.String()
+				}
 			}
 
 			rels := strings.Split(rel, " ")
@@ -223,9 +225,10 @@ func (p *parser) walk(node *html.Node) {
 					value = getAttrPtr(node, "poster")
 				}
 				if p.base != nil && value != nil {
-					urlParsed, _ := url.Parse(*value)
-					urlParsed = p.base.ResolveReference(urlParsed)
-					*value = urlParsed.String()
+					if urlParsed, err := url.Parse(*value); err == nil {
+						urlParsed = p.base.ResolveReference(urlParsed)
+						*value = urlParsed.String()
+					}
 				}
 				if value == nil {
 					value = getValueClassPattern(node)
@@ -527,9 +530,10 @@ func getImpliedPhoto(node *html.Node, baseURL *url.URL) string {
 		return ""
 	}
 	if baseURL != nil {
-		urlParsed, _ := url.Parse(*photo)
-		urlParsed = baseURL.ResolveReference(urlParsed)
-		*photo = urlParsed.String()
+		if urlParsed, err := url.Parse(*photo); err == nil {
+			urlParsed = baseURL.ResolveReference(urlParsed)
+			*photo = urlParsed.String()
+		}
 	}
 	return *photo
 }
@@ -576,9 +580,10 @@ func getImpliedURL(node *html.Node, baseURL *url.URL) string {
 		return ""
 	}
 	if baseURL != nil {
-		urlParsed, _ := url.Parse(*value)
-		urlParsed = baseURL.ResolveReference(urlParsed)
-		*value = urlParsed.String()
+		if urlParsed, err := url.Parse(*value); err == nil {
+			urlParsed = baseURL.ResolveReference(urlParsed)
+			*value = urlParsed.String()
+		}
 	}
 	return *value
 }
