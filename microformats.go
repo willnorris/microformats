@@ -248,18 +248,24 @@ func (p *parser) walk(node *html.Node) {
 				}
 			case "e":
 				value = new(string)
-				*value = getTextContent(node)
+				*value = strings.TrimSpace(getTextContent(node))
 				var buf bytes.Buffer
 				for c := node.FirstChild; c != nil; c = c.NextSibling {
 					html.Render(&buf, c)
 				}
-				htmlbody = strings.TrimSpace(buf.String())
+				htmlbody = buf.String()
+				htmlbody = strings.TrimFunc(htmlbody, func(r rune) bool {
+					return r == ' '
+				})
 			case "dt":
 				if value == nil {
 					value = getDateTimeValue(node)
 				}
 				if value == nil && isAtom(node, atom.Time, atom.Ins, atom.Del) {
 					value = getAttrPtr(node, "datetime")
+					if value != nil {
+						*value = strings.Replace(*value, "T", " ", -1)
+					}
 				}
 				if value == nil && isAtom(node, atom.Abbr) {
 					value = getAttrPtr(node, "title")

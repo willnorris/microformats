@@ -44,7 +44,6 @@ var skipTests = []string{
 	"microformats-v2/h-event/concatenate",
 	"microformats-v2/h-event/dates",
 	"microformats-v2/h-feed/implied-title",
-	"microformats-v2/h-feed/simple",
 	"microformats-v2/h-recipe/all",
 	"microformats-v2/h-review/vcard",
 	"microformats-v2/rel/duplicate-rels",
