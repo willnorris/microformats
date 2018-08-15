@@ -285,6 +285,9 @@ func (p *parser) walk(node *html.Node) {
 				}
 
 				htmlbody = strings.Replace(buf.String(), "/>", " />", -1)
+				htmlbody = strings.TrimRightFunc(htmlbody, func(r rune) bool {
+					return r == ' '
+				})
 			case "dt":
 				if value == nil {
 					value = getDateTimeValue(node)
