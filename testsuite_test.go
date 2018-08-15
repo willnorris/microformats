@@ -48,7 +48,6 @@ var skipTests = []string{
 	"microformats-v2/h-card/p-property",
 	"microformats-v2/h-entry/impliedvalue-nested",
 	"microformats-v2/h-entry/summarycontent",
-	"microformats-v2/h-entry/urlincontent",
 	"microformats-v2/h-event/concatenate",
 	"microformats-v2/h-feed/implied-title",
 	"microformats-v2/h-feed/simple",
@@ -138,6 +137,8 @@ func runTest(t *testing.T, test string) {
 	if err != nil {
 		t.Fatalf("error reading file %q: %v", test+".json", err)
 	}
+	// normalize self-closing HTML tags to match what net/html produces
+	expectedJSON = bytes.Replace(expectedJSON, []byte(" />"), []byte("/>"), -1)
 	want := make(map[string]interface{})
 	err = json.Unmarshal(expectedJSON, &want)
 	if err != nil {

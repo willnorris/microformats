@@ -99,6 +99,35 @@ func ParseNode(doc *html.Node, baseURL *url.URL) *Data {
 	return p.curData
 }
 
+// expandHref expands relative URLs in a.href and img.src attributes to be absolute URLs.
+func (p *parser) expandHref(node *html.Node) {
+	if isAtom(node, atom.A) {
+		href := getAttrPtr(node, "href")
+		if href != nil {
+			if urlParsed, err := url.Parse(*href); err == nil {
+				urlParsed = p.base.ResolveReference(urlParsed)
+				*href = urlParsed.String()
+			}
+		}
+		return
+	}
+
+	if isAtom(node, atom.Img) {
+		href := getAttrPtr(node, "src")
+		if href != nil {
+			if urlParsed, err := url.Parse(*href); err == nil {
+				urlParsed = p.base.ResolveReference(urlParsed)
+				*href = urlParsed.String()
+			}
+		}
+		return
+	}
+
+	for c := node.FirstChild; c != nil; c = c.NextSibling {
+		p.expandHref(c)
+	}
+}
+
 func (p *parser) walk(node *html.Node) {
 	var curItem *Microformat
 	var priorItem *Microformat
@@ -250,7 +279,9 @@ func (p *parser) walk(node *html.Node) {
 				value = new(string)
 				*value = getTextContent(node)
 				var buf bytes.Buffer
+
 				for c := node.FirstChild; c != nil; c = c.NextSibling {
+					p.expandHref(c)
 					html.Render(&buf, c)
 				}
 				htmlbody = strings.TrimSpace(buf.String())
@@ -327,9 +358,9 @@ func getAttrPtr(node *html.Node, name string) *string {
 	if node == nil {
 		return nil
 	}
-	for _, attr := range node.Attr {
+	for i, attr := range node.Attr {
 		if strings.EqualFold(attr.Key, name) {
-			return &attr.Val
+			return &node.Attr[i].Val
 		}
 	}
 	return nil
