@@ -99,6 +99,7 @@ func ParseNode(doc *html.Node, baseURL *url.URL) *Data {
 	return p.curData
 }
 
+// expandHref expands relative URLs in a.href and img.src attributes to be absolute URLs.
 func (p *parser) expandHref(node *html.Node) {
 	if isAtom(node, atom.A) {
 		href := getAttrPtr(node, "href")
