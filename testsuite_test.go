@@ -34,6 +34,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/kylelemons/godebug/pretty"
 	"willnorris.com/go/microformats"
 )
 
@@ -151,6 +152,6 @@ func runTest(t *testing.T, test string) {
 	}
 
 	if !reflect.DeepEqual(got, want) {
-		t.Fatalf("Parse returned %v\n\nwant: %v\n\n", got, want)
+		t.Fatalf("Parse value differs:\n%v", pretty.Compare(want, got))
 	}
 }
