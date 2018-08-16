@@ -191,7 +191,7 @@ func Test_GetTextContent(t *testing.T) {
 		{"<a>foo</a>", "foo"},
 		{"<a><b>foo</b>bar</a>", "foobar"},
 		{"<a><b>foo</b><i>bar</i></a>", "foobar"},
-		{"<a> <b>foo</b> <i>bar</i> </a>", " foo bar "},
+		{"<a> <b>foo</b> <i>bar</i> </a>", "foo bar"},
 		{"<a><b><i>foo</i></b>bar</a>", "foobar"},
 	}
 

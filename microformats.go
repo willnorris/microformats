@@ -361,7 +361,7 @@ func getTextContent(node *html.Node) string {
 	for c := node.FirstChild; c != nil; c = c.NextSibling {
 		buf.WriteString(getTextContent(c))
 	}
-	return buf.String()
+	return strings.TrimSpace(buf.String())
 }
 
 // getOnlyChild returns the sole child of node.  Returns nil if node has zero
