@@ -253,10 +253,7 @@ func (p *parser) walk(node *html.Node) {
 				for c := node.FirstChild; c != nil; c = c.NextSibling {
 					html.Render(&buf, c)
 				}
-				htmlbody = buf.String()
-				htmlbody = strings.TrimFunc(htmlbody, func(r rune) bool {
-					return r == ' '
-				})
+				htmlbody = strings.TrimSpace(buf.String())
 			case "dt":
 				if value == nil {
 					value = getDateTimeValue(node)
