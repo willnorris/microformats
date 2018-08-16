@@ -99,7 +99,7 @@ func ParseNode(doc *html.Node, baseURL *url.URL) *Data {
 	return p.curData
 }
 
-func (p *parser) replaceHref(node *html.Node) {
+func (p *parser) expandHref(node *html.Node) {
 	if isAtom(node, atom.A) {
 		href := getAttrPtr(node, "href")
 		if href != nil {
@@ -123,7 +123,7 @@ func (p *parser) replaceHref(node *html.Node) {
 	}
 
 	for c := node.FirstChild; c != nil; c = c.NextSibling {
-		p.replaceHref(c)
+		p.expandHref(c)
 	}
 }
 
@@ -280,7 +280,7 @@ func (p *parser) walk(node *html.Node) {
 				var buf bytes.Buffer
 
 				for c := node.FirstChild; c != nil; c = c.NextSibling {
-					p.replaceHref(c)
+					p.expandHref(c)
 					html.Render(&buf, c)
 				}
 
