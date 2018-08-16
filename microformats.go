@@ -263,9 +263,6 @@ func (p *parser) walk(node *html.Node) {
 				}
 				if value == nil && isAtom(node, atom.Time, atom.Ins, atom.Del) {
 					value = getAttrPtr(node, "datetime")
-					if value != nil {
-						*value = strings.Replace(*value, "T", " ", -1)
-					}
 				}
 				if value == nil && isAtom(node, atom.Abbr) {
 					value = getAttrPtr(node, "title")
