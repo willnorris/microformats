@@ -48,7 +48,6 @@ var skipTests = []string{
 	"microformats-v2/h-card/p-property",
 	"microformats-v2/h-entry/impliedvalue-nested",
 	"microformats-v2/h-entry/summarycontent",
-	"microformats-v2/h-entry/urlincontent",
 	"microformats-v2/h-event/concatenate",
 	"microformats-v2/h-feed/implied-title",
 	"microformats-v2/h-feed/simple",
