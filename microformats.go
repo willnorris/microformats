@@ -277,7 +277,7 @@ func (p *parser) walk(node *html.Node) {
 				}
 			case "e":
 				value = new(string)
-				*value = getTextContent(node)
+				*value = strings.TrimSpace(getTextContent(node))
 				var buf bytes.Buffer
 
 				for c := node.FirstChild; c != nil; c = c.NextSibling {
