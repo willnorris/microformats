@@ -40,30 +40,10 @@ import (
 
 // skip the tests which we don't pass yet
 var skipTests = []string{
-	"microformats-v2/h-adr/simpleproperties",
 	"microformats-v2/h-card/impliedname",
-	"microformats-v2/h-card/impliedphoto",
-	"microformats-v2/h-card/impliedurl",
-	"microformats-v2/h-card/impliedurlempty",
 	"microformats-v2/h-card/p-property",
-	"microformats-v2/h-entry/impliedvalue-nested",
-	"microformats-v2/h-entry/summarycontent",
 	"microformats-v2/h-event/concatenate",
-	"microformats-v2/h-feed/implied-title",
-	"microformats-v2/h-feed/simple",
-	"microformats-v2/h-geo/abbrpattern",
-	"microformats-v2/h-geo/hidden",
-	"microformats-v2/h-geo/valuetitleclass",
-	"microformats-v2/h-product/aggregate",
-	"microformats-v2/h-product/simpleproperties",
 	"microformats-v2/h-recipe/all",
-	"microformats-v2/h-resume/education",
-	"microformats-v2/h-resume/work",
-	"microformats-v2/h-review-aggregate/hevent",
-	"microformats-v2/h-review-aggregate/justahyperlink",
-	"microformats-v2/h-review-aggregate/simpleproperties",
-	"microformats-v2/h-review/implieditem",
-	"microformats-v2/h-review/item",
 	"microformats-v2/h-review/vcard",
 	"microformats-v2/rel/duplicate-rels",
 	"microformats-v2/rel/varying-text-duplicate-rels",
@@ -94,7 +74,7 @@ func TestSuite(t *testing.T) {
 }
 
 // listTests recursively lists microformat tests in the specified root
-// directory.  A test is identified as pair of matching .html and .json files
+// directory.  A test is identified as a pair of matching .html and .json files
 // in the same directory.  Returns a slice of named tests, where the test name
 // is the path to the html and json files relative to root, excluding any file
 // extension.

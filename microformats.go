@@ -49,6 +49,13 @@ type Microformat struct {
 	Shape      string                   `json:"shape,omitempty"`
 	Coords     string                   `json:"coords,omitempty"`
 	Children   []*Microformat           `json:"children,omitempty"`
+
+	// track whether this microformat has various types of properties or nested
+	// microformats.  This is required for processing implied property values.
+	hasNestedMicroformats bool
+	hasPProperties        bool
+	hasEProperties        bool
+	hasUProperties        bool
 }
 
 // Data specifies all of the microformats and data parsed from a single HTML
@@ -144,6 +151,8 @@ func (p *parser) walk(node *html.Node) {
 		curItem.Properties = make(map[string][]interface{})
 		if p.curItem == nil {
 			p.curData.Items = append(p.curData.Items, curItem)
+		} else {
+			p.curItem.hasNestedMicroformats = true
 		}
 		priorItem = p.curItem
 		p.curItem = curItem
@@ -188,10 +197,14 @@ func (p *parser) walk(node *html.Node) {
 	}
 
 	if curItem != nil {
+		// all child elements of node have been processed, and all explicit
+		// properties on curItem have been set. Now process implied property values.
 		if _, ok := curItem.Properties["name"]; !ok {
-			name := getImpliedName(node)
-			if name != "" {
-				curItem.Properties["name"] = append(curItem.Properties["name"], name)
+			if !curItem.hasNestedMicroformats && !curItem.hasPProperties && !curItem.hasEProperties {
+				name := getImpliedName(node)
+				if name != "" {
+					curItem.Properties["name"] = append(curItem.Properties["name"], name)
+				}
 			}
 		}
 		if _, ok := curItem.Properties["photo"]; !ok {
@@ -201,13 +214,16 @@ func (p *parser) walk(node *html.Node) {
 			}
 		}
 		if _, ok := curItem.Properties["url"]; !ok {
-			url := getImpliedURL(node, p.base)
-			if url != "" {
-				curItem.Properties["url"] = append(curItem.Properties["url"], url)
+			if !curItem.hasNestedMicroformats && !curItem.hasUProperties {
+				url := getImpliedURL(node, p.base)
+				if url != "" {
+					curItem.Properties["url"] = append(curItem.Properties["url"], url)
+				}
 			}
 		}
 		p.curItem = priorItem
 	}
+
 	var propertyclasses [][]string
 	for _, class := range classes {
 		match := propertyClassNames.FindStringSubmatch(class)
@@ -223,6 +239,9 @@ func (p *parser) walk(node *html.Node) {
 			var htmlbody string
 			switch prefix {
 			case "p":
+				if p.curItem != nil {
+					p.curItem.hasPProperties = true
+				}
 				value = getValueClassPattern(node)
 				if value == nil && isAtom(node, atom.Abbr, atom.Link) {
 					value = getAttrPtr(node, "title")
@@ -241,6 +260,9 @@ func (p *parser) walk(node *html.Node) {
 					embedValue = getFirstPropValue(curItem, "name")
 				}
 			case "u":
+				if p.curItem != nil {
+					p.curItem.hasUProperties = true
+				}
 				if value == nil && isAtom(node, atom.A, atom.Area, atom.Link) {
 					value = getAttrPtr(node, "href")
 				}
@@ -276,6 +298,9 @@ func (p *parser) walk(node *html.Node) {
 					embedValue = getFirstPropValue(curItem, "url")
 				}
 			case "e":
+				if p.curItem != nil {
+					p.curItem.hasEProperties = true
+				}
 				value = new(string)
 				*value = getTextContent(node)
 				var buf bytes.Buffer
@@ -326,6 +351,7 @@ func (p *parser) walk(node *html.Node) {
 	} else {
 		if curItem != nil && p.curItem != nil {
 			p.curItem.Children = append(p.curItem.Children, curItem)
+			p.curItem.hasNestedMicroformats = true
 		}
 	}
 }
