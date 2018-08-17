@@ -49,8 +49,6 @@ var skipTests = []string{
 	"microformats-v2/h-entry/impliedvalue-nested",
 	"microformats-v2/h-entry/summarycontent",
 	"microformats-v2/h-event/concatenate",
-	"microformats-v2/h-feed/implied-title",
-	"microformats-v2/h-feed/simple",
 	"microformats-v2/h-geo/abbrpattern",
 	"microformats-v2/h-geo/hidden",
 	"microformats-v2/h-geo/valuetitleclass",

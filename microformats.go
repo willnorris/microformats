@@ -128,16 +128,18 @@ func (p *parser) expandHref(node *html.Node) {
 	}
 }
 
-func (p *parser) walk(node *html.Node) {
+func (p *parser) walk(node *html.Node) int {
 	var curItem *Microformat
 	var priorItem *Microformat
 	var rootclasses []string
+	var count int
 	classes := getClasses(node)
 	for _, class := range classes {
 		if rootClassNames.MatchString(class) {
 			rootclasses = append(rootclasses, class)
 		}
 	}
+	count += len(rootclasses)
 	if len(rootclasses) > 0 {
 		curItem = &Microformat{}
 		curItem.Type = rootclasses
@@ -183,15 +185,19 @@ func (p *parser) walk(node *html.Node) {
 		}
 	}
 
+	var innercount int
 	for c := node.FirstChild; c != nil; c = c.NextSibling {
-		p.walk(c)
+		innercount += p.walk(c)
 	}
+	count += innercount
 
 	if curItem != nil {
 		if _, ok := curItem.Properties["name"]; !ok {
-			name := getImpliedName(node)
-			if name != "" {
-				curItem.Properties["name"] = append(curItem.Properties["name"], name)
+			if innercount == 0 {
+				name := getImpliedName(node)
+				if name != "" {
+					curItem.Properties["name"] = append(curItem.Properties["name"], name)
+				}
 			}
 		}
 		if _, ok := curItem.Properties["photo"]; !ok {
@@ -328,6 +334,8 @@ func (p *parser) walk(node *html.Node) {
 			p.curItem.Children = append(p.curItem.Children, curItem)
 		}
 	}
+
+	return count
 }
 
 func getClasses(node *html.Node) []string {
