@@ -353,7 +353,7 @@ func (p *parser) walk(node *html.Node) {
 					Value:      *embedValue,
 					HTML:       htmlbody,
 				})
-			} else if value != nil && *value != "" && p.curItem != nil {
+			} else if value != nil && p.curItem != nil {
 				if htmlbody != "" {
 					p.curItem.Properties[name] = append(p.curItem.Properties[name], map[string]interface{}{"value": *value, "html": htmlbody})
 				} else {
