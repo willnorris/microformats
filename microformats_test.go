@@ -182,17 +182,28 @@ func Test_IsAtom(t *testing.T) {
 }
 
 func Test_GetTextContent(t *testing.T) {
+	base, _ := url.Parse("http://example.com/")
+	p := &parser{base: base}
 	tests := []struct {
-		html, content string
+		html    string
+		imgFn   func(*html.Node) string
+		content string
 	}{
-		{"", ""},
-		{"foo", "foo"},
-		{"<a>", ""},
-		{"<a>foo</a>", "foo"},
-		{"<a><b>foo</b>bar</a>", "foobar"},
-		{"<a><b>foo</b><i>bar</i></a>", "foobar"},
-		{"<a> <b>foo</b> <i>bar</i> </a>", "foo bar"},
-		{"<a><b><i>foo</i></b>bar</a>", "foobar"},
+		{"", nil, ""},
+		{"foo", nil, "foo"},
+		{"<a>", nil, ""},
+		{"<a>foo</a>", nil, "foo"},
+		{"<a><b>foo</b>bar</a>", nil, "foobar"},
+		{"<a><b>foo</b><i>bar</i></a>", nil, "foobar"},
+		{"<a> <b>foo</b> <i>bar</i> </a>", nil, " foo bar "},
+		{"<a><b><i>foo</i></b>bar</a>", nil, "foobar"},
+
+		// test image functions
+		{"<a><img alt='foo'></a>", nil, ""},
+		{"<a><img alt='foo'></a>", imageAltValue, "foo"},
+		{"<a><img src='foo'></a>", imageAltValue, ""},
+		{"<a><img src='foo'></a>", p.imageAltSrcValue, " http://example.com/foo "},
+		{"<a><img alt='foo' src='bar'></a>", p.imageAltSrcValue, "foo"},
 	}
 
 	for _, tt := range tests {
@@ -201,7 +212,7 @@ func Test_GetTextContent(t *testing.T) {
 			t.Fatalf("Error parsing HTML: %v", err)
 		}
 
-		if got, want := getTextContent(n), tt.content; got != want {
+		if got, want := getTextContent(n, tt.imgFn), tt.content; got != want {
 			t.Errorf("getTextContent(%q) returned %q, want %q", tt.html, got, want)
 		}
 	}

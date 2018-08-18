@@ -25,6 +25,7 @@ package microformats // import "willnorris.com/go/microformats"
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"net/url"
 	"regexp"
@@ -183,7 +184,7 @@ func (p *parser) walk(node *html.Node) {
 				p.curData.Rels[relval] = append(p.curData.Rels[relval], urlVal)
 			}
 			p.curData.RelURLs[urlVal] = &RelURL{
-				Text:     getTextContent(node),
+				Text:     getTextContent(node, nil),
 				Rels:     rels,
 				Media:    getAttr(node, "media"),
 				HrefLang: getAttr(node, "hreflang"),
@@ -254,7 +255,7 @@ func (p *parser) walk(node *html.Node) {
 				}
 				if value == nil {
 					value = new(string)
-					*value = strings.TrimSpace(getTextContent(node))
+					*value = strings.TrimSpace(getTextContent(node, p.imageAltSrcValue))
 				}
 				if curItem != nil && p.curItem != nil {
 					embedValue = getFirstPropValue(curItem, "name")
@@ -292,7 +293,7 @@ func (p *parser) walk(node *html.Node) {
 				}
 				if value == nil {
 					value = new(string)
-					*value = strings.TrimSpace(getTextContent(node))
+					*value = strings.TrimSpace(getTextContent(node, nil))
 				}
 				if curItem != nil && p.curItem != nil {
 					embedValue = getFirstPropValue(curItem, "url")
@@ -302,11 +303,10 @@ func (p *parser) walk(node *html.Node) {
 					p.curItem.hasEProperties = true
 				}
 				value = new(string)
-				*value = getTextContent(node)
+				*value = strings.TrimSpace(getTextContent(node, p.imageAltSrcValue))
 				var buf bytes.Buffer
 
 				for c := node.FirstChild; c != nil; c = c.NextSibling {
-					p.expandHref(c)
 					html.Render(&buf, c)
 				}
 				htmlbody = strings.TrimSpace(buf.String())
@@ -325,7 +325,7 @@ func (p *parser) walk(node *html.Node) {
 				}
 				if value == nil {
 					value = new(string)
-					*value = strings.TrimSpace(getTextContent(node))
+					*value = strings.TrimSpace(getTextContent(node, nil))
 				}
 			}
 			if curItem != nil && p.curItem != nil {
@@ -404,21 +404,43 @@ func isAtom(node *html.Node, atoms ...atom.Atom) bool {
 	return false
 }
 
-func getTextContent(node *html.Node) string {
+func getTextContent(node *html.Node, imgFn func(*html.Node) string) string {
 	if node == nil {
 		return ""
 	}
 	if isAtom(node, atom.Script, atom.Style) {
 		return ""
 	}
+	if isAtom(node, atom.Img) && imgFn != nil {
+		return imgFn(node)
+	}
 	if node.Type == html.TextNode {
 		return node.Data
 	}
 	var buf bytes.Buffer
 	for c := node.FirstChild; c != nil; c = c.NextSibling {
-		buf.WriteString(getTextContent(c))
+		if !hasMatchingClass(c, rootClassNames) {
+			buf.WriteString(getTextContent(c, imgFn))
+		}
 	}
-	return strings.TrimSpace(buf.String())
+	return buf.String()
+}
+
+func imageAltValue(node *html.Node) string {
+	return getAttr(node, "alt")
+}
+
+func (p *parser) imageAltSrcValue(node *html.Node) string {
+	if v := getAttrPtr(node, "alt"); v != nil {
+		return *v
+	}
+	if v := getAttrPtr(node, "src"); v != nil {
+		if urlParsed, err := url.Parse(*v); err == nil {
+			urlParsed = p.base.ResolveReference(urlParsed)
+			return fmt.Sprintf(" %v ", urlParsed.String())
+		}
+	}
+	return ""
 }
 
 // getOnlyChild returns the sole child of node.  Returns nil if node has zero
@@ -537,7 +559,7 @@ func getImpliedName(node *html.Node) string {
 
 	if name == nil {
 		name = new(string)
-		*name = getTextContent(node)
+		*name = strings.TrimSpace(getTextContent(node, imageAltValue))
 	}
 	return strings.TrimSpace(*name)
 }
@@ -682,7 +704,7 @@ func parseValueClassPattern(node *html.Node, dt bool) []string {
 			} else if dt && isAtom(c, atom.Del, atom.Ins, atom.Time) && getAttrPtr(c, "datetime") != nil {
 				values = append(values, *getAttrPtr(c, "datetime"))
 			} else {
-				values = append(values, getTextContent(c))
+				values = append(values, strings.TrimSpace(getTextContent(c, nil)))
 			}
 		}
 	}
