@@ -41,9 +41,7 @@ import (
 // skip the tests which we don't pass yet
 var skipTests = []string{
 	"microformats-v2/h-entry/urlincontent",
-	"microformats-v2/h-event/concatenate",
 	"microformats-v2/h-product/aggregate",
-	"microformats-v2/h-recipe/all",
 	"microformats-v2/h-review/vcard",
 }
 

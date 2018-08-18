@@ -212,7 +212,12 @@ func (p *parser) walk(node *html.Node) {
 
 	if curItem != nil {
 		// all child elements of node have been processed, and all explicit
-		// properties on curItem have been set. Now process implied property values.
+		// properties on curItem have been set.
+
+		// Process implied date for 'end' property.
+		implyEndDate(curItem)
+
+		// Now process implied property values.
 		if _, ok := curItem.Properties["name"]; !ok {
 			if !curItem.hasNestedMicroformats && !curItem.hasPProperties && !curItem.hasEProperties {
 				name := getImpliedName(node)

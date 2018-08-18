@@ -136,10 +136,12 @@ var (
 		{"2006-01-02T15:04:05-07:00", true},
 		{"2006-01-02T15:04:05-0700", true},
 		{"2006-01-02T15:04:05-07", true},
+		{"2006-01-02T15:04:05", true},
 		{"2006-01-02T15:04Z07:00", false},
 		{"2006-01-02T15:04-07:00", false},
 		{"2006-01-02T15:04-0700", false},
 		{"2006-01-02T15:04-07", false},
+		{"2006-01-02T15:04", false},
 	}
 
 	timeFormats = []struct {
@@ -230,4 +232,35 @@ func getDateTimeValue(node *html.Node) *string {
 		return &value
 	}
 	return nil
+}
+
+// Process implied date for 'end' property.  This is technically part of the value class pattern
+// parsing rules, and at this point, we don't know if these were specified using VCP, but we
+// imply date all the same anyway.
+func implyEndDate(item *Microformat) {
+	var startDate time.Time
+	for _, v := range item.Properties["start"] {
+		if start, ok := v.(string); ok {
+			var dt datetime
+			dt.Parse(start)
+			if dt.hasDate {
+				startDate = dt.t
+				break
+			}
+		}
+	}
+	if startDate.IsZero() {
+		return
+	}
+
+	for i, v := range item.Properties["end"] {
+		if end, ok := v.(string); ok {
+			var dt datetime
+			dt.Parse(end)
+			if !dt.t.IsZero() && !dt.hasDate {
+				dt.setDate(startDate.Year(), startDate.Month(), startDate.Day())
+				item.Properties["end"][i] = dt.String()
+			}
+		}
+	}
 }
