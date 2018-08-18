@@ -437,9 +437,7 @@ func getTextContent(node *html.Node, imgFn func(*html.Node) string) string {
 	}
 	var buf bytes.Buffer
 	for c := node.FirstChild; c != nil; c = c.NextSibling {
-		if !hasMatchingClass(c, rootClassNames) {
-			buf.WriteString(getTextContent(c, imgFn))
-		}
+		buf.WriteString(getTextContent(c, imgFn))
 	}
 	return buf.String()
 }

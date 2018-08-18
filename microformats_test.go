@@ -360,13 +360,13 @@ func Test_GetImpliedName(t *testing.T) {
 		{`<abbr title="name">`, "name"},
 
 		{`<span><img alt="name"></span>`, "name"},
-		{`<span><img alt="name" class="h-card"></span>`, ""},
+		{`<span><img alt="name" class="h-card"></span>`, "name"},
 		{`<span><area alt="name"></span>`, "name"},
 		{`<span><area alt="name" class="h-card"></span>`, ""},
 		{`<span><abbr title="name"></span>`, "name"},
 
 		{`<p><span><img alt="name"></span></p>`, "name"},
-		{`<p><span><img alt="name" class="h-card"></span></p>`, ""},
+		{`<p><span><img alt="name" class="h-card"></span></p>`, "name"},
 		{`<p><span><area alt="name"></span></p>`, "name"},
 		{`<p><span><area alt="name" class="h-card"></span></p>`, ""},
 		{`<p><span><abbr title="name"></span></p>`, "name"},
