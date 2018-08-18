@@ -41,7 +41,6 @@ import (
 // skip the tests which we don't pass yet
 var skipTests = []string{
 	"microformats-v2/h-entry/urlincontent",
-	"microformats-v2/h-review/vcard",
 }
 
 func TestSuite(t *testing.T) {
@@ -114,6 +113,7 @@ func runTest(t *testing.T, test string) {
 	}
 	// normalize self-closing HTML tags to match what net/html produces
 	expectedJSON = bytes.Replace(expectedJSON, []byte(" />"), []byte("/>"), -1)
+
 	want := make(map[string]interface{})
 	err = json.Unmarshal(expectedJSON, &want)
 	if err != nil {
@@ -121,6 +121,9 @@ func runTest(t *testing.T, test string) {
 	}
 
 	outputJSON, _ := json.Marshal(data)
+	// reverse golang.org/x/net/http's escaping of apostrophes
+	outputJSON = bytes.Replace(outputJSON, []byte(`\u0026#39;`), []byte("'"), -1)
+
 	got := make(map[string]interface{})
 	err = json.Unmarshal(outputJSON, &got)
 	if err != nil {
