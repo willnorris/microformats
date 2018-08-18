@@ -46,8 +46,6 @@ var skipTests = []string{
 	"microformats-v2/h-product/aggregate",
 	"microformats-v2/h-recipe/all",
 	"microformats-v2/h-review/vcard",
-	"microformats-v2/rel/duplicate-rels",
-	"microformats-v2/rel/varying-text-duplicate-rels",
 }
 
 func TestSuite(t *testing.T) {

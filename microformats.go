@@ -74,6 +74,7 @@ type RelURL struct {
 	Text     string   `json:"text,omitempty"`
 	Media    string   `json:"media,omitempty"`
 	HrefLang string   `json:"hreflang,omitempty"`
+	Title    string   `json:"title,omitempty"`
 	Type     string   `json:"type,omitempty"`
 }
 
@@ -181,14 +182,26 @@ func (p *parser) walk(node *html.Node) {
 
 			rels := strings.Split(rel, " ")
 			for _, relval := range rels {
-				p.curData.Rels[relval] = append(p.curData.Rels[relval], urlVal)
+				var seen bool // whether we've already stored this url for this rel
+				for _, u := range p.curData.Rels[relval] {
+					if u == urlVal {
+						seen = true
+					}
+				}
+				if !seen {
+					p.curData.Rels[relval] = append(p.curData.Rels[relval], urlVal)
+				}
 			}
-			p.curData.RelURLs[urlVal] = &RelURL{
-				Text:     getTextContent(node, nil),
-				Rels:     rels,
-				Media:    getAttr(node, "media"),
-				HrefLang: getAttr(node, "hreflang"),
-				Type:     getAttr(node, "type"),
+
+			if _, ok := p.curData.RelURLs[urlVal]; !ok {
+				p.curData.RelURLs[urlVal] = &RelURL{
+					Text:     getTextContent(node, nil),
+					Rels:     rels,
+					Media:    getAttr(node, "media"),
+					HrefLang: getAttr(node, "hreflang"),
+					Title:    getAttr(node, "title"),
+					Type:     getAttr(node, "type"),
+				}
 			}
 		}
 	}
