@@ -61,6 +61,10 @@ func Test_BackcompatPropertyClasses(t *testing.T) {
 		// itemtype-specific property mappings
 		{[]string{"summary"}, []string{"h-entry"}, []string{"p-summary"}},
 		{[]string{"summary"}, []string{"h-event"}, []string{"p-name"}},
+
+		// duplicate properties
+		//{[]string{"summary"}, []string{"h-entry", "h-resume"}, []string{"p-summary"}},
+		//{[]string{"summary"}, []string{"h-entry", "h-event"}, []string{"p-summary", "p-name"}},
 	}
 
 	for _, tt := range tests {

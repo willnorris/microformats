@@ -41,15 +41,15 @@ import (
 // skip the tests which we don't pass yet
 var skipTests = []string{
 	"microformats-mixed/h-entry/mixedroots",
-	"microformats-mixed/h-resume/mixedroots",
+	//"microformats-mixed/h-resume/mixedroots",
 	"microformats-v1/hcard/single",
 	"microformats-v1/hentry/summarycontent",
 	"microformats-v1/hfeed/simple",
 	"microformats-v1/hnews/all",
 	"microformats-v1/hnews/minimum",
 	"microformats-v1/hproduct/aggregate",
-	"microformats-v1/hresume/education",
-	"microformats-v1/hresume/work",
+	//"microformats-v1/hresume/education",
+	//"microformats-v1/hresume/work",
 	"microformats-v1/hreview/item",
 	"microformats-v1/hreview/vcard",
 	"microformats-v1/hreview-aggregate/justahyperlink",

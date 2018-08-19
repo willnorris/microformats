@@ -179,13 +179,17 @@ func backcompatRootClasses(classes []string) []string {
 }
 
 func backcompatPropertyClasses(classes []string, context []string) []string {
-	var propertyclasses []string
+	var classmap = make(map[string]bool)
 	for _, class := range classes {
 		for _, ctx := range context {
 			if c, ok := backcompatPropertyOverrideMap[ctx][class]; ok {
-				propertyclasses = append(propertyclasses, c)
+				classmap[c] = true
 			}
 		}
+	}
+	var propertyclasses []string
+	for c := range classmap {
+		propertyclasses = append(propertyclasses, c)
 	}
 	return propertyclasses
 }
