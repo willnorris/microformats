@@ -57,6 +57,9 @@ type Microformat struct {
 	hasPProperties        bool
 	hasEProperties        bool
 	hasUProperties        bool
+
+	// whether this microformat is a v1 format parsed in backwards compatible mode
+	backcompat bool
 }
 
 // Data specifies all of the microformats and data parsed from a single HTML
@@ -104,7 +107,7 @@ func ParseNode(doc *html.Node, baseURL *url.URL) *Data {
 	}
 	p.base = baseURL
 	p.baseFound = false
-	p.walk(doc, false)
+	p.walk(doc)
 	return p.curData
 }
 
@@ -143,7 +146,7 @@ func expandURL(r string, base *url.URL) string {
 	return r
 }
 
-func (p *parser) walk(node *html.Node, backcompat bool) {
+func (p *parser) walk(node *html.Node) {
 	var curItem *Microformat
 	var priorItem *Microformat
 	var rootclasses []string
@@ -154,6 +157,8 @@ func (p *parser) walk(node *html.Node, backcompat bool) {
 			rootclasses = append(rootclasses, class)
 		}
 	}
+
+	var backcompat bool
 	if len(rootclasses) == 0 {
 		rootclasses = backcompatRootClasses(classes)
 		if len(rootclasses) > 0 {
@@ -162,9 +167,11 @@ func (p *parser) walk(node *html.Node, backcompat bool) {
 	}
 
 	if len(rootclasses) > 0 {
-		curItem = &Microformat{}
-		curItem.Type = rootclasses
-		curItem.Properties = make(map[string][]interface{})
+		curItem = &Microformat{
+			Type:       rootclasses,
+			Properties: make(map[string][]interface{}),
+			backcompat: backcompat,
+		}
 		if p.curItem == nil {
 			p.curData.Items = append(p.curData.Items, curItem)
 		} else {
@@ -215,7 +222,7 @@ func (p *parser) walk(node *html.Node, backcompat bool) {
 	}
 
 	for c := node.FirstChild; c != nil; c = c.NextSibling {
-		p.walk(c, backcompat)
+		p.walk(c)
 	}
 
 	if curItem != nil {
@@ -225,7 +232,7 @@ func (p *parser) walk(node *html.Node, backcompat bool) {
 		// Process implied date for 'end' property.
 		implyEndDate(curItem)
 
-		if !backcompat {
+		if p.curItem == nil || !p.curItem.backcompat {
 			// Now process implied property values.
 			if _, ok := curItem.Properties["name"]; !ok {
 				if !curItem.hasNestedMicroformats && !curItem.hasPProperties && !curItem.hasEProperties {
@@ -254,7 +261,7 @@ func (p *parser) walk(node *html.Node, backcompat bool) {
 	}
 
 	var propertyclasses []string
-	if backcompat {
+	if p.curItem != nil && p.curItem.backcompat {
 		var itemType []string
 		if p.curItem != nil {
 			itemType = p.curItem.Type
