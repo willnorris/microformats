@@ -40,11 +40,27 @@ import (
 
 // skip the tests which we don't pass yet
 var skipTests = []string{
+	"microformats-v1/hcard/single",
+	"microformats-v1/hentry/summarycontent",
+	"microformats-v1/hfeed/simple",
+	"microformats-v1/hnews/all",
+	"microformats-v1/hnews/minimum",
+	"microformats-v1/hproduct/aggregate",
+	"microformats-v1/hresume/education",
+	"microformats-v1/hresume/work",
+	"microformats-v1/hreview/item",
+	"microformats-v1/hreview/vcard",
+	"microformats-v1/hreview-aggregate/justahyperlink",
+	"microformats-v1/includes/hcarditemref",
+	"microformats-v1/includes/hyperlink",
+	"microformats-v1/includes/heventitemref",
+	"microformats-v1/includes/object",
+	"microformats-v1/includes/table",
 	"microformats-v2/h-entry/urlincontent",
 }
 
 func TestSuite(t *testing.T) {
-	for _, version := range []string{"microformats-v2"} {
+	for _, version := range []string{"microformats-v1", "microformats-v2"} {
 		t.Run(version, func(t *testing.T) {
 			base := filepath.Join("testdata", "tests", version)
 			tests, err := listTests(base)

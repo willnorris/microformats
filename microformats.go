@@ -104,7 +104,7 @@ func ParseNode(doc *html.Node, baseURL *url.URL) *Data {
 	}
 	p.base = baseURL
 	p.baseFound = false
-	p.walk(doc)
+	p.walk(doc, false)
 	return p.curData
 }
 
@@ -143,16 +143,24 @@ func expandURL(r string, base *url.URL) string {
 	return r
 }
 
-func (p *parser) walk(node *html.Node) {
+func (p *parser) walk(node *html.Node, backcompat bool) {
 	var curItem *Microformat
 	var priorItem *Microformat
 	var rootclasses []string
+
 	classes := getClasses(node)
 	for _, class := range classes {
 		if rootClassNames.MatchString(class) {
 			rootclasses = append(rootclasses, class)
 		}
 	}
+	if len(rootclasses) == 0 {
+		rootclasses = backcompatRootClasses(classes)
+		if len(rootclasses) > 0 {
+			backcompat = true
+		}
+	}
+
 	if len(rootclasses) > 0 {
 		curItem = &Microformat{}
 		curItem.Type = rootclasses
@@ -207,7 +215,7 @@ func (p *parser) walk(node *html.Node) {
 	}
 
 	for c := node.FirstChild; c != nil; c = c.NextSibling {
-		p.walk(c)
+		p.walk(c, backcompat)
 	}
 
 	if curItem != nil {
@@ -217,42 +225,53 @@ func (p *parser) walk(node *html.Node) {
 		// Process implied date for 'end' property.
 		implyEndDate(curItem)
 
-		// Now process implied property values.
-		if _, ok := curItem.Properties["name"]; !ok {
-			if !curItem.hasNestedMicroformats && !curItem.hasPProperties && !curItem.hasEProperties {
-				name := getImpliedName(node)
-				if name != "" {
-					curItem.Properties["name"] = append(curItem.Properties["name"], name)
+		if !backcompat {
+			// Now process implied property values.
+			if _, ok := curItem.Properties["name"]; !ok {
+				if !curItem.hasNestedMicroformats && !curItem.hasPProperties && !curItem.hasEProperties {
+					name := getImpliedName(node)
+					if name != "" {
+						curItem.Properties["name"] = append(curItem.Properties["name"], name)
+					}
 				}
 			}
-		}
-		if _, ok := curItem.Properties["photo"]; !ok {
-			photo := getImpliedPhoto(node, p.base)
-			if photo != "" {
-				curItem.Properties["photo"] = append(curItem.Properties["photo"], photo)
+			if _, ok := curItem.Properties["photo"]; !ok {
+				photo := getImpliedPhoto(node, p.base)
+				if photo != "" {
+					curItem.Properties["photo"] = append(curItem.Properties["photo"], photo)
+				}
 			}
-		}
-		if _, ok := curItem.Properties["url"]; !ok {
-			if !curItem.hasNestedMicroformats && !curItem.hasUProperties {
-				url := getImpliedURL(node, p.base)
-				if url != "" {
-					curItem.Properties["url"] = append(curItem.Properties["url"], url)
+			if _, ok := curItem.Properties["url"]; !ok {
+				if !curItem.hasNestedMicroformats && !curItem.hasUProperties {
+					url := getImpliedURL(node, p.base)
+					if url != "" {
+						curItem.Properties["url"] = append(curItem.Properties["url"], url)
+					}
 				}
 			}
 		}
 		p.curItem = priorItem
 	}
 
-	var propertyclasses [][]string
-	for _, class := range classes {
-		match := propertyClassNames.FindStringSubmatch(class)
-		if match != nil {
-			propertyclasses = append(propertyclasses, match)
+	var propertyclasses []string
+	if backcompat {
+		var itemType []string
+		if p.curItem != nil {
+			itemType = p.curItem.Type
+		}
+		propertyclasses = backcompatPropertyClasses(classes, itemType)
+	} else {
+		for _, class := range classes {
+			match := propertyClassNames.FindStringSubmatch(class)
+			if match != nil {
+				propertyclasses = append(propertyclasses, match[0])
+			}
 		}
 	}
 	if len(propertyclasses) > 0 {
 		for _, prop := range propertyclasses {
-			prefix, name := prop[1], prop[2]
+			parts := strings.SplitN(prop, "-", 2)
+			prefix, name := parts[0], parts[1]
 
 			var value, embedValue *string
 			var htmlbody string
