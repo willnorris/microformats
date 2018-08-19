@@ -44,6 +44,29 @@ func parseNode(s string) (n *html.Node, err error) {
 
 func ptr(s string) *string { return &s }
 
+func Test_ExpandURL(t *testing.T) {
+	example, _ := url.Parse("http://example.com/base/")
+	tests := []struct {
+		relative string
+		base     *url.URL
+		want     string
+	}{
+		{"", nil, ""},
+		{"", example, "http://example.com/base/"},
+		{"/", nil, "/"},
+		{"/", example, "http://example.com/"},
+		{"foo", example, "http://example.com/base/foo"},
+		{"/foo", example, "http://example.com/foo"},
+	}
+
+	for _, tt := range tests {
+		got := expandURL(tt.relative, tt.base)
+		if want := tt.want; got != want {
+			t.Errorf("expandURL(%q, %q) returned %q, want %q", tt.relative, tt.base, got, want)
+		}
+	}
+}
+
 func Test_GetClasses(t *testing.T) {
 	tests := []struct {
 		html    string

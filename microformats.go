@@ -113,10 +113,7 @@ func (p *parser) expandHref(node *html.Node) {
 	if isAtom(node, atom.A) {
 		href := getAttrPtr(node, "href")
 		if href != nil {
-			if urlParsed, err := url.Parse(*href); err == nil {
-				urlParsed = p.base.ResolveReference(urlParsed)
-				*href = urlParsed.String()
-			}
+			*href = expandURL(*href, p.base)
 		}
 		return
 	}
@@ -124,10 +121,7 @@ func (p *parser) expandHref(node *html.Node) {
 	if isAtom(node, atom.Img) {
 		href := getAttrPtr(node, "src")
 		if href != nil {
-			if urlParsed, err := url.Parse(*href); err == nil {
-				urlParsed = p.base.ResolveReference(urlParsed)
-				*href = urlParsed.String()
-			}
+			*href = expandURL(*href, p.base)
 		}
 		return
 	}
@@ -135,6 +129,18 @@ func (p *parser) expandHref(node *html.Node) {
 	for c := node.FirstChild; c != nil; c = c.NextSibling {
 		p.expandHref(c)
 	}
+}
+
+// expandURL expands relative URL r into an absolute URL by resolving it relative to
+// base. If r is not a valid URL or base is nil, the original r value is returned.
+func expandURL(r string, base *url.URL) string {
+	if base != nil {
+		if u, err := url.Parse(r); err == nil {
+			u = base.ResolveReference(u)
+			r = u.String()
+		}
+	}
+	return r
 }
 
 func (p *parser) walk(node *html.Node) {
@@ -172,13 +178,7 @@ func (p *parser) walk(node *html.Node) {
 	if isAtom(node, atom.A, atom.Link) {
 		if rel := getAttr(node, "rel"); rel != "" {
 			urlVal := getAttr(node, "href")
-
-			if p.base != nil {
-				if urlParsed, err := url.Parse(urlVal); err == nil {
-					urlParsed = p.base.ResolveReference(urlParsed)
-					urlVal = urlParsed.String()
-				}
-			}
+			urlVal = expandURL(urlVal, p.base)
 
 			rels := strings.Split(rel, " ")
 			for _, relval := range rels {
@@ -294,11 +294,8 @@ func (p *parser) walk(node *html.Node) {
 				if value == nil && isAtom(node, atom.Video) {
 					value = getAttrPtr(node, "poster")
 				}
-				if p.base != nil && value != nil {
-					if urlParsed, err := url.Parse(*value); err == nil {
-						urlParsed = p.base.ResolveReference(urlParsed)
-						*value = urlParsed.String()
-					}
+				if value != nil {
+					*value = expandURL(*value, p.base)
 				}
 				if value == nil {
 					value = getValueClassPattern(node)
@@ -451,10 +448,7 @@ func (p *parser) imageAltSrcValue(node *html.Node) string {
 		return *v
 	}
 	if v := getAttrPtr(node, "src"); v != nil {
-		if urlParsed, err := url.Parse(*v); err == nil {
-			urlParsed = p.base.ResolveReference(urlParsed)
-			return fmt.Sprintf(" %v ", urlParsed.String())
-		}
+		return fmt.Sprintf(" %v ", expandURL(*v, p.base))
 	}
 	return ""
 }
@@ -624,13 +618,7 @@ func getImpliedPhoto(node *html.Node, baseURL *url.URL) string {
 	if photo == nil {
 		return ""
 	}
-	if baseURL != nil {
-		if urlParsed, err := url.Parse(*photo); err == nil {
-			urlParsed = baseURL.ResolveReference(urlParsed)
-			*photo = urlParsed.String()
-		}
-	}
-	return *photo
+	return expandURL(*photo, baseURL)
 }
 
 func getImpliedURL(node *html.Node, baseURL *url.URL) string {
@@ -674,13 +662,7 @@ func getImpliedURL(node *html.Node, baseURL *url.URL) string {
 	if value == nil {
 		return ""
 	}
-	if baseURL != nil {
-		if urlParsed, err := url.Parse(*value); err == nil {
-			urlParsed = baseURL.ResolveReference(urlParsed)
-			*value = urlParsed.String()
-		}
-	}
-	return *value
+	return expandURL(*value, baseURL)
 }
 
 func getValueClassPattern(node *html.Node) *string {
