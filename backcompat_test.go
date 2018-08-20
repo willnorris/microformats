@@ -77,3 +77,49 @@ func Test_BackcompatPropertyClasses(t *testing.T) {
 		}
 	}
 }
+
+func Test_BackcompatRelClasses(t *testing.T) {
+	tests := []struct {
+		rels    []string
+		context []string // microformat type that property appears in
+		want    []string
+	}{
+		{nil, nil, nil},
+		{[]string{""}, nil, nil},
+		{[]string{"bookmark"}, nil, nil},
+		{[]string{"bookmark"}, []string{"h-entry"}, []string{"u-url"}},
+		{[]string{"bookmark", "foo"}, []string{"h-entry"}, []string{"u-url"}},
+		{[]string{"bookmark", "tag"}, []string{"h-review"}, []string{"u-url", "u-category"}},
+		{[]string{"bookmark"}, []string{"h-entry", "h-review"}, []string{"u-url"}},
+	}
+
+	for _, tt := range tests {
+		got := backcompatRelClasses(tt.rels, tt.context)
+		sort.Strings(got)
+		sort.Strings(tt.want)
+		if want := tt.want; !reflect.DeepEqual(got, want) {
+			t.Errorf("backcompatRelClasses(%q) returned %q, want %q)", tt.rels, got, want)
+		}
+	}
+}
+
+func Test_BackcompatURLCategory(t *testing.T) {
+	tests := []struct {
+		url  string
+		want string
+	}{
+		{"", ""},
+		{"a", "a"},
+		{"a/b", "b"},
+		{"/a/b", "b"},
+		{"/a/b/", "b"},
+		{"http://example.com/a/b", "b"},
+	}
+
+	for _, tt := range tests {
+		got := backcompatURLCategory(tt.url)
+		if want := tt.want; got != want {
+			t.Errorf("backcompatURLCategory(%q) returned %q, want %q)", tt.url, got, want)
+		}
+	}
+}

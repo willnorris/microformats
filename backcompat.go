@@ -22,6 +22,11 @@
 
 package microformats
 
+import (
+	"net/url"
+	"path"
+)
+
 var (
 	backcompatRootMap = map[string]string{
 		"adr":               "h-adr",
@@ -166,6 +171,22 @@ var (
 			"votes":   "p-votes",
 		},
 	}
+
+	backcompatRelMap = map[string]map[string]string{
+		"h-entry": map[string]string{
+			"bookmark": "u-url",
+		},
+		"h-feed": map[string]string{
+			"tag": "u-category",
+		},
+		"h-news": map[string]string{
+			"principles": "u-principles",
+		},
+		"h-review": map[string]string{
+			"bookmark": "u-url",
+			"tag":      "u-category",
+		},
+	}
 )
 
 func backcompatRootClasses(classes []string) []string {
@@ -192,4 +213,31 @@ func backcompatPropertyClasses(classes []string, context []string) []string {
 		propertyclasses = append(propertyclasses, c)
 	}
 	return propertyclasses
+}
+
+func backcompatRelClasses(rels []string, context []string) []string {
+	var classmap = make(map[string]bool)
+	for _, rel := range rels {
+		for _, ctx := range context {
+			if c, ok := backcompatRelMap[ctx][rel]; ok {
+				classmap[c] = true
+			}
+		}
+	}
+	var propertyclasses []string
+	for c := range classmap {
+		propertyclasses = append(propertyclasses, c)
+	}
+	return propertyclasses
+}
+
+// strip provided URL to its last path segment to serve as a category value.
+func backcompatURLCategory(s string) string {
+	if s == "" {
+		return s
+	}
+	if p, err := url.Parse(s); err == nil {
+		return path.Base(p.Path)
+	}
+	return s
 }

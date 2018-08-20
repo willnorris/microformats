@@ -190,12 +190,13 @@ func (p *parser) walk(node *html.Node) {
 		}
 	}
 
+	var rels []string
 	if isAtom(node, atom.A, atom.Link) {
 		if rel := getAttr(node, "rel"); rel != "" {
 			urlVal := getAttr(node, "href")
 			urlVal = expandURL(urlVal, p.base)
 
-			rels := strings.Split(rel, " ")
+			rels = strings.Split(rel, " ")
 			for _, relval := range rels {
 				var seen bool // whether we've already stored this url for this rel
 				for _, u := range p.curData.Rels[relval] {
@@ -267,6 +268,9 @@ func (p *parser) walk(node *html.Node) {
 			itemType = p.curItem.Type
 		}
 		propertyclasses = backcompatPropertyClasses(classes, itemType)
+		if relclasses := backcompatRelClasses(rels, itemType); len(relclasses) > 0 {
+			propertyclasses = append(propertyclasses, relclasses...)
+		}
 	} else {
 		for _, class := range classes {
 			match := propertyClassNames.FindStringSubmatch(class)
@@ -338,6 +342,11 @@ func (p *parser) walk(node *html.Node) {
 				}
 				if curItem != nil && p.curItem != nil {
 					embedValue = getFirstPropValue(curItem, "url")
+				}
+
+				// for category URLs in backcompat mode, strip to the last path segment
+				if p.curItem != nil && p.curItem.backcompat && name == "category" {
+					*value = backcompatURLCategory(*value)
 				}
 			case "e":
 				if p.curItem != nil {

@@ -43,19 +43,19 @@ var skipTests = []string{
 	"microformats-mixed/h-entry/mixedroots",            // microformats/microformats-parsing#38
 	"microformats-v1/hcard/single",                     // date formatting
 	"microformats-v1/hentry/summarycontent",            // date formatting, microformats/tests#100
-	"microformats-v1/hfeed/simple",                     // date formatting, rel values, microformats/tests#100
-	"microformats-v1/hnews/all",                        // date formatting, rel values, microformats/tests#100
-	"microformats-v1/hnews/minimum",                    // date formatting, rel values, microformats/tests#100
+	"microformats-v1/hfeed/simple",                     // date formatting, microformats/tests#100
+	"microformats-v1/hnews/all",                        // date formatting, microformats/tests#100
+	"microformats-v1/hnews/minimum",                    // date formatting, microformats/tests#100
 	"microformats-v1/hproduct/aggregate",               // microformats/tests#99
 	"microformats-v1/hreview/item",                     // implied h-item
-	"microformats-v1/hreview/vcard",                    // rel values, microformats/tests#100
+	"microformats-v1/hreview/vcard",                    // microformats/tests#100
 	"microformats-v1/hreview-aggregate/justahyperlink", // implied h-item
-	"microformats-v1/includes/hcarditemref",
-	"microformats-v1/includes/hyperlink",
-	"microformats-v1/includes/heventitemref",
-	"microformats-v1/includes/object",
-	"microformats-v1/includes/table",
-	"microformats-v2/h-entry/urlincontent", // microformats/tests#98
+	"microformats-v1/includes/hcarditemref",            // includes
+	"microformats-v1/includes/hyperlink",               // includes
+	"microformats-v1/includes/heventitemref",           // includes
+	"microformats-v1/includes/object",                  // includes
+	"microformats-v1/includes/table",                   // includes
+	"microformats-v2/h-entry/urlincontent",             // microformats/tests#98
 }
 
 func TestSuite(t *testing.T) {
