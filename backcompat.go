@@ -94,12 +94,13 @@ var (
 			"sound":            "u-sound",
 			"tel":              "p-tel",
 			"title":            "p-job-title",
-			"tz":               "dt-tz",
+			"tz":               "p-tz",
 			"uid":              "u-uid",
 			"url":              "u-url",
 		},
 		"h-entry": map[string]string{
 			"author":        "p-author",
+			"category":      "p-category",
 			"entry-content": "e-content",
 			"entry-summary": "p-summary",
 			"entry-title":   "p-name",
@@ -114,6 +115,7 @@ var (
 			"dtend":       "dt-end",
 			"dtstart":     "dt-start",
 			"duration":    "dt-duration",
+			"geo":         "p-geo",
 			"location":    "p-location",
 			"summary":     "p-name",
 			"url":         "u-url",
@@ -139,11 +141,24 @@ var (
 			"category":    "p-category",
 			"description": "p-description",
 			"fn":          "p-name",
+			"identifier":  "u-identifier",
 			"listing":     "p-listing",
 			"photo":       "u-photo",
 			"price":       "p-price",
 			"review":      "p-review",
 			"url":         "u-url",
+		},
+		"h-recipe": map[string]string{
+			"author":       "p-author",
+			"category":     "p-category",
+			"duration":     "dt-duration",
+			"fn":           "p-name",
+			"ingredient":   "p-ingredient",
+			"instructions": "e-instructions",
+			"nutrition":    "p-nutrition",
+			"photo":        "u-photo",
+			"summary":      "p-summary",
+			"yield":        "p-yield",
 		},
 		"h-resume": map[string]string{
 			"affiliation":  "p-affiliation",
@@ -155,12 +170,14 @@ var (
 			"summary":      "p-summary",
 		},
 		"h-review": map[string]string{
+			"best":        "p-best",
 			"description": "e-content",
 			"dtreviewed":  "dt-reviewed",
 			"item":        "p-item",
 			"rating":      "p-rating",
 			"reviewer":    "p-author",
 			"summary":     "p-name",
+			"worst":       "p-worst",
 		},
 		"h-review-aggregate": map[string]string{
 			"average": "p-average",
@@ -170,18 +187,26 @@ var (
 			"rating":  "p-rating",
 			"summary": "p-name",
 			"votes":   "p-votes",
+			"worst":   "p-worst",
 		},
 	}
 
 	backcompatRelMap = map[string]map[string]string{
+		"h-card": map[string]string{
+			"tag": "u-category",
+		},
 		"h-entry": map[string]string{
 			"bookmark": "u-url",
+			"tag":      "u-category",
 		},
 		"h-feed": map[string]string{
 			"tag": "u-category",
 		},
 		"h-news": map[string]string{
 			"principles": "u-principles",
+		},
+		"h-recipe": map[string]string{
+			"tag": "u-category",
 		},
 		"h-review": map[string]string{
 			"bookmark": "u-url",
