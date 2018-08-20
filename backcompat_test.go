@@ -49,56 +49,37 @@ func Test_BackcompatRootClasses(t *testing.T) {
 func Test_BackcompatPropertyClasses(t *testing.T) {
 	tests := []struct {
 		classes []string
-		context []string // microformat type that property appears in
-		want    []string
-	}{
-		{nil, nil, nil},
-		{[]string{""}, nil, nil},
-		{[]string{"foo"}, nil, nil},
-		{[]string{"fn"}, []string{"h-card"}, []string{"p-name"}},
-		{[]string{"fn", "foo"}, []string{"h-card"}, []string{"p-name"}},
-		{[]string{"fn", "email"}, []string{"h-card"}, []string{"p-name", "u-email"}},
-
-		// itemtype-specific property mappings
-		{[]string{"summary"}, []string{"h-entry"}, []string{"p-summary"}},
-		{[]string{"summary"}, []string{"h-event"}, []string{"p-name"}},
-
-		// duplicate properties
-		{[]string{"summary"}, []string{"h-entry", "h-resume"}, []string{"p-summary"}},
-		{[]string{"summary"}, []string{"h-entry", "h-event"}, []string{"p-summary", "p-name"}},
-	}
-
-	for _, tt := range tests {
-		got := backcompatPropertyClasses(tt.classes, tt.context)
-		sort.Strings(got)
-		sort.Strings(tt.want)
-		if want := tt.want; !reflect.DeepEqual(got, want) {
-			t.Errorf("backcompatPropertyClasses(%q) returned %q, want %q)", tt.classes, got, want)
-		}
-	}
-}
-
-func Test_BackcompatRelClasses(t *testing.T) {
-	tests := []struct {
 		rels    []string
 		context []string // microformat type that property appears in
 		want    []string
 	}{
-		{nil, nil, nil},
-		{[]string{""}, nil, nil},
-		{[]string{"bookmark"}, nil, nil},
-		{[]string{"bookmark"}, []string{"h-entry"}, []string{"u-url"}},
-		{[]string{"bookmark", "foo"}, []string{"h-entry"}, []string{"u-url"}},
-		{[]string{"bookmark", "tag"}, []string{"h-review"}, []string{"u-url", "u-category"}},
-		{[]string{"bookmark"}, []string{"h-entry", "h-review"}, []string{"u-url"}},
+		{nil, nil, nil, nil},
+		{[]string{""}, nil, nil, nil},
+		{[]string{"foo"}, nil, nil, nil},
+		{[]string{"fn"}, nil, []string{"h-card"}, []string{"p-name"}},
+		{[]string{"fn", "foo"}, nil, []string{"h-card"}, []string{"p-name"}},
+		{[]string{"fn", "email"}, nil, []string{"h-card"}, []string{"p-name", "u-email"}},
+
+		// itemtype-specific property mappings
+		{[]string{"summary"}, nil, []string{"h-entry"}, []string{"p-summary"}},
+		{[]string{"summary"}, nil, []string{"h-event"}, []string{"p-name"}},
+
+		// duplicate properties
+		{[]string{"summary"}, nil, []string{"h-entry", "h-resume"}, []string{"p-summary"}},
+		{[]string{"summary"}, nil, []string{"h-entry", "h-event"}, []string{"p-summary", "p-name"}},
+
+		// rels
+		{nil, []string{"bookmark"}, nil, nil},
+		{nil, []string{"bookmark"}, []string{"h-entry"}, []string{"u-url"}},
+		{[]string{"category"}, []string{"tag"}, []string{"h-card"}, []string{"u-category"}},
 	}
 
 	for _, tt := range tests {
-		got := backcompatRelClasses(tt.rels, tt.context)
+		got := backcompatPropertyClasses(tt.classes, tt.rels, tt.context)
 		sort.Strings(got)
 		sort.Strings(tt.want)
 		if want := tt.want; !reflect.DeepEqual(got, want) {
-			t.Errorf("backcompatRelClasses(%q) returned %q, want %q)", tt.rels, got, want)
+			t.Errorf("backcompatPropertyClasses(%q) returned %q, want %q)", tt.classes, got, want)
 		}
 	}
 }

@@ -267,10 +267,7 @@ func (p *parser) walk(node *html.Node) {
 		if p.curItem != nil {
 			itemType = p.curItem.Type
 		}
-		propertyclasses = backcompatPropertyClasses(classes, itemType)
-		if relclasses := backcompatRelClasses(rels, itemType); len(relclasses) > 0 {
-			propertyclasses = append(propertyclasses, relclasses...)
-		}
+		propertyclasses = backcompatPropertyClasses(classes, rels, itemType)
 	} else {
 		for _, class := range classes {
 			match := propertyClassNames.FindStringSubmatch(class)

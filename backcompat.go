@@ -25,6 +25,7 @@ package microformats
 import (
 	"net/url"
 	"path"
+	"strings"
 )
 
 var (
@@ -199,33 +200,27 @@ func backcompatRootClasses(classes []string) []string {
 	return rootclasses
 }
 
-func backcompatPropertyClasses(classes []string, context []string) []string {
-	var classmap = make(map[string]bool)
+func backcompatPropertyClasses(classes []string, rels []string, context []string) []string {
+	var classmap = make(map[string]string)
 	for _, class := range classes {
 		for _, ctx := range context {
 			if c, ok := backcompatPropertyOverrideMap[ctx][class]; ok {
-				classmap[c] = true
+				parts := strings.SplitN(c, "-", 2)
+				classmap[parts[1]] = c
 			}
 		}
 	}
-	var propertyclasses []string
-	for c := range classmap {
-		propertyclasses = append(propertyclasses, c)
-	}
-	return propertyclasses
-}
-
-func backcompatRelClasses(rels []string, context []string) []string {
-	var classmap = make(map[string]bool)
 	for _, rel := range rels {
 		for _, ctx := range context {
 			if c, ok := backcompatRelMap[ctx][rel]; ok {
-				classmap[c] = true
+				parts := strings.SplitN(c, "-", 2)
+				classmap[parts[1]] = c
 			}
 		}
 	}
+
 	var propertyclasses []string
-	for c := range classmap {
+	for _, c := range classmap {
 		propertyclasses = append(propertyclasses, c)
 	}
 	return propertyclasses
