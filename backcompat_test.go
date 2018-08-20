@@ -39,7 +39,7 @@ func Test_BackcompatRootClasses(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		got := backcompatRootClasses(tt.classes)
+		got := backcompatRootClasses(tt.classes, nil)
 		if want := tt.want; !reflect.DeepEqual(got, want) {
 			t.Errorf("backcompatRootClasses(%q) returned %q, want %q)", tt.classes, got, want)
 		}

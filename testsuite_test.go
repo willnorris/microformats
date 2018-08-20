@@ -40,22 +40,20 @@ import (
 
 // skip the tests which we don't pass yet
 var skipTests = []string{
-	"microformats-mixed/h-entry/mixedroots",            // microformats/microformats-parsing#38
-	"microformats-v1/hcard/single",                     // microformats/tests#101
-	"microformats-v1/hentry/summarycontent",            // microformats/tests#100, microformats/tests#101
-	"microformats-v1/hfeed/simple",                     // microformats/tests#100, microformats/tests#101
-	"microformats-v1/hnews/all",                        // microformats/tests#100, microformats/tests#101
-	"microformats-v1/hnews/minimum",                    // microformats/tests#100, microformats/tests#101
-	"microformats-v1/hproduct/aggregate",               // microformats/tests#99
-	"microformats-v1/hreview/item",                     // implied h-item
-	"microformats-v1/hreview/vcard",                    // microformats/tests#100
-	"microformats-v1/hreview-aggregate/justahyperlink", // implied h-item
-	"microformats-v1/includes/hcarditemref",            // includes
-	"microformats-v1/includes/hyperlink",               // includes
-	"microformats-v1/includes/heventitemref",           // includes
-	"microformats-v1/includes/object",                  // includes
-	"microformats-v1/includes/table",                   // includes
-	"microformats-v2/h-entry/urlincontent",             // microformats/tests#98
+	"microformats-mixed/h-entry/mixedroots",  // microformats/microformats-parsing#38
+	"microformats-v1/hcard/single",           // microformats/tests#101
+	"microformats-v1/hentry/summarycontent",  // microformats/tests#100, microformats/tests#101
+	"microformats-v1/hfeed/simple",           // microformats/tests#100, microformats/tests#101
+	"microformats-v1/hnews/all",              // microformats/tests#100, microformats/tests#101
+	"microformats-v1/hnews/minimum",          // microformats/tests#100, microformats/tests#101
+	"microformats-v1/hproduct/aggregate",     // microformats/tests#99
+	"microformats-v1/hreview/vcard",          // microformats/tests#100
+	"microformats-v1/includes/hcarditemref",  // includes
+	"microformats-v1/includes/hyperlink",     // includes
+	"microformats-v1/includes/heventitemref", // includes
+	"microformats-v1/includes/object",        // includes
+	"microformats-v1/includes/table",         // includes
+	"microformats-v2/h-entry/urlincontent",   // microformats/tests#98
 }
 
 func TestSuite(t *testing.T) {

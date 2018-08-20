@@ -160,7 +160,7 @@ func (p *parser) walk(node *html.Node) {
 
 	var backcompat bool
 	if len(rootclasses) == 0 {
-		rootclasses = backcompatRootClasses(classes)
+		rootclasses = backcompatRootClasses(classes, p.curItem)
 		if len(rootclasses) > 0 {
 			backcompat = true
 		}

@@ -130,6 +130,11 @@ var (
 			"latitude":  "p-latitude",
 			"longitude": "p-longitude",
 		},
+		"h-item": map[string]string{
+			"fn":    "p-name",
+			"photo": "u-photo",
+			"url":   "u-url",
+		},
 		"h-news": map[string]string{
 			"dateline":   "p-dateline",
 			"entry":      "p-entry",
@@ -215,13 +220,27 @@ var (
 	}
 )
 
-func backcompatRootClasses(classes []string) []string {
+func backcompatRootClasses(classes []string, parent *Microformat) []string {
 	var rootclasses []string
+	var itemClass bool
 	for _, class := range classes {
 		if c, ok := backcompatRootMap[class]; ok {
 			rootclasses = append(rootclasses, c)
 		}
+		if class == "item" {
+			itemClass = true
+		}
 	}
+
+	// handle implied h-item microformat inside of h-review
+	if len(rootclasses) == 0 && parent != nil && itemClass {
+		for _, t := range parent.Type {
+			if t == "h-review" || t == "h-review-aggregate" {
+				rootclasses = append(rootclasses, "h-item")
+			}
+		}
+	}
+
 	return rootclasses
 }
 
