@@ -22,6 +22,7 @@ package microformats
 
 import (
 	"reflect"
+	"sort"
 	"testing"
 )
 
@@ -63,12 +64,14 @@ func Test_BackcompatPropertyClasses(t *testing.T) {
 		{[]string{"summary"}, []string{"h-event"}, []string{"p-name"}},
 
 		// duplicate properties
-		//{[]string{"summary"}, []string{"h-entry", "h-resume"}, []string{"p-summary"}},
-		//{[]string{"summary"}, []string{"h-entry", "h-event"}, []string{"p-summary", "p-name"}},
+		{[]string{"summary"}, []string{"h-entry", "h-resume"}, []string{"p-summary"}},
+		{[]string{"summary"}, []string{"h-entry", "h-event"}, []string{"p-summary", "p-name"}},
 	}
 
 	for _, tt := range tests {
 		got := backcompatPropertyClasses(tt.classes, tt.context)
+		sort.Strings(got)
+		sort.Strings(tt.want)
 		if want := tt.want; !reflect.DeepEqual(got, want) {
 			t.Errorf("backcompatPropertyClasses(%q) returned %q, want %q)", tt.classes, got, want)
 		}

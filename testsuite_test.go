@@ -40,25 +40,22 @@ import (
 
 // skip the tests which we don't pass yet
 var skipTests = []string{
-	"microformats-mixed/h-entry/mixedroots",
-	//"microformats-mixed/h-resume/mixedroots",
-	"microformats-v1/hcard/single",
-	"microformats-v1/hentry/summarycontent",
-	"microformats-v1/hfeed/simple",
-	"microformats-v1/hnews/all",
-	"microformats-v1/hnews/minimum",
-	"microformats-v1/hproduct/aggregate",
-	//"microformats-v1/hresume/education",
-	//"microformats-v1/hresume/work",
-	"microformats-v1/hreview/item",
-	"microformats-v1/hreview/vcard",
-	"microformats-v1/hreview-aggregate/justahyperlink",
+	"microformats-mixed/h-entry/mixedroots",            // microformats/microformats-parsing#38
+	"microformats-v1/hcard/single",                     // date formatting
+	"microformats-v1/hentry/summarycontent",            // date formatting, microformats/tests#100
+	"microformats-v1/hfeed/simple",                     // date formatting, rel values, microformats/tests#100
+	"microformats-v1/hnews/all",                        // date formatting, rel values, microformats/tests#100
+	"microformats-v1/hnews/minimum",                    // date formatting, rel values, microformats/tests#100
+	"microformats-v1/hproduct/aggregate",               // microformats/tests#99
+	"microformats-v1/hreview/item",                     // implied h-item
+	"microformats-v1/hreview/vcard",                    // rel values, microformats/tests#100
+	"microformats-v1/hreview-aggregate/justahyperlink", // implied h-item
 	"microformats-v1/includes/hcarditemref",
 	"microformats-v1/includes/hyperlink",
 	"microformats-v1/includes/heventitemref",
 	"microformats-v1/includes/object",
 	"microformats-v1/includes/table",
-	"microformats-v2/h-entry/urlincontent",
+	"microformats-v2/h-entry/urlincontent", // microformats/tests#98
 }
 
 func TestSuite(t *testing.T) {
