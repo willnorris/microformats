@@ -26,6 +26,9 @@ import (
 	"net/url"
 	"path"
 	"strings"
+
+	"golang.org/x/net/html"
+	"golang.org/x/net/html/atom"
 )
 
 var (
@@ -278,4 +281,85 @@ func backcompatURLCategory(s string) string {
 		return path.Base(p.Path)
 	}
 	return s
+}
+
+func (p *parser) backcompatIncludeRefs(node *html.Node) (refs []string, replace bool) {
+	classes := getClasses(node)
+	for _, class := range classes {
+		if class == "include" {
+			var id string
+			if node.DataAtom == atom.A {
+				id = getAttr(node, "href")
+			} else if node.DataAtom == atom.Object {
+				id = getAttr(node, "data")
+			}
+
+			if !strings.HasPrefix(id, "#") {
+				// skip links not within the current page
+				continue
+			}
+
+			id = strings.TrimPrefix(id, "#")
+			if id == "" {
+				continue
+			}
+
+			return append(refs, id), true
+		}
+	}
+
+	if node.DataAtom == atom.Td {
+		refs = append(refs, strings.Fields(getAttr(node, "headers"))...)
+	}
+	refs = append(refs, strings.Fields(getAttr(node, "itemref"))...)
+
+	return refs, false
+}
+
+func (p *parser) backcompatIncludeNode(node *html.Node, refs []string, replace bool) *html.Node {
+	if len(refs) == 0 {
+		return node
+	}
+
+	for _, ref := range refs {
+		if n := findNodeByID(p.root, ref); n != nil {
+			if node != n && !isParentNode(node, n) {
+				if replace {
+					return n
+				}
+				node.AppendChild(cloneNode(n))
+			}
+		}
+	}
+
+	return node
+}
+
+func findNodeByID(node *html.Node, id string) *html.Node {
+	if getAttr(node, "id") == id {
+		return node
+	}
+	for c := node.FirstChild; c != nil; c = c.NextSibling {
+		if n := findNodeByID(c, id); n != nil {
+			return n
+		}
+	}
+	return nil
+}
+
+func isParentNode(child, parent *html.Node) bool {
+	for c := child; c.Parent != nil; c = c.Parent {
+		if c == parent {
+			return true
+		}
+	}
+	return false
+}
+
+func cloneNode(node *html.Node) *html.Node {
+	clone := *node
+	clone.Parent = nil
+	clone.PrevSibling = nil
+	clone.NextSibling = nil
+	return &clone
 }

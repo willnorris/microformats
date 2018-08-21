@@ -41,11 +41,7 @@ import (
 // skip the tests which we don't pass yet
 var skipTests = []string{
 	"microformats-mixed/h-entry/mixedroots",  // microformats/microformats-parsing#38
-	"microformats-v1/includes/hcarditemref",  // includes
-	"microformats-v1/includes/hyperlink",     // includes
-	"microformats-v1/includes/heventitemref", // includes
-	"microformats-v1/includes/object",        // includes
-	"microformats-v1/includes/table",         // includes
+	"microformats-v1/includes/heventitemref", // microformats/tests#107
 	"microformats-v2/h-entry/urlincontent",   // microformats/tests#105, microformats/tests#106, microformats/microformats-parsing#38
 }
 

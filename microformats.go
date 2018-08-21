@@ -87,6 +87,9 @@ type parser struct {
 	curItem   *Microformat
 	base      *url.URL
 	baseFound bool
+
+	// root node of the parsed document
+	root *html.Node
 }
 
 // Parse the microformats found in the HTML document read from r.  baseURL is
@@ -108,6 +111,7 @@ func ParseNode(doc *html.Node, baseURL *url.URL) *Data {
 	}
 	p.base = baseURL
 	p.baseFound = false
+	p.root = doc
 	p.walk(doc)
 	return p.curData
 }
@@ -157,6 +161,7 @@ func (p *parser) walk(node *html.Node) {
 		if rootClassNames.MatchString(class) {
 			rootclasses = append(rootclasses, class)
 		}
+
 	}
 
 	var backcompat bool
@@ -182,6 +187,15 @@ func (p *parser) walk(node *html.Node) {
 		priorItem = p.curItem
 		p.curItem = curItem
 	}
+
+	// handle backcompat include pattern
+	if p.curItem != nil && p.curItem.backcompat {
+		refs, replace := p.backcompatIncludeRefs(node)
+		if len(refs) != 0 {
+			node = p.backcompatIncludeNode(node, refs, replace)
+		}
+	}
+
 	if !p.baseFound && isAtom(node, atom.Base) {
 		if href := getAttr(node, "href"); href != "" {
 			if newbase, err := url.Parse(href); err == nil {
