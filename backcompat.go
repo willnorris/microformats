@@ -44,19 +44,7 @@ var (
 		"vevent":            "h-event",
 	}
 
-	backcompatPropertyMap = map[string]string{
-		"author":            "p-author",
-		"description":       "p-description",
-		"job-title":         "p-job-title",
-		"organization-name": "p-organization-name",
-		"organization-unit": "p-organization-unit",
-		"published":         "dt-published",
-		"summary":           "p-summary",
-		"title":             "p-title",
-		"worst":             "p-worst",
-	}
-
-	backcompatPropertyOverrideMap = map[string]map[string]string{
+	backcompatPropertyMap = map[string]map[string]string{
 		"h-adr": map[string]string{
 			"country-name":     "p-country-name",
 			"extended-address": "p-extended-address",
@@ -248,7 +236,7 @@ func backcompatPropertyClasses(classes []string, rels []string, context []string
 	var classmap = make(map[string]string)
 	for _, class := range classes {
 		for _, ctx := range context {
-			if c, ok := backcompatPropertyOverrideMap[ctx][class]; ok {
+			if c, ok := backcompatPropertyMap[ctx][class]; ok {
 				parts := strings.SplitN(c, "-", 2)
 				classmap[parts[1]] = c
 			}
