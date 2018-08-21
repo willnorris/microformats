@@ -124,8 +124,6 @@ func runTest(t *testing.T, test string) {
 	if err != nil {
 		t.Fatalf("error reading file %q: %v", test+".json", err)
 	}
-	// normalize self-closing HTML tags to match what net/html produces
-	expectedJSON = bytes.Replace(expectedJSON, []byte(" />"), []byte("/>"), -1)
 
 	want := make(map[string]interface{})
 	err = json.Unmarshal(expectedJSON, &want)
@@ -134,9 +132,6 @@ func runTest(t *testing.T, test string) {
 	}
 
 	outputJSON, _ := json.Marshal(data)
-	// reverse golang.org/x/net/http's escaping of apostrophes
-	outputJSON = bytes.Replace(outputJSON, []byte(`\u0026#39;`), []byte("'"), -1)
-
 	got := make(map[string]interface{})
 	err = json.Unmarshal(outputJSON, &got)
 	if err != nil {

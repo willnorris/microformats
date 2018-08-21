@@ -357,6 +357,12 @@ func (p *parser) walk(node *html.Node) {
 					html.Render(&buf, c)
 				}
 				htmlbody = strings.TrimSpace(buf.String())
+
+				// HTML spec: Serializing HTML Fragments algorithm does not include
+				// a trailing slash, so remove it.  Nor should apostrophes be
+				// encoded, which golang.org/x/net/html is doing.
+				htmlbody = strings.Replace(htmlbody, `/>`, `>`, -1)
+				htmlbody = strings.Replace(htmlbody, `&#39;`, `'`, -1)
 			case "dt":
 				if value == nil {
 					value = getDateTimeValue(node)
