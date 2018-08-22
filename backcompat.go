@@ -29,6 +29,7 @@ import (
 )
 
 var (
+	// map microformats v1 root classes to their v2 equivalent.
 	backcompatRootMap = map[string]string{
 		"adr":               "h-adr",
 		"geo":               "h-geo",
@@ -44,6 +45,8 @@ var (
 		"vevent":            "h-event",
 	}
 
+	// map microformats v1 property classes to their v2 equivalent. These
+	// mappings are root-specific.
 	backcompatPropertyMap = map[string]map[string]string{
 		"h-adr": map[string]string{
 			"country-name":     "p-country-name",
@@ -184,6 +187,8 @@ var (
 		},
 	}
 
+	// map microformats v1 rel values to their v2 property equivalent. These
+	// mappings are root-specific.
 	backcompatRelMap = map[string]map[string]string{
 		"h-card": map[string]string{
 			"tag": "u-category",
@@ -208,6 +213,9 @@ var (
 	}
 )
 
+// backcompatRootClasses returns the v2 root classes for the backcompat v1
+// roots in the provided classes. parent identifies the parent microformat, if
+// present, since some root mappings are context-specific.
 func backcompatRootClasses(classes []string, parent *Microformat) []string {
 	var rootclasses []string
 	var itemClass bool
@@ -232,6 +240,9 @@ func backcompatRootClasses(classes []string, parent *Microformat) []string {
 	return rootclasses
 }
 
+// backcompatPropertyClasses returns the v2 property classes for the backcompat
+// v1 properties in the provided classes and rel values.  context identifies
+// the v2 microformat types (h-card, h-adr, etc) the parsed property belongs to.
 func backcompatPropertyClasses(classes []string, rels []string, context []string) []string {
 	var classmap = make(map[string]string)
 	for _, class := range classes {

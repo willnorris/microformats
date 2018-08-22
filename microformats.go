@@ -89,7 +89,7 @@ type parser struct {
 }
 
 // Parse the microformats found in the HTML document read from r.  baseURL is
-// the URL this document was retrieved from which is used to resolve any
+// the URL this document was retrieved from and is used to resolve any
 // relative URLs.
 func Parse(r io.Reader, baseURL *url.URL) *Data {
 	doc, _ := html.Parse(r)
@@ -97,7 +97,7 @@ func Parse(r io.Reader, baseURL *url.URL) *Data {
 }
 
 // ParseNode parses the microformats found in doc.  baseURL is the URL this
-// document was retrieved from which is used to resolve any relative URLs.
+// document was retrieved from and is used to resolve any relative URLs.
 func ParseNode(doc *html.Node, baseURL *url.URL) *Data {
 	p := new(parser)
 	p.curData = &Data{
@@ -409,6 +409,7 @@ func (p *parser) walk(node *html.Node) {
 	}
 }
 
+// getClasses returns all of the classes on node.
 func getClasses(node *html.Node) []string {
 	if c := getAttrPtr(node, "class"); c != nil {
 		return strings.Split(*c, " ")
@@ -416,6 +417,7 @@ func getClasses(node *html.Node) []string {
 	return nil
 }
 
+// hasMatchingClass whether node contains a class that matches regex.
 func hasMatchingClass(node *html.Node, regex *regexp.Regexp) bool {
 	classes := getClasses(node)
 	for _, class := range classes {
@@ -426,6 +428,7 @@ func hasMatchingClass(node *html.Node, regex *regexp.Regexp) bool {
 	return false
 }
 
+// getAttr returns the value of the specified attribute on node.
 func getAttr(node *html.Node, name string) string {
 	if v := getAttrPtr(node, name); v != nil {
 		return *v
@@ -433,6 +436,8 @@ func getAttr(node *html.Node, name string) string {
 	return ""
 }
 
+// getAttr returns pointer to value of the specified attribute on node.  If
+// node does not contain the specified attribute, nil will be returned.
 func getAttrPtr(node *html.Node, name string) *string {
 	if node == nil {
 		return nil
@@ -445,6 +450,7 @@ func getAttrPtr(node *html.Node, name string) *string {
 	return nil
 }
 
+// isAtom returns whether node's atom is one of atoms.
 func isAtom(node *html.Node, atoms ...atom.Atom) bool {
 	if node == nil {
 		return false
@@ -457,6 +463,10 @@ func isAtom(node *html.Node, atoms ...atom.Atom) bool {
 	return false
 }
 
+// getTextContent returns the text content of node, following the common
+// microformats v2 algorithm.  Nested script and style elements are ignored,
+// and img elements are run through imgFn.  If imgFn is nil, img elements are
+// ignored as well.
 func getTextContent(node *html.Node, imgFn func(*html.Node) string) string {
 	if node == nil {
 		return ""
@@ -477,10 +487,14 @@ func getTextContent(node *html.Node, imgFn func(*html.Node) string) string {
 	return buf.String()
 }
 
+// imageAltValue returns the value of node's alt attribute.
 func imageAltValue(node *html.Node) string {
 	return getAttr(node, "alt")
 }
 
+// imageAltSrcValue returns the value of node's alt attribute.  If node doesn't
+// have an alt attribute, the value of node's src attribute is expanded to an
+// absolute URL and returned.
 func (p *parser) imageAltSrcValue(node *html.Node) string {
 	if v := getAttrPtr(node, "alt"); v != nil {
 		return *v
@@ -549,6 +563,9 @@ func getOnlyChildAtomWithAttr(node *html.Node, atom atom.Atom, attr string) *htm
 	return n
 }
 
+// getImpliedName gets the implied name value for node.
+//
+// See http://microformats.org/wiki/microformats2-parsing
 func getImpliedName(node *html.Node) string {
 	var name *string
 	if isAtom(node, atom.Img, atom.Area) {
@@ -612,6 +629,9 @@ func getImpliedName(node *html.Node) string {
 	return strings.TrimSpace(*name)
 }
 
+// getImpliedName gets the implied photo value for node.
+//
+// See http://microformats.org/wiki/microformats2-parsing
 func getImpliedPhoto(node *html.Node, baseURL *url.URL) string {
 	var photo *string
 	if photo == nil && isAtom(node, atom.Img) {
@@ -659,6 +679,9 @@ func getImpliedPhoto(node *html.Node, baseURL *url.URL) string {
 	return expandURL(*photo, baseURL)
 }
 
+// getImpliedName gets the implied url value for node.
+//
+// See http://microformats.org/wiki/microformats2-parsing
 func getImpliedURL(node *html.Node, baseURL *url.URL) string {
 	var value *string
 	if value == nil && isAtom(node, atom.A, atom.Area) {
@@ -703,6 +726,9 @@ func getImpliedURL(node *html.Node, baseURL *url.URL) string {
 	return expandURL(*value, baseURL)
 }
 
+// getValueClassPattern gets the value of node using the value class pattern.
+//
+// See http://microformats.org/wiki/value-class-pattern
 func getValueClassPattern(node *html.Node) *string {
 	values := parseValueClassPattern(node, false)
 	if len(values) > 0 {
@@ -712,6 +738,8 @@ func getValueClassPattern(node *html.Node) *string {
 	return nil
 }
 
+// parseValueClassPattern parses node for values using the value class pattern.
+// If dt is true, the rules for date and time parsing will be used.
 func parseValueClassPattern(node *html.Node, dt bool) []string {
 	if node == nil {
 		return nil
@@ -748,6 +776,7 @@ func parseValueClassPattern(node *html.Node, dt bool) []string {
 	return values
 }
 
+// getFirstPropValue returns the first property value for prop in item.
 func getFirstPropValue(item *Microformat, prop string) *string {
 	values := item.Properties[prop]
 	if len(values) > 0 {
