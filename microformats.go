@@ -389,7 +389,7 @@ func (p *parser) walk(node *html.Node) {
 				var buf bytes.Buffer
 
 				for c := node.FirstChild; c != nil; c = c.NextSibling {
-					// p.expandAttrURLs(c) // microformats/microformats2-parsing#38
+					p.expandAttrURLs(c) // microformats/microformats2-parsing#38
 					html.Render(&buf, c)
 				}
 				htmlbody = strings.TrimSpace(buf.String())
