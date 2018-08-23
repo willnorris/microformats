@@ -29,6 +29,7 @@ import (
 	"io"
 	"net/url"
 	"regexp"
+	"sort"
 	"strings"
 
 	"golang.org/x/net/html"
@@ -167,6 +168,7 @@ func (p *parser) walk(node *html.Node) {
 	}
 
 	if len(rootclasses) > 0 {
+		sort.Strings(rootclasses)
 		curItem = &Microformat{
 			Type:       rootclasses,
 			Properties: make(map[string][]interface{}),
