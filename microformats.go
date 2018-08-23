@@ -116,26 +116,45 @@ func ParseNode(doc *html.Node, baseURL *url.URL) *Data {
 	return p.curData
 }
 
-// expandHref expands relative URLs in a.href and img.src attributes to be absolute URLs.
-func (p *parser) expandHref(node *html.Node) {
-	if isAtom(node, atom.A) {
-		href := getAttrPtr(node, "href")
-		if href != nil {
-			*href = expandURL(*href, p.base)
-		}
-		return
+// expandAttrURLs expands relative URLs in attributes to be absolute URLs.
+// Attributes are taken from https://html.spec.whatwg.org/multipage/indices.html#attributes-3.
+func (p *parser) expandAttrURLs(node *html.Node) {
+	var attr []string
+	if isAtom(node, atom.Form) {
+		attr = append(attr, "action")
+	}
+	if isAtom(node, atom.Blockquote, atom.Del, atom.Ins, atom.Q) {
+		attr = append(attr, "cite")
+	}
+	if isAtom(node, atom.Object) {
+		attr = append(attr, "data")
+	}
+	if isAtom(node, atom.Button, atom.Input) {
+		attr = append(attr, "formaction")
+	}
+	if isAtom(node, atom.A, atom.Area, atom.Base, atom.Link) {
+		attr = append(attr, "href")
+	}
+	if isAtom(node, atom.A, atom.Area) {
+		attr = append(attr, "ping")
+	}
+	if isAtom(node, atom.Audio, atom.Embed, atom.Iframe, atom.Img, atom.Input, atom.Script, atom.Source, atom.Track, atom.Video) {
+		attr = append(attr, "src")
+	}
+	if isAtom(node, atom.Video) {
+		attr = append(attr, "poster")
 	}
 
-	if isAtom(node, atom.Img) {
-		href := getAttrPtr(node, "src")
-		if href != nil {
-			*href = expandURL(*href, p.base)
+	for _, a := range attr {
+		value := getAttrPtr(node, a)
+		if value != nil {
+			*value = expandURL(*value, p.base)
 		}
 		return
 	}
 
 	for c := node.FirstChild; c != nil; c = c.NextSibling {
-		p.expandHref(c)
+		p.expandAttrURLs(c)
 	}
 }
 
@@ -370,6 +389,7 @@ func (p *parser) walk(node *html.Node) {
 				var buf bytes.Buffer
 
 				for c := node.FirstChild; c != nil; c = c.NextSibling {
+					// p.expandAttrURLs(c) // microformats/microformats2-parsing#38
 					html.Render(&buf, c)
 				}
 				htmlbody = strings.TrimSpace(buf.String())
