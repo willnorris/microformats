@@ -4,10 +4,12 @@
 [![Build Status](https://travis-ci.org/willnorris/microformats.svg)](https://travis-ci.org/willnorris/microformats)
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE)
 
-microformats is a go library and tool for parsing [microformats (v2)][].  It is
-based on Andy Leap's [original library][andyleap/microformats].
+microformats is a go library and tool for parsing [microformats][], supporting
+both classic v1 and [v2 syntax][].  It is based on Andy Leap's [original
+library][andyleap/microformats].
 
-[microformats (v2)]: http://microformats.org/wiki/microformats-2
+[microformats]: https://microformats.io/
+[v2 syntax]: http://microformats.org/wiki/microformats-2
 [andyleap/microformats]: https://github.com/andyleap/microformats
 
 ## License

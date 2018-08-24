@@ -18,7 +18,8 @@
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 // IN THE SOFTWARE.
 
-// Package microformats provides a microformats V2 parser.
+// Package microformats provides a microformats parser, supporting both v1 and
+// v2 syntax.
 //
 // See also: http://microformats.org/wiki/microformats2
 package microformats // import "willnorris.com/go/microformats"
