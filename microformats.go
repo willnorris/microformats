@@ -388,9 +388,6 @@ func (p *parser) walk(node *html.Node) {
 				if value == nil && isAtom(node, atom.Video) {
 					value = getAttrPtr(node, "poster")
 				}
-				if value != nil {
-					*value = expandURL(*value, p.base)
-				}
 				if value == nil {
 					value = getValueClassPattern(node)
 				}
@@ -403,6 +400,9 @@ func (p *parser) walk(node *html.Node) {
 				if value == nil {
 					value = new(string)
 					*value = strings.TrimSpace(getTextContent(node, nil))
+				}
+				if value != nil {
+					*value = expandURL(*value, p.base)
 				}
 				if curItem != nil && p.curItem != nil {
 					embedValue = getFirstPropValue(curItem, "url")
