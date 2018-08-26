@@ -40,8 +40,7 @@ import (
 
 // skip the tests which we don't pass yet
 var skipTests = []string{
-	"microformats-v1/includes/heventitemref", // microformats/tests#107
-	"microformats-v2/h-entry/urlincontent",   // microformats/tests#105, microformats/tests#106
+	"microformats-v2/h-entry/urlincontent", // microformats/tests#106
 }
 
 func TestSuite(t *testing.T) {
