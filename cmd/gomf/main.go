@@ -3,6 +3,11 @@
 // selector will be used as the root node for parsing.
 //
 // Usage: gomf <URL> [optional selector]
+//
+// For example, to parse all microformats from https://microformats.io inside
+// the <main> element, call:
+//
+//     gomf "https://microformats.io" "main"
 package main
 
 import (

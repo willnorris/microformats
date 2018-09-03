@@ -21,6 +21,16 @@
 // Package microformats provides a microformats parser, supporting both v1 and
 // v2 syntax.
 //
+// Usage:
+//
+//     import "willnorris.com/go/microformats"
+//
+// Retrive the HTML contents of a page, and call Parse or ParseNode, depending
+// on what input you have (an io.Reader or an html.Node).
+//
+// To parse only a section of an HTML document, use a package like goquery to
+// select the root node to parse from.  For example, see cmd/gomf/main.go.
+//
 // See also: http://microformats.org/wiki/microformats2
 package microformats // import "willnorris.com/go/microformats"
 
@@ -53,23 +63,41 @@ type Microformat struct {
 	Coords     string                   `json:"coords,omitempty"`
 	Children   []*Microformat           `json:"children,omitempty"`
 
-	// track whether this microformat has various types of properties or nested
-	// microformats.  This is required for processing implied property values.
+	// track whether this microformat has various types of properties or
+	// nested microformats. Used in processing implied property values.
 	hasNestedMicroformats bool
 	hasPProperties        bool
 	hasEProperties        bool
 	hasUProperties        bool
 
-	// whether this microformat is a v1 format parsed in backwards compatible mode
+	// whether this is a v1 microformat parsed in backwards compatible mode
 	backcompat bool
 }
 
 // Data specifies all of the microformats and data parsed from a single HTML
 // page.
 type Data struct {
-	Items   []*Microformat      `json:"items"`
-	Rels    map[string][]string `json:"rels"`
-	RelURLs map[string]*RelURL  `json:"rel-urls"`
+	// Items includes all top-level microformats found on the page.
+	Items []*Microformat `json:"items"`
+
+	// Rels includes all related URLs found on the page (<a> or <link>
+	// elements with a "rel" value).  Map keys are the rel value, mapped to
+	// a slice of URLs with that relation.  For example:
+	//
+	//     map[string][]string{
+	//         "author": {"http://example.com/a", "http://example.com/b"},
+	//         "alternate": {"http://example.com/fr"},
+	//     }
+	//
+	// Relative URL values are resolved to absolute URLs using the base URL
+	// of the page.
+	Rels map[string][]string `json:"rels"`
+
+	// RelURLs maps related URLs found on the page to additional metadata
+	// about that relationship. If a URL is linked to more than once, only
+	// the metadata for the first link is included here.  Relative URL
+	// values are resolved to absolute URLs using the base URL of the page.
+	RelURLs map[string]*RelURL `json:"rel-urls"`
 }
 
 // RelURL represents the attributes of a URL.  The URL value itself is the map
@@ -83,6 +111,8 @@ type RelURL struct {
 	Type     string   `json:"type,omitempty"`
 }
 
+// parser parses a single HTML page for microformats.  parser is not thread
+// safe, and should only be used to parse a single document.
 type parser struct {
 	curData   *Data
 	curItem   *Microformat
@@ -171,6 +201,7 @@ func expandURL(r string, base *url.URL) string {
 	return r
 }
 
+// walk the DOM rooted at node, storing parsed microformats in p.
 func (p *parser) walk(node *html.Node) {
 	var curItem *Microformat
 	var priorItem *Microformat

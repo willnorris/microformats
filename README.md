@@ -12,6 +12,23 @@ library][andyleap/microformats].
 [v2 syntax]: http://microformats.org/wiki/microformats-2
 [andyleap/microformats]: https://github.com/andyleap/microformats
 
+## Usage
+
+Import the package:
+
+``` go
+import "willnorris.com/go/microformats"
+```
+
+Fetch the HTML contents of a page, and call [Parse][] or [ParseNode][],
+depending on what input you have (an [io.Reader][] or an [html.Node][]). See an
+example of each in [cmd/gomf/main.go](cmd/gomf/main.go).
+
+[Parse]: https://godoc.org/willnorris.com/go/microformats#Parse
+[ParseNode]: https://godoc.org/willnorris.com/go/microformats#ParseNode
+[io.Reader]: https://golang.org/pkg/io/#Reader
+[html.Node]: https://godoc.org/golang.org/x/net/html#Node
+
 ## License
 
 microformats is released under an [MIT license](LICENSE).  Though portions are
