@@ -4,10 +4,12 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"flag"
 	"fmt"
 	"html/template"
+	"io"
 	"net/http"
 	"net/url"
 	"os"
@@ -43,6 +45,11 @@ func index(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	buf := new(bytes.Buffer)
+	enc := json.NewEncoder(buf)
+	enc.SetEscapeHTML(false)
+	enc.SetIndent("", "  ")
+
 	if r.Method == "GET" && parsedURL != nil {
 		resp, err := http.Get(parsedURL.String())
 		if err != nil {
@@ -51,25 +58,22 @@ func index(w http.ResponseWriter, r *http.Request) {
 		defer resp.Body.Close()
 
 		mf := microformats.Parse(resp.Body, parsedURL)
-		j, err := json.MarshalIndent(mf, "", "    ")
-		if err != nil {
+		if err := enc.Encode(mf); err != nil {
 			http.Error(w, fmt.Sprintf("error marshaling json: %v", err), http.StatusInternalServerError)
 		}
 
 		if callback := r.FormValue("callback"); callback != "" {
-			fmt.Fprintf(w, "%s(%s)", callback, j)
+			fmt.Fprintf(w, "%s(%s)", callback, buf.String())
 		} else {
-			w.Write(j)
+			io.Copy(w, buf)
 		}
 		return
 	}
 
 	html := r.FormValue("html")
-	var j []byte
 	if html != "" {
 		mf := microformats.Parse(strings.NewReader(html), parsedURL)
-		j, err = json.MarshalIndent(mf, "", "  ")
-		if err != nil {
+		if err := enc.Encode(mf); err != nil {
 			http.Error(w, fmt.Sprintf("error marshaling json: %v", err), http.StatusInternalServerError)
 		}
 	}
@@ -81,7 +85,7 @@ func index(w http.ResponseWriter, r *http.Request) {
 	}{
 		html,
 		u,
-		string(j),
+		buf.String(),
 	}
 
 	tpl.Execute(w, data)

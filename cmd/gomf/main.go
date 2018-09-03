@@ -1,12 +1,12 @@
 // The gomf tool is a command line tool which parses microformats from the
-// specified URL.
+// specified URL.  If selector is provided, the first element that matches the
+// selector will be used as the root node for parsing.
 //
 // Usage: gomf <URL> [optional selector]
 package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"net/url"
@@ -30,11 +30,17 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		data = microformats.ParseNode(doc.Find(os.Args[2]).Get(0), u)
+		s := doc.Find(os.Args[2])
+		if s.Length() == 0 {
+			log.Fatal("selector did not match any elements")
+		}
+		data = microformats.ParseNode(s.Get(0), u)
 	} else {
 		data = microformats.Parse(resp.Body, u)
 	}
 
-	json, _ := json.MarshalIndent(data, "", "  ")
-	fmt.Println(string(json))
+	enc := json.NewEncoder(os.Stdout)
+	enc.SetEscapeHTML(false)
+	enc.SetIndent("", "  ")
+	enc.Encode(data)
 }
