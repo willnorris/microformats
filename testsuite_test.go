@@ -39,9 +39,7 @@ import (
 )
 
 // skip the tests which we don't pass yet
-var skipTests = []string{
-	"microformats-v2/h-entry/urlincontent", // microformats/tests#106
-}
+var skipTests = []string{}
 
 func TestSuite(t *testing.T) {
 	for _, version := range []string{"microformats-mixed", "microformats-v1", "microformats-v2"} {
