@@ -41,8 +41,8 @@ func Test_NilItems(t *testing.T) {
 
 func Test_DiscoverPostType_Type(t *testing.T) {
 	item := &microformats.Microformat{Type: []string{"h-event"}}
-	if got, want := DiscoverResponseType(item), "event"; got != want {
-		//t.Errorf("DiscoverResponseType(%v) returned %q, want %q", item, got, want)
+	if got, want := DiscoverPostType(item), "event"; got != want {
+		t.Errorf("DiscoverResponseType(%v) returned %q, want %q", item, got, want)
 	}
 }
 
@@ -75,10 +75,14 @@ func Test_DiscoverPostType_Properties(t *testing.T) {
 		{pm{"in-reply-to": {}}, "note"},
 		{pm{"in-reply-to": {""}}, "note"},
 		{pm{"in-reply-to": {"foo"}}, "reply"},
+		{pm{"video": {"foo"}}, "video"},
+		{pm{"photo": {"foo"}}, "photo"},
 
 		// content and name variations
+		{pm{"content": {"foo"}}, "note"},
 		{pm{"content": {"foo"}, "name": {"foo"}}, "note"},
 		{pm{"summary": {"foo"}, "name": {"foo"}}, "note"},
+		{pm{"content": {"foobar"}, "name": {"foo"}}, "note"},
 		{pm{"summary": {"foo"}, "name": {"Foo"}}, "article"},
 		{pm{"content": {"foo"}, "name": {"bar"}}, "article"},
 		{pm{"content": {"foo"}, "name": {"bar"}}, "article"},

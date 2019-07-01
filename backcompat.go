@@ -283,6 +283,16 @@ func backcompatURLCategory(s string) string {
 	return s
 }
 
+// backcompatIncludeRefs returns references found using the include pattern.
+//
+// refs includes the IDs of referenced nodes (without any leading '#')
+//
+// replace is true if the referenced node was identified using a pattern  which
+// instructs the referencing node to be replaced entirely, rather than the
+// referenced node being amended.
+//
+// See http://microformats.org/wiki/include-pattern
+// See http://microformats.org/wiki/microdata
 func (p *parser) backcompatIncludeRefs(node *html.Node) (refs []string, replace bool) {
 	classes := getClasses(node)
 	for _, class := range classes {
@@ -316,6 +326,10 @@ func (p *parser) backcompatIncludeRefs(node *html.Node) (refs []string, replace 
 	return refs, false
 }
 
+// backcompatIncludeNode includes referenced notes following the include
+// pattern.
+//
+// see backcompatIncludeRefs for information on refs and replace parameters.
 func (p *parser) backcompatIncludeNode(node *html.Node, refs []string, replace bool) *html.Node {
 	if len(refs) == 0 {
 		return node
@@ -323,7 +337,7 @@ func (p *parser) backcompatIncludeNode(node *html.Node, refs []string, replace b
 
 	for _, ref := range refs {
 		if n := findNodeByID(p.root, ref); n != nil {
-			if node != n && !isParentNode(node, n) {
+			if node != n && !isAncestorNode(node, n) {
 				if replace {
 					return n
 				}
@@ -335,6 +349,8 @@ func (p *parser) backcompatIncludeNode(node *html.Node, refs []string, replace b
 	return node
 }
 
+// findNodeByID searches node and its children, returning the node with the
+// specified id value.
 func findNodeByID(node *html.Node, id string) *html.Node {
 	if getAttr(node, "id") == id {
 		return node
@@ -347,8 +363,9 @@ func findNodeByID(node *html.Node, id string) *html.Node {
 	return nil
 }
 
-func isParentNode(child, parent *html.Node) bool {
-	for c := child; c.Parent != nil; c = c.Parent {
+// isAncestorNode returns true if parent is an ancestor node of child.
+func isAncestorNode(child, parent *html.Node) bool {
+	for c := child; c != nil; c = c.Parent {
 		if c == parent {
 			return true
 		}
@@ -356,6 +373,7 @@ func isParentNode(child, parent *html.Node) bool {
 	return false
 }
 
+// cloneNode makes a copy of node, detaching any parent or sibling nodes.
 func cloneNode(node *html.Node) *html.Node {
 	clone := *node
 	clone.Parent = nil

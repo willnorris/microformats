@@ -21,6 +21,7 @@
 package microformats
 
 import (
+	"bytes"
 	"net/url"
 	"reflect"
 	"regexp"
@@ -43,7 +44,57 @@ func parseNode(s string) (n *html.Node, err error) {
 	return n, err
 }
 
+func renderNode(n *html.Node) string {
+	b := new(bytes.Buffer)
+	html.Render(b, n)
+	return b.String()
+}
+
 func ptr(s string) *string { return &s }
+
+func Test_ExpandAttrURLs(t *testing.T) {
+	base, _ := url.Parse("/a/")
+	p := &parser{base: base}
+
+	tests := []struct {
+		html string
+		want string
+	}{
+		{`<form action="b"></form>`, `<form action="/a/b"></form>`},
+		{`<blockquote cite="b"></blockquote>`, `<blockquote cite="/a/b"></blockquote>`},
+		{`<del cite="b"></del>`, `<del cite="/a/b"></del>`},
+		{`<ins cite="b"></ins>`, `<ins cite="/a/b"></ins>`},
+		{`<q cite="b"></q>`, `<q cite="/a/b"></q>`},
+		{`<object data="b"></object>`, `<object data="/a/b"></object>`},
+		{`<button formaction="b"></button>`, `<button formaction="/a/b"></button>`},
+		{`<input formaction="b"/>`, `<input formaction="/a/b"/>`},
+		{`<a href="b"></a>`, `<a href="/a/b"></a>`},
+		{`<area href="b"/>`, `<area href="/a/b"/>`},
+		{`<base href="b"/>`, `<base href="/a/b"/>`},
+		{`<link href="b"/>`, `<link href="/a/b"/>`},
+		//{`<a ping="b"></a>`, `<a ping="/a/b"></a>`},
+		//{`<area ping="b"/>`, `<area ping="/a/b"/>`},
+		{`<audio src="b"></audio>`, `<audio src="/a/b"></audio>`},
+		{`<embed src="b"/>`, `<embed src="/a/b"/>`},
+		{`<iframe src="b"></iframe>`, `<iframe src="/a/b"></iframe>`},
+		{`<img src="b"/>`, `<img src="/a/b"/>`},
+		//{`<input src="b"/>`, `<input src="/a/b"/>`},
+		{`<script src="b"></script>`, `<script src="/a/b"></script>`},
+		{`<source src="b"/>`, `<source src="/a/b"/>`},
+		{`<track src="b"/>`, `<track src="/a/b"/>`},
+		{`<video src="b"></video>`, `<video src="/a/b"></video>`},
+		//{`<video poster="b"></video>`, `<video poster="/a/b"></video>`},
+	}
+
+	for _, tt := range tests {
+		n, _ := parseNode(tt.html)
+		p.expandAttrURLs(n)
+		got := renderNode(n)
+		if got != tt.want {
+			t.Errorf("expandAttrURL(%q) returned %q, want %q", tt.html, got, tt.want)
+		}
+	}
+}
 
 func Test_ExpandURL(t *testing.T) {
 	example, _ := url.Parse("http://example.com/base/")
@@ -228,6 +279,7 @@ func Test_GetTextContent(t *testing.T) {
 		{"<a><img src='foo'></a>", imageAltValue, ""},
 		{"<a><img src='foo'></a>", p.imageAltSrcValue, " http://example.com/foo "},
 		{"<a><img alt='foo' src='bar'></a>", p.imageAltSrcValue, "foo"},
+		{"<a><img></a>", p.imageAltSrcValue, ""},
 	}
 
 	for _, tt := range tests {
@@ -472,6 +524,7 @@ func Test_GetImpliedURL(t *testing.T) {
 		{`<p><a href="p"></p>`, nil, "p"},
 		{`<p><a href="p"></p>`, base, "http://example.com/p"},
 		{`<p><a href="p" class="h-entry"></p>`, nil, ""},
+		{`<p><b><a href="p"></b></p>`, nil, "p"},
 
 		{`<p><area href="p"></p>`, nil, "p"},
 		{`<p><area href="p"></p>`, base, "http://example.com/p"},

@@ -21,9 +21,11 @@
 package microformats
 
 import (
-	"reflect"
 	"sort"
 	"testing"
+
+	"github.com/google/go-cmp/cmp"
+	"golang.org/x/net/html"
 )
 
 func Test_BackcompatRootClasses(t *testing.T) {
@@ -40,7 +42,7 @@ func Test_BackcompatRootClasses(t *testing.T) {
 
 	for _, tt := range tests {
 		got := backcompatRootClasses(tt.classes, nil)
-		if want := tt.want; !reflect.DeepEqual(got, want) {
+		if want := tt.want; !cmp.Equal(got, want) {
 			t.Errorf("backcompatRootClasses(%q) returned %q, want %q)", tt.classes, got, want)
 		}
 	}
@@ -78,7 +80,7 @@ func Test_BackcompatPropertyClasses(t *testing.T) {
 		got := backcompatPropertyClasses(tt.classes, tt.rels, tt.context)
 		sort.Strings(got)
 		sort.Strings(tt.want)
-		if want := tt.want; !reflect.DeepEqual(got, want) {
+		if want := tt.want; !cmp.Equal(got, want) {
 			t.Errorf("backcompatPropertyClasses(%q) returned %q, want %q)", tt.classes, got, want)
 		}
 	}
@@ -95,12 +97,106 @@ func Test_BackcompatURLCategory(t *testing.T) {
 		{"/a/b", "b"},
 		{"/a/b/", "b"},
 		{"http://example.com/a/b", "b"},
+		{"%", "%"}, // invalid URL
 	}
 
 	for _, tt := range tests {
 		got := backcompatURLCategory(tt.url)
 		if want := tt.want; got != want {
 			t.Errorf("backcompatURLCategory(%q) returned %q, want %q)", tt.url, got, want)
+		}
+	}
+}
+
+func Test_BackcompatIncludeRefs(t *testing.T) {
+	tests := []struct {
+		html        string
+		wantRefs    []string
+		wantReplace bool
+	}{
+		{`<a></a>`, nil, false},
+		{`<a href="#foo"></a>`, nil, false},
+		{`<a class="include" href="foo"></a>`, nil, false},
+		{`<a class="include" href="#"></a>`, nil, false},
+		{
+			`<object class="include" data="#foo">`,
+			[]string{"foo"},
+			true,
+		},
+		{
+			`<a class="include" href="#foo"></a>`,
+			[]string{"foo"},
+			true,
+		},
+		{
+			`<a itemref="foo"></a>`,
+			[]string{"foo"},
+			false,
+		},
+		{
+			`<a itemref="foo bar"></a>`,
+			[]string{"foo", "bar"},
+			false,
+		},
+	}
+
+	for _, tt := range tests {
+		p := &parser{}
+		node, _ := parseNode(tt.html)
+		refs, replace := p.backcompatIncludeRefs(node)
+		if !cmp.Equal(refs, tt.wantRefs) {
+			t.Errorf("backcompatIncludeRefs(%v) returned refs %v, want %v", tt.html, refs, tt.wantRefs)
+		}
+		if replace != tt.wantReplace {
+			t.Errorf("backcompatIncludeRefs(%v) returned replace %t, want %t", tt.html, replace, tt.wantReplace)
+		}
+	}
+}
+
+func Test_BackcompatIncludeNode(t *testing.T) {
+	n, _ := parseNode("<p></p>")
+
+	tests := []struct {
+		node    *html.Node
+		refs    []string
+		replace bool
+		want    *html.Node
+	}{
+		{n, []string{}, false, n},
+	}
+
+	for _, tt := range tests {
+		p := &parser{}
+		got := p.backcompatIncludeNode(tt.node, tt.refs, tt.replace)
+		if want := tt.want; !cmp.Equal(got, want) {
+			t.Errorf("backcompatIncludeNode(%v, %v, %v) returned %v, want %v", tt.node, tt.refs, tt.replace, got, want)
+		}
+	}
+}
+
+func Test_IsAncestorNode(t *testing.T) {
+	a1, _ := parseNode("<p><b></b></p>")
+	a2 := a1.FirstChild
+	b1, _ := parseNode("<div></div>")
+
+	tests := []struct {
+		parent, child *html.Node
+		want          bool // expected return from from isAncestorNode
+	}{
+		{nil, nil, false},
+		{a1, nil, false},
+		{nil, a1, false},
+
+		{a1, a1, true},
+		{a1, a2, true},
+		{a2, a1, false},
+		{a1, b1, false},
+	}
+
+	for _, tt := range tests {
+		got := isAncestorNode(tt.child, tt.parent)
+		if got != tt.want {
+			t.Errorf("isAncestorNode(%v, %v) returned %v, want %v", tt.child, tt.parent, got, tt.want)
 		}
 	}
 }
