@@ -21,9 +21,10 @@
 package microformats
 
 import (
-	"reflect"
 	"testing"
 	"time"
+
+	"github.com/google/go-cmp/cmp"
 )
 
 func Test_Datetime_SetDate(t *testing.T) {
@@ -229,7 +230,7 @@ func Test_GetDateTimeValue(t *testing.T) {
 			t.Fatalf("Error parsing HTML: %v", err)
 		}
 
-		if got, want := getDateTimeValue(n), tt.value; !reflect.DeepEqual(got, want) {
+		if got, want := getDateTimeValue(n), tt.value; !cmp.Equal(got, want) {
 			t.Errorf("getDateTimeValue(%q) returned %v, want %v", tt.html, *got, *want)
 		}
 	}
@@ -289,7 +290,7 @@ func Test_ImplyEndDate(t *testing.T) {
 		}
 
 		implyEndDate(item)
-		if got, want := item.Properties["end"], tt.want; !reflect.DeepEqual(got, want) {
+		if got, want := item.Properties["end"], tt.want; !cmp.Equal(got, want) {
 			t.Errorf("implyEndDate(%q, %q) returned %#v, want %#v", tt.start, tt.end, got, want)
 		}
 	}

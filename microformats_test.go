@@ -27,6 +27,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/google/go-cmp/cmp"
 	"golang.org/x/net/html"
 	"golang.org/x/net/html/atom"
 )
@@ -89,7 +90,7 @@ func Test_GetClasses(t *testing.T) {
 			t.Fatalf("Error parsing HTML: %v", err)
 		}
 
-		if got, want := getClasses(n), tt.classes; !reflect.DeepEqual(got, want) {
+		if got, want := getClasses(n), tt.classes; !cmp.Equal(got, want) {
 			t.Errorf("getClasses(%q) returned %v, want %v", tt.html, got, want)
 		}
 	}
@@ -171,7 +172,7 @@ func Test_GetAttr(t *testing.T) {
 			t.Errorf("getAttr(%q, %q) returned %v, want %v", tt.html, tt.attr, got, want)
 		}
 
-		if got, want := getAttrPtr(n, tt.attr), tt.ptr; !reflect.DeepEqual(got, want) {
+		if got, want := getAttrPtr(n, tt.attr), tt.ptr; !cmp.Equal(got, want) {
 			t.Errorf("getAttrPtr(%q, %q) returned %v, want %v", tt.html, tt.attr, got, want)
 		}
 	}
@@ -526,7 +527,7 @@ func Test_GetValueClassPattern(t *testing.T) {
 			t.Fatalf("Error parsing HTML: %v", err)
 		}
 
-		if got, want := getValueClassPattern(n), tt.value; !reflect.DeepEqual(got, want) {
+		if got, want := getValueClassPattern(n), tt.value; !cmp.Equal(got, want) {
 			t.Errorf("getValueClassPattern(%q) returned %v, want %v", tt.html, got, want)
 		}
 	}
@@ -551,7 +552,7 @@ func Test_GetFirstPropValue(t *testing.T) {
 
 	for _, tt := range tests {
 		mf := &Microformat{Properties: tt.properties}
-		if got, want := getFirstPropValue(mf, tt.prop), tt.value; !reflect.DeepEqual(got, want) {
+		if got, want := getFirstPropValue(mf, tt.prop), tt.value; !cmp.Equal(got, want) {
 			t.Errorf("getFirstPropValue(%v, %q) returned %v, want %v", tt.properties, tt.prop, got, want)
 		}
 	}

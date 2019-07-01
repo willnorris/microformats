@@ -30,10 +30,10 @@ import (
 	"os"
 	"path"
 	"path/filepath"
-	"reflect"
 	"strings"
 	"testing"
 
+	"github.com/google/go-cmp/cmp"
 	"github.com/kylelemons/godebug/pretty"
 	"willnorris.com/go/microformats"
 )
@@ -125,7 +125,7 @@ func runTest(t *testing.T, test string) {
 		t.Fatalf("error unmarshaling json: %v", err)
 	}
 
-	if !reflect.DeepEqual(got, want) {
+	if !cmp.Equal(got, want) {
 		t.Fatalf("Parse value differs:\n%v", pretty.Compare(want, got))
 	}
 }
