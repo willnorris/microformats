@@ -37,7 +37,7 @@ func Test_Datetime_SetDate(t *testing.T) {
 		ref,
 		time.Date(2003, 4, 5, 0, 0, 0, 0, time.UTC),
 		time.Date(2003, 4, 5, 6, 7, 8, 0, time.UTC),
-		time.Time{},
+		{},
 	} {
 		d.setDate(tt.Year(), tt.Month(), tt.Day())
 
@@ -69,7 +69,7 @@ func Test_Datetime_SetTime(t *testing.T) {
 		ref,
 		time.Date(0, 0, 0, 4, 5, 6, 0, time.UTC),
 		time.Date(2000, 1, 3, 4, 5, 6, 0, time.UTC),
-		time.Time{},
+		{},
 	} {
 		d.setTime(tt.Hour(), tt.Minute(), tt.Second())
 
@@ -100,7 +100,7 @@ func Test_Datetime_SetTZ(t *testing.T) {
 	for _, tt := range []time.Time{
 		ref,
 		time.Date(2000, 1, 3, 4, 5, 6, 0, time.UTC),
-		time.Time{},
+		{},
 	} {
 		d.setTZ(tt.Location())
 
