@@ -29,11 +29,11 @@ import (
 	"willnorris.com/go/microformats"
 )
 
-// DiscoverPostType determines the type of a post identified by the provided
+// PostType determines the type of a post identified by the provided
 // microformat using the Post Type Algorithm.
 //
 // See also https://www.w3.org/TR/post-type-discovery/#algorithm
-func DiscoverPostType(item *microformats.Microformat) string {
+func PostType(item *microformats.Microformat) string {
 	if item == nil {
 		return ""
 	}
@@ -45,7 +45,7 @@ func DiscoverPostType(item *microformats.Microformat) string {
 	}
 
 	// duplicate rsvp, repost, like, reply detection from response algorithm
-	if t := DiscoverResponseType(item); t != "" && t != "mention" {
+	if t := ResponseType(item); t != "" && t != "mention" {
 		return t
 	}
 
@@ -96,11 +96,11 @@ func DiscoverPostType(item *microformats.Microformat) string {
 	return "note"
 }
 
-// DiscoverResponseType determines the type of a post identified by the
+// ResponseType determines the type of a post identified by the
 // provided microformat using the Response Type Algorithm.
 //
 // See also https://www.w3.org/TR/post-type-discovery/#response-algorithm
-func DiscoverResponseType(item *microformats.Microformat) string {
+func ResponseType(item *microformats.Microformat) string {
 	if item == nil {
 		return ""
 	}

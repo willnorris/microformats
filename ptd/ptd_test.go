@@ -31,22 +31,22 @@ type pm map[string][]interface{}
 
 func Test_NilItems(t *testing.T) {
 	want := ""
-	if got := DiscoverPostType(nil); got != want {
-		t.Errorf("DiscoverPostType(nil) returned %q, want %q", got, want)
+	if got := PostType(nil); got != want {
+		t.Errorf("PostType(nil) returned %q, want %q", got, want)
 	}
-	if got := DiscoverResponseType(nil); got != want {
-		t.Errorf("DiscoverResponseType(nil) returned %q, want %q", got, want)
+	if got := ResponseType(nil); got != want {
+		t.Errorf("ResponseType(nil) returned %q, want %q", got, want)
 	}
 }
 
-func Test_DiscoverPostType_Type(t *testing.T) {
+func Test_PostType_Type(t *testing.T) {
 	item := &microformats.Microformat{Type: []string{"h-event"}}
-	if got, want := DiscoverPostType(item), "event"; got != want {
-		t.Errorf("DiscoverResponseType(%v) returned %q, want %q", item, got, want)
+	if got, want := PostType(item), "event"; got != want {
+		t.Errorf("ResponseType(%v) returned %q, want %q", item, got, want)
 	}
 }
 
-func Test_DiscoverPostType_Properties(t *testing.T) {
+func Test_PostType_Properties(t *testing.T) {
 	tests := []struct {
 		properties pm
 		want       string
@@ -92,13 +92,13 @@ func Test_DiscoverPostType_Properties(t *testing.T) {
 
 	for _, tt := range tests {
 		item := &microformats.Microformat{Properties: tt.properties}
-		if got, want := DiscoverPostType(item), tt.want; got != want {
-			t.Errorf("DiscoverPostType(%v) returned %q, want %q", tt.properties, got, want)
+		if got, want := PostType(item), tt.want; got != want {
+			t.Errorf("PostType(%v) returned %q, want %q", tt.properties, got, want)
 		}
 	}
 }
 
-func Test_DiscoverResponseType(t *testing.T) {
+func Test_ResponseType(t *testing.T) {
 	tests := []struct {
 		properties pm
 		want       string
@@ -131,8 +131,8 @@ func Test_DiscoverResponseType(t *testing.T) {
 
 	for _, tt := range tests {
 		item := &microformats.Microformat{Properties: tt.properties}
-		if got, want := DiscoverResponseType(item), tt.want; got != want {
-			t.Errorf("DiscoverResponseType(%v) returned %q, want %q", tt.properties, got, want)
+		if got, want := ResponseType(item), tt.want; got != want {
+			t.Errorf("ResponseType(%v) returned %q, want %q", tt.properties, got, want)
 		}
 	}
 }
