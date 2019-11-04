@@ -28,7 +28,6 @@ import (
 	"io/ioutil"
 	"net/url"
 	"os"
-	"path"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -40,7 +39,7 @@ import (
 
 // skip the tests which we don't pass yet
 var skipTests = []string{
-	"microformats-v1/hcard/email", // https://github.com/microformats/tests/pull/108
+	filepath.Join("microformats-v1", "hcard", "email"), // https://github.com/microformats/tests/pull/108
 }
 
 func TestSuite(t *testing.T) {
@@ -55,7 +54,7 @@ func TestSuite(t *testing.T) {
 			for _, test := range tests {
 				t.Run(test, func(t *testing.T) {
 					for _, skip := range skipTests {
-						if path.Join(version, test) == skip {
+						if filepath.Join(version, test) == skip {
 							t.Skip()
 						}
 					}
