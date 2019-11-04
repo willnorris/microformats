@@ -1,7 +1,7 @@
 # microformats
 
-[![GoDoc](https://godoc.org/willnorris.com/go/webmention?status.svg)](https://godoc.org/willnorris.com/go/microformats)
-[![Build Status](https://travis-ci.org/willnorris/microformats.svg)](https://travis-ci.org/willnorris/microformats)
+[![GoDoc](https://godoc.org/willnorris.com/go/microformats?status.svg)](https://godoc.org/willnorris.com/go/microformats)
+[![Test Status](https://github.com/willnorris/microformats/workflows/tests/badge.svg)](https://github.com/willnorris/microformats/actions?query=workflow%3Atests)
 [![Test Coverage](https://codecov.io/gh/willnorris/microformats/branch/master/graph/badge.svg)](https://codecov.io/gh/willnorris/microformats)
 
 microformats is a go library and tool for parsing [microformats][], supporting
