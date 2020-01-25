@@ -130,6 +130,8 @@ func Test_GetClasses(t *testing.T) {
 
 		{`<img class="a">`, []string{"a"}},
 		{`<img class="a b">`, []string{"a", "b"}},
+		{`<img class=" a
+		b	c ">`, []string{"a", "b", "c"}},
 		{`<img class="http://example.com/ b">`, []string{"http://example.com/", "b"}},
 
 		{`<img CLASS="a">`, []string{"a"}},
@@ -158,8 +160,8 @@ func Test_HasMatchingClass(t *testing.T) {
 		{``, ``, false},
 		{`<img>`, ``, false},
 		{`<img>`, `.*`, false},
+		{`<img class="">`, `.*`, false},
 
-		{`<img class="">`, `.*`, true},
 		{`<img class="a">`, `.+`, true},
 
 		// root class names

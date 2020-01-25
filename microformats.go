@@ -263,7 +263,7 @@ func (p *parser) walk(node *html.Node) {
 			urlVal := getAttr(node, "href")
 			urlVal = expandURL(urlVal, p.base)
 
-			rels = strings.Split(rel, " ")
+			rels = strings.Fields(rel)
 			for _, relval := range rels {
 				var seen bool // whether we've already stored this url for this rel
 				for _, u := range p.curData.Rels[relval] {
@@ -480,7 +480,7 @@ func (p *parser) walk(node *html.Node) {
 // getClasses returns all of the classes on node.
 func getClasses(node *html.Node) []string {
 	if c := getAttrPtr(node, "class"); c != nil {
-		return strings.Split(*c, " ")
+		return strings.Fields(*c)
 	}
 	return nil
 }
