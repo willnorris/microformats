@@ -181,7 +181,6 @@ func (p *parser) expandAttrURLs(node *html.Node) {
 		if value != nil {
 			*value = expandURL(*value, p.base)
 		}
-		return
 	}
 
 	for c := node.FirstChild; c != nil; c = c.NextSibling {

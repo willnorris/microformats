@@ -84,6 +84,9 @@ func Test_ExpandAttrURLs(t *testing.T) {
 		{`<track src="b"/>`, `<track src="/a/b"/>`},
 		{`<video src="b"></video>`, `<video src="/a/b"></video>`},
 		//{`<video poster="b"></video>`, `<video poster="/a/b"></video>`},
+
+		// multiple attributes
+		{`<input formaction="b" src="c"/>`, `<input formaction="/a/b" src="/a/c"/>`},
 	}
 
 	for _, tt := range tests {
