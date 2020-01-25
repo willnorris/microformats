@@ -129,11 +129,12 @@ func ResponseType(item *microformats.Microformat) string {
 // Returns true if one of values is a string that is a valid URL.
 func validURL(values []interface{}) bool {
 	for _, value := range values {
+		// url.Parse will happily parse an empty string, but
+		// that's probably not really what we want here
 		if s, ok := value.(string); ok && s != "" {
-			// url.Parse will happily parse an empty string, but
-			// that's probably not really what we want here
-			_, err := url.Parse(s)
-			return err == nil
+			if _, err := url.Parse(s); err == nil {
+				return true
+			}
 		}
 	}
 	return false

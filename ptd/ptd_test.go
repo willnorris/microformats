@@ -136,3 +136,26 @@ func Test_ResponseType(t *testing.T) {
 		}
 	}
 }
+
+func Test_ValidURL(t *testing.T) {
+	tests := []struct {
+		values []interface{}
+		want   bool
+	}{
+		{[]interface{}{}, false},
+		{[]interface{}{""}, false},
+		{[]interface{}{"%"}, false},
+		{[]interface{}{struct{}{}}, false},
+
+		{[]interface{}{"a"}, true},
+		{[]interface{}{"a", "b"}, true},
+		{[]interface{}{"", "a"}, true},
+		{[]interface{}{"%", "a"}, true},
+	}
+
+	for _, tt := range tests {
+		if got, want := validURL(tt.values), tt.want; got != want {
+			t.Errorf("validURL(%q) returned %v, want %v", tt.values, got, want)
+		}
+	}
+}
