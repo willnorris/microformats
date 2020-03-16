@@ -398,10 +398,10 @@ func (p *parser) walk(node *html.Node) {
 				}
 				if value == nil {
 					value = new(string)
-					*value = strings.TrimSpace(getTextContent(node, nil))
+					*value = getTextContent(node, nil)
 				}
 				if value != nil {
-					*value = expandURL(*value, p.base)
+					*value = strings.TrimSpace(expandURL(*value, p.base))
 				}
 				if curItem != nil && p.curItem != nil {
 					embedValue = getFirstPropValue(curItem, "url")
