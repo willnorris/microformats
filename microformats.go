@@ -55,6 +55,7 @@ var (
 // Microformat specifies a single microformat object and its properties.  It
 // may represent a person, an address, a blog post, etc.
 type Microformat struct {
+	ID         string                   `json:"id,omitempty"`
 	Value      string                   `json:"value,omitempty"`
 	HTML       string                   `json:"html,omitempty"`
 	Type       []string                 `json:"type"`
@@ -228,6 +229,9 @@ func (p *parser) walk(node *html.Node) {
 			Type:       rootclasses,
 			Properties: make(map[string][]interface{}),
 			backcompat: backcompat,
+		}
+		if !backcompat {
+			curItem.ID = getAttr(node, "id")
 		}
 		if p.curItem == nil {
 			p.curData.Items = append(p.curData.Items, curItem)
@@ -467,6 +471,7 @@ func (p *parser) walk(node *html.Node) {
 					embedValue = value
 				}
 				p.curItem.Properties[name] = append(p.curItem.Properties[name], &Microformat{
+					ID:         curItem.ID,
 					Type:       curItem.Type,
 					Properties: curItem.Properties,
 					Coords:     curItem.Coords,
