@@ -203,6 +203,10 @@ func expandURL(r string, base *url.URL) string {
 
 // walk the DOM rooted at node, storing parsed microformats in p.
 func (p *parser) walk(node *html.Node) {
+	if isAtom(node, atom.Template) {
+		return
+	}
+
 	var curItem *Microformat
 	var priorItem *Microformat
 	var rootclasses []string
@@ -558,7 +562,7 @@ func getTextContent(node *html.Node, imgFn func(*html.Node) string) string {
 	if node == nil {
 		return ""
 	}
-	if isAtom(node, atom.Script, atom.Style) {
+	if isAtom(node, atom.Script, atom.Style, atom.Template) {
 		return ""
 	}
 	if isAtom(node, atom.Img) && imgFn != nil {
