@@ -24,10 +24,10 @@ Fetch the HTML contents of a page, and call [Parse][] or [ParseNode][],
 depending on what input you have (an [io.Reader][] or an [html.Node][]). See an
 example of each in [cmd/gomf/main.go](cmd/gomf/main.go).
 
-[Parse]: https://godoc.org/willnorris.com/go/microformats#Parse
-[ParseNode]: https://godoc.org/willnorris.com/go/microformats#ParseNode
+[Parse]: https://pkg.go.dev/willnorris.com/go/microformats#Parse
+[ParseNode]: https://pkg.go.dev/willnorris.com/go/microformats#ParseNode
 [io.Reader]: https://golang.org/pkg/io/#Reader
-[html.Node]: https://godoc.org/golang.org/x/net/html#Node
+[html.Node]: https://pkg.go.dev/golang.org/x/net/html#Node
 
 ## License
 
