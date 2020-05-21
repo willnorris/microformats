@@ -40,10 +40,6 @@ import (
 // skip the tests which we don't pass yet
 var skipTests = []string{
 	// most of these breakages are related to https://github.com/microformats/tests/pull/109
-	filepath.Join("microformats-v2", "h-card", "hyperlinkedphoto"),
-	filepath.Join("microformats-v2", "h-card", "impliedname"),
-	filepath.Join("microformats-v2", "h-card", "impliedphoto"),
-	filepath.Join("microformats-v2", "h-review", "photo"),
 	filepath.Join("microformats-v2", "mixed", "id"),
 	filepath.Join("microformats-v2", "mixed", "ignoretemplate"),
 	filepath.Join("microformats-v2", "mixed", "vendorprefix"),

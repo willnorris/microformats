@@ -310,8 +310,13 @@ func (p *parser) walk(node *html.Node) {
 				}
 			}
 			if _, ok := curItem.Properties["photo"]; !ok {
-				photo := getImpliedPhoto(node, p.base)
-				if photo != "" {
+				photo, alt := getImpliedPhoto(node, p.base)
+				if alt != "" {
+					curItem.Properties["photo"] = append(curItem.Properties["photo"], map[string]string{
+						"alt":   alt,
+						"value": photo,
+					})
+				} else if photo != "" {
 					curItem.Properties["photo"] = append(curItem.Properties["photo"], photo)
 				}
 			}
@@ -706,13 +711,14 @@ func getImpliedName(node *html.Node) string {
 	return strings.TrimSpace(*name)
 }
 
-// getImpliedName gets the implied photo value for node.
+// getImpliedPhoto gets the implied photo value for node.
 //
 // See http://microformats.org/wiki/microformats2-parsing
-func getImpliedPhoto(node *html.Node, baseURL *url.URL) string {
+func getImpliedPhoto(node *html.Node, baseURL *url.URL) (src, alt string) {
 	var photo *string
 	if photo == nil && isAtom(node, atom.Img) {
 		photo = getAttrPtr(node, "src")
+		alt = getAttr(node, "alt")
 	}
 	if photo == nil && isAtom(node, atom.Object) {
 		photo = getAttrPtr(node, "data")
@@ -722,6 +728,7 @@ func getImpliedPhoto(node *html.Node, baseURL *url.URL) string {
 		subnode := getOnlyChildAtomWithAttr(node, atom.Img, "src")
 		if subnode != nil && !hasMatchingClass(subnode, rootClassNames) {
 			photo = getAttrPtr(subnode, "src")
+			alt = getAttr(subnode, "alt")
 		}
 	}
 	if photo == nil {
@@ -737,6 +744,7 @@ func getImpliedPhoto(node *html.Node, baseURL *url.URL) string {
 			subsubnode := getOnlyChildAtomWithAttr(subnode, atom.Img, "src")
 			if subsubnode != nil && !hasMatchingClass(subsubnode, rootClassNames) {
 				photo = getAttrPtr(subsubnode, "src")
+				alt = getAttr(subsubnode, "alt")
 			}
 		}
 	}
@@ -751,9 +759,9 @@ func getImpliedPhoto(node *html.Node, baseURL *url.URL) string {
 	}
 
 	if photo == nil {
-		return ""
+		return "", alt
 	}
-	return expandURL(*photo, baseURL)
+	return expandURL(*photo, baseURL), alt
 }
 
 // getImpliedName gets the implied url value for node.

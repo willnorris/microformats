@@ -474,28 +474,35 @@ func Test_GetImpliedPhoto(t *testing.T) {
 		html string
 		base *url.URL
 		url  string
+		alt  string
 	}{
-		{"", nil, ""},
+		{"", nil, "", ""},
 
-		{`<img src="p">`, nil, "p"},
-		{`<img src="p">`, base, "http://example.com/p"},
+		{`<img src="p">`, nil, "p", ""},
+		{`<img src="p" alt="a">`, nil, "p", "a"},
+		{`<img src="p">`, base, "http://example.com/p", ""},
+		{`<img src="p" alt="a">`, base, "http://example.com/p", "a"},
 
-		{`<object data="p">`, nil, "p"},
-		{`<object data="p">`, base, "http://example.com/p"},
+		{`<object data="p">`, nil, "p", ""},
+		{`<object data="p">`, base, "http://example.com/p", ""},
 
-		{`<p><img src="p"></p>`, nil, "p"},
-		{`<p><img src="p"></p>`, base, "http://example.com/p"},
-		{`<p><img src="p"><img src="q"></p>`, nil, ""},
-		{`<p><img src="p" class="h-entry"></p>`, nil, ""},
+		{`<p><img src="p"></p>`, nil, "p", ""},
+		{`<p><img src="p" alt="a"></p>`, nil, "p", "a"},
+		{`<p><img src="p"></p>`, base, "http://example.com/p", ""},
+		{`<p><img src="p" alt="a"></p>`, base, "http://example.com/p", "a"},
+		{`<p><img src="p"><img src="q"></p>`, nil, "", ""},
+		{`<p><img src="p" class="h-entry"></p>`, nil, "", ""},
 
-		{`<p><object data="p"></p>`, nil, "p"},
-		{`<p><object data="p"></p>`, base, "http://example.com/p"},
-		{`<p><object data="p"></object><object data="p"></object></p>`, nil, ""},
-		{`<p><object data="p" class="h-entry"></p>`, nil, ""},
+		{`<p><object data="p"></p>`, nil, "p", ""},
+		{`<p><object data="p"></p>`, base, "http://example.com/p", ""},
+		{`<p><object data="p"></object><object data="p"></object></p>`, nil, "", ""},
+		{`<p><object data="p" class="h-entry"></p>`, nil, "", ""},
 
-		{`<p><span><object data="p"></span></p>`, nil, "p"},
-		{`<p><span><object data="p"></span></p>`, base, "http://example.com/p"},
-		{`<p><span><object data="p" class="h-entry"></span></p>`, nil, ""},
+		{`<p><span><img src="p"></span></p>`, nil, "p", ""},
+		{`<p><span><img src="p" alt="a"></span></p>`, nil, "p", "a"},
+		{`<p><span><object data="p"></span></p>`, nil, "p", ""},
+		{`<p><span><object data="p"></span></p>`, base, "http://example.com/p", ""},
+		{`<p><span><object data="p" class="h-entry"></span></p>`, nil, "", ""},
 	}
 
 	for _, tt := range tests {
@@ -504,8 +511,12 @@ func Test_GetImpliedPhoto(t *testing.T) {
 			t.Fatalf("Error parsing HTML: %v", err)
 		}
 
-		if got, want := getImpliedPhoto(n, tt.base), tt.url; got != want {
-			t.Errorf("getImpliedPhoto(%q, %s) returned %v, want %v", tt.html, tt.base, got, want)
+		src, alt := getImpliedPhoto(n, tt.base)
+		if got, want := src, tt.url; got != want {
+			t.Errorf("getImpliedPhoto(%q, %s) returned src %v, want %v", tt.html, tt.base, got, want)
+		}
+		if got, want := alt, tt.alt; got != want {
+			t.Errorf("getImpliedPhoto(%q, %s) returned alt %v, want %v", tt.html, tt.base, got, want)
 		}
 	}
 }
