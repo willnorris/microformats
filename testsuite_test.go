@@ -39,9 +39,7 @@ import (
 
 // skip the tests which we don't pass yet
 var skipTests = []string{
-	// most of these breakages are related to https://github.com/microformats/tests/pull/109
-	filepath.Join("microformats-v2", "mixed", "vendorprefix"),
-	filepath.Join("microformats-v2", "mixed", "vendorprefixproperty"),
+	// all tests pass!
 }
 
 func TestSuite(t *testing.T) {

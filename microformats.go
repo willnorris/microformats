@@ -48,8 +48,8 @@ import (
 )
 
 var (
-	rootClassNames     = regexp.MustCompile(`^h-[a-z\-]+$`)
-	propertyClassNames = regexp.MustCompile(`^(p|u|dt|e)-([a-z\-]+)$`)
+	rootClassNames     = regexp.MustCompile(`^h-([a-z0-9]+-)?[a-z]+(-[a-z]+)*$`)
+	propertyClassNames = regexp.MustCompile(`^(p|u|dt|e)-([a-z0-9]+-)?[a-z]+(-[a-z]+)*$`)
 )
 
 // Microformat specifies a single microformat object and its properties.  It
