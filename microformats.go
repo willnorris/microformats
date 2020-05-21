@@ -348,7 +348,7 @@ func (p *parser) walk(node *html.Node) {
 			prefix, name := parts[0], parts[1]
 
 			var value, embedValue *string
-			var htmlbody string
+			var propData = make(map[string]string)
 			switch prefix {
 			case "p":
 				if p.curItem != nil {
@@ -423,13 +423,14 @@ func (p *parser) walk(node *html.Node) {
 					p.expandAttrURLs(c) // microformats/microformats2-parsing#38
 					html.Render(&buf, c)
 				}
-				htmlbody = strings.TrimSpace(buf.String())
+				htmlbody := strings.TrimSpace(buf.String())
 
 				// HTML spec: Serializing HTML Fragments algorithm does not include
 				// a trailing slash, so remove it.  Nor should apostrophes be
 				// encoded, which golang.org/x/net/html is doing.
 				htmlbody = strings.Replace(htmlbody, `/>`, `>`, -1)
 				htmlbody = strings.Replace(htmlbody, `&#39;`, `'`, -1)
+				propData["html"] = htmlbody
 			case "dt":
 				if value == nil {
 					value = getDateTimeValue(node)
@@ -458,11 +459,12 @@ func (p *parser) walk(node *html.Node) {
 					Coords:     curItem.Coords,
 					Shape:      curItem.Shape,
 					Value:      *embedValue,
-					HTML:       htmlbody,
+					HTML:       propData["html"],
 				})
 			} else if value != nil && p.curItem != nil {
-				if htmlbody != "" {
-					p.curItem.Properties[name] = append(p.curItem.Properties[name], map[string]interface{}{"value": *value, "html": htmlbody})
+				if len(propData) > 0 {
+					propData["value"] = *value
+					p.curItem.Properties[name] = append(p.curItem.Properties[name], propData)
 				} else {
 					p.curItem.Properties[name] = append(p.curItem.Properties[name], *value)
 				}
