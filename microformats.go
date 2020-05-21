@@ -378,7 +378,15 @@ func (p *parser) walk(node *html.Node) {
 				if value == nil && isAtom(node, atom.A, atom.Area, atom.Link) {
 					value = getAttrPtr(node, "href")
 				}
-				if value == nil && isAtom(node, atom.Img, atom.Audio, atom.Video, atom.Source) {
+				if value == nil && isAtom(node, atom.Img) {
+					value = getAttrPtr(node, "src")
+					if !p.curItem.backcompat {
+						if alt := imageAltValue(node); alt != "" {
+							propData["alt"] = alt
+						}
+					}
+				}
+				if value == nil && isAtom(node, atom.Audio, atom.Video, atom.Source) {
 					value = getAttrPtr(node, "src")
 				}
 				if value == nil && isAtom(node, atom.Object) {
@@ -398,7 +406,7 @@ func (p *parser) walk(node *html.Node) {
 				}
 				if value == nil {
 					value = new(string)
-					*value = getTextContent(node, nil)
+					*value = strings.TrimSpace(getTextContent(node, nil))
 				}
 				if value != nil {
 					*value = strings.TrimSpace(expandURL(*value, p.base))
