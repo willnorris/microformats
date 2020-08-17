@@ -9,7 +9,7 @@ both classic v1 and [v2 syntax][].  It is based on Andy Leap's [original
 library][andyleap/microformats].
 
 [microformats]: https://microformats.io/
-[v2 syntax]: http://microformats.org/wiki/microformats-2
+[v2 syntax]: https://microformats.org/wiki/microformats-2
 [andyleap/microformats]: https://github.com/andyleap/microformats
 
 ## Usage
