@@ -1,3 +1,6 @@
+// Copyright (c) 2015 Andy Leap, Google
+// SPDX-License-Identifier: MIT
+
 // The gomfweb command runs a simple web server that demonstrates the use of
 // the go microformats library.  It can parse the microformats found at a URL
 // or in a provided snippet of HTML.

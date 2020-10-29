@@ -1,22 +1,5 @@
 // Copyright (c) 2015 Andy Leap, Google
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to
-// deal in the Software without restriction, including without limitation the
-// rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
-// sell copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-// FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
-// IN THE SOFTWARE.
+// SPDX-License-Identifier: MIT
 
 // Package microformats provides a microformats parser, supporting both v1 and
 // v2 syntax.
@@ -25,7 +8,7 @@
 //
 //     import "willnorris.com/go/microformats"
 //
-// Retrive the HTML contents of a page, and call Parse or ParseNode, depending
+// Retrieve the HTML contents of a page, and call Parse or ParseNode, depending
 // on what input you have (an io.Reader or an html.Node).
 //
 // To parse only a section of an HTML document, use a package like goquery to
@@ -216,7 +199,6 @@ func (p *parser) walk(node *html.Node) {
 		if rootClassNames.MatchString(class) {
 			rootclasses = append(rootclasses, class)
 		}
-
 	}
 
 	var backcompat bool

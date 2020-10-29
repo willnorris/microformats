@@ -1,3 +1,6 @@
+// Copyright (c) 2015 Andy Leap, Google
+// SPDX-License-Identifier: MIT
+
 // The gomf tool is a command line tool which parses microformats from the
 // specified URL.  If selector is provided, the first element that matches the
 // selector will be used as the root node for parsing.
