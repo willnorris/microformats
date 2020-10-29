@@ -37,7 +37,7 @@ func index(w http.ResponseWriter, r *http.Request) {
 	var parsedURL *url.URL
 	var err error
 
-	u := r.FormValue("url")
+	u := strings.TrimSpace(r.FormValue("url"))
 	if u != "" {
 		parsedURL, err = url.Parse(u)
 		if err != nil {

@@ -16,13 +16,14 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strings"
 
 	"github.com/PuerkitoBio/goquery"
 	"willnorris.com/go/microformats"
 )
 
 func main() {
-	u, _ := url.Parse(os.Args[1])
+	u, _ := url.Parse(strings.TrimSpace(os.Args[1]))
 	resp, err := http.Get(u.String())
 	if err != nil {
 		log.Fatal(err)
