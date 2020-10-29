@@ -393,7 +393,7 @@ func (p *parser) walk(node *html.Node) {
 				}
 				if value == nil && isAtom(node, atom.Img) {
 					value = getAttrPtr(node, "src")
-					if !p.curItem.backcompat {
+					if p.curItem != nil && !p.curItem.backcompat {
 						if alt := imageAltValue(node); alt != "" {
 							propData["alt"] = alt
 						}
