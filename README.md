@@ -28,8 +28,3 @@ example of each in [cmd/gomf/main.go](cmd/gomf/main.go).
 [ParseNode]: https://pkg.go.dev/willnorris.com/go/microformats#ParseNode
 [io.Reader]: https://golang.org/pkg/io/#Reader
 [html.Node]: https://pkg.go.dev/golang.org/x/net/html#Node
-
-## License
-
-microformats is released under an [MIT license](LICENSE).  Though portions are
-copyright Google, it is not an official Google product.
