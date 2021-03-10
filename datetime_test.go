@@ -150,6 +150,7 @@ func Test_Datetime_Parse(t *testing.T) {
 	}{
 		{"2000-01-02T03:04:05Z", time.Date(2000, 1, 2, 3, 4, 5, 0, time.UTC)},
 		{"2000-01-02t03:04Z", time.Date(2000, 1, 2, 3, 4, 0, 0, time.UTC)},
+		{"2000-01-02 03:04:05Z", time.Date(2000, 1, 2, 3, 4, 5, 0, time.UTC)},
 
 		{"2000-01-02", time.Date(2000, 1, 2, 0, 0, 0, 0, time.UTC)},
 		{"2000-145", time.Date(2000, 5, 24, 0, 0, 0, 0, time.UTC)},

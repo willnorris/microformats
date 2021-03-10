@@ -156,7 +156,7 @@ var (
 func (d *datetime) Parse(s string) {
 	// normalize datetime value
 	s = strings.ToUpper(s)
-	s = strings.Replace(s, " ", "T", -1)
+	s = strings.Replace(s, " ", "T", 1)
 	s = reAMPM.ReplaceAllString(s, "$1$2")
 
 	// datetime formats
