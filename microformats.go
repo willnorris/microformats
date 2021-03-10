@@ -526,6 +526,11 @@ func getAttrPtr(node *html.Node, name string) *string {
 	return nil
 }
 
+// hasAttr returns whether node has an attribute with the specified name.
+func hasAttr(node *html.Node, name string) bool {
+	return getAttrPtr(node, name) != nil
+}
+
 // isAtom returns whether node's atom is one of atoms.
 func isAtom(node *html.Node, atoms ...atom.Atom) bool {
 	if node == nil {
@@ -628,7 +633,7 @@ func getOnlyChildAtomWithAttr(node *html.Node, atom atom.Atom, attr string) *htm
 	}
 	var n *html.Node
 	for c := node.FirstChild; c != nil; c = c.NextSibling {
-		if c.Type == html.ElementNode && c.DataAtom == atom && getAttrPtr(c, attr) != nil {
+		if c.Type == html.ElementNode && c.DataAtom == atom && hasAttr(c, attr) {
 			if n == nil {
 				n = c
 			} else {
@@ -836,17 +841,17 @@ func parseValueClassPattern(node *html.Node, dt bool) []string {
 			}
 		}
 		if valueTitleClass {
-			values = append(values, *getAttrPtr(c, "title"))
+			values = append(values, getAttr(c, "title"))
 		} else if valueClass {
 			switch {
-			case isAtom(c, atom.Img, atom.Area) && getAttrPtr(c, "alt") != nil:
-				values = append(values, *getAttrPtr(c, "alt"))
-			case isAtom(c, atom.Data) && getAttrPtr(c, "value") != nil:
-				values = append(values, *getAttrPtr(c, "value"))
-			case isAtom(c, atom.Abbr) && getAttrPtr(c, "title") != nil:
-				values = append(values, *getAttrPtr(c, "title"))
-			case dt && isAtom(c, atom.Del, atom.Ins, atom.Time) && getAttrPtr(c, "datetime") != nil:
-				values = append(values, *getAttrPtr(c, "datetime"))
+			case isAtom(c, atom.Img, atom.Area) && hasAttr(c, "alt"):
+				values = append(values, getAttr(c, "alt"))
+			case isAtom(c, atom.Data) && hasAttr(c, "value"):
+				values = append(values, getAttr(c, "value"))
+			case isAtom(c, atom.Abbr) && hasAttr(c, "title"):
+				values = append(values, getAttr(c, "title"))
+			case dt && isAtom(c, atom.Del, atom.Ins, atom.Time) && hasAttr(c, "datetime"):
+				values = append(values, getAttr(c, "datetime"))
 			default:
 				values = append(values, strings.TrimSpace(getTextContent(c, nil)))
 			}
