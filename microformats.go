@@ -434,8 +434,8 @@ func (p *parser) walk(node *html.Node) {
 				// HTML spec: Serializing HTML Fragments algorithm does not include
 				// a trailing slash, so remove it.  Nor should apostrophes be
 				// encoded, which golang.org/x/net/html is doing.
-				htmlbody = strings.Replace(htmlbody, `/>`, `>`, -1)
-				htmlbody = strings.Replace(htmlbody, `&#39;`, `'`, -1)
+				htmlbody = strings.ReplaceAll(htmlbody, `/>`, `>`)
+				htmlbody = strings.ReplaceAll(htmlbody, `&#39;`, `'`)
 				propData["html"] = htmlbody
 			case "dt":
 				if value == nil {
@@ -838,15 +838,16 @@ func parseValueClassPattern(node *html.Node, dt bool) []string {
 		if valueTitleClass {
 			values = append(values, *getAttrPtr(c, "title"))
 		} else if valueClass {
-			if isAtom(c, atom.Img, atom.Area) && getAttrPtr(c, "alt") != nil {
+			switch {
+			case isAtom(c, atom.Img, atom.Area) && getAttrPtr(c, "alt") != nil:
 				values = append(values, *getAttrPtr(c, "alt"))
-			} else if isAtom(c, atom.Data) && getAttrPtr(c, "value") != nil {
+			case isAtom(c, atom.Data) && getAttrPtr(c, "value") != nil:
 				values = append(values, *getAttrPtr(c, "value"))
-			} else if isAtom(c, atom.Abbr) && getAttrPtr(c, "title") != nil {
+			case isAtom(c, atom.Abbr) && getAttrPtr(c, "title") != nil:
 				values = append(values, *getAttrPtr(c, "title"))
-			} else if dt && isAtom(c, atom.Del, atom.Ins, atom.Time) && getAttrPtr(c, "datetime") != nil {
+			case dt && isAtom(c, atom.Del, atom.Ins, atom.Time) && getAttrPtr(c, "datetime") != nil:
 				values = append(values, *getAttrPtr(c, "datetime"))
-			} else {
+			default:
 				values = append(values, strings.TrimSpace(getTextContent(c, nil)))
 			}
 		}
