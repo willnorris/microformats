@@ -10,6 +10,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 )
 
+//nolint:dupl // Test_Datetime_SetDate is very similar to but different from Test_Datetime_SetTime
 func Test_Datetime_SetDate(t *testing.T) {
 	var d datetime
 
@@ -42,6 +43,7 @@ func Test_Datetime_SetDate(t *testing.T) {
 	}
 }
 
+//nolint:dupl // Test_Datetime_SetDate is very similar to but different from Test_Datetime_SetTime
 func Test_Datetime_SetTime(t *testing.T) {
 	var d datetime
 

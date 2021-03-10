@@ -185,6 +185,8 @@ func expandURL(r string, base *url.URL) string {
 }
 
 // walk the DOM rooted at node, storing parsed microformats in p.
+//
+//nolint:gocyclo,funlen // maybe we'll refactor it one day
 func (p *parser) walk(node *html.Node) {
 	if isAtom(node, atom.Template) {
 		return
@@ -647,6 +649,8 @@ func getOnlyChildAtomWithAttr(node *html.Node, atom atom.Atom, attr string) *htm
 // getImpliedName gets the implied name value for node.
 //
 // See http://microformats.org/wiki/microformats2-parsing
+//
+//nolint:gocyclo,funlen // getImpliedName is necessarily complex due to parsing rules
 func getImpliedName(node *html.Node) string {
 	var name *string
 	if isAtom(node, atom.Img, atom.Area) {
