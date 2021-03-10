@@ -29,7 +29,7 @@ func parseNode(s string) (n *html.Node, err error) {
 
 func renderNode(n *html.Node) string {
 	b := new(bytes.Buffer)
-	html.Render(b, n)
+	_ = html.Render(b, n)
 	return b.String()
 }
 

@@ -13,6 +13,7 @@ import (
 	"fmt"
 	"html/template"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
 	"os"
@@ -33,7 +34,7 @@ func main() {
 	}
 
 	fmt.Printf("gomfweb listening on %s\n", *addr)
-	http.ListenAndServe(*addr, nil)
+	log.Fatal(http.ListenAndServe(*addr, nil))
 }
 
 func index(w http.ResponseWriter, r *http.Request) {
@@ -68,7 +69,9 @@ func index(w http.ResponseWriter, r *http.Request) {
 		if callback := r.FormValue("callback"); callback != "" {
 			fmt.Fprintf(w, "%s(%s)", callback, buf.String())
 		} else {
-			io.Copy(w, buf)
+			if _, err := io.Copy(w, buf); err != nil {
+				log.Print(err)
+			}
 		}
 		return
 	}
@@ -91,7 +94,9 @@ func index(w http.ResponseWriter, r *http.Request) {
 		buf.String(),
 	}
 
-	tpl.Execute(w, data)
+	if err := tpl.Execute(w, data); err != nil {
+		log.Print(err)
+	}
 }
 
 var tpl = template.Must(template.New("").Parse(`<!DOCTYPE html>

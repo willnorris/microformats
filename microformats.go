@@ -424,7 +424,10 @@ func (p *parser) walk(node *html.Node) {
 
 				for c := node.FirstChild; c != nil; c = c.NextSibling {
 					p.expandAttrURLs(c) // microformats/microformats2-parsing#38
-					html.Render(&buf, c)
+
+					// ignore errors from html.Render which nearly always result from being unable
+					// to write to the underlying io.Writer, which never happens with bytes.Buffer.
+					_ = html.Render(&buf, c)
 				}
 				htmlbody := strings.TrimSpace(buf.String())
 

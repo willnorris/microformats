@@ -51,5 +51,7 @@ func main() {
 	enc := json.NewEncoder(os.Stdout)
 	enc.SetEscapeHTML(false)
 	enc.SetIndent("", "  ")
-	enc.Encode(data)
+	if err := enc.Encode(data); err != nil {
+		log.Fatal(err)
+	}
 }
