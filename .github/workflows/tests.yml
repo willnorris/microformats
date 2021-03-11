@@ -1,4 +1,11 @@
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
 name: tests
 env:
   GO111MODULE: on
@@ -7,8 +14,21 @@ jobs:
   test:
     strategy:
       matrix:
-        go-version: [1.x, 1.13.x]
-        platform: [ubuntu-latest, windows-latest]
+        go-version:
+          # support the two most recent major go versions
+          - 1.x
+          - 1.15.x
+        platform: [ubuntu-latest]
+        include:
+          # include windows, but only with the latest Go version, since there
+          # shouldn't be anything in the library that is platform specific
+          - go-version: 1.x
+            platform: windows-latest
+
+          # only update test coverage stats with the most recent go version on linux
+          - go-version: 1.x
+            platform: ubuntu-latest
+            update-coverage: true
     runs-on: ${{ matrix.platform }}
 
     steps:
@@ -17,12 +37,8 @@ jobs:
         go-version: ${{ matrix.go-version }}
 
     - uses: actions/checkout@v2
-    - name: Checkout submodules
-      shell: bash
-      run: |
-        auth_header="$(git config --local --get http.https://github.com/.extraheader)"
-        git submodule sync --recursive
-        git -c "http.extraheader=$auth_header" -c protocol.version=2 submodule update --init --force --recursive --depth=1
+      with:
+        submodules: recursive
 
     - name: Cache go modules
       uses: actions/cache@v1
@@ -31,17 +47,11 @@ jobs:
         key: ${{ runner.os }}-go-${{ hashFiles('go.sum') }}
         restore-keys: ${{ runner.os }}-go-
 
-    - name: Run go fmt
-      if: runner.os != 'Windows'
-      run: diff -u <(echo -n) <(gofmt -d -s .)
-
-    - name: Run go vet
-      run: go vet ./...
-
     - name: Run go test
       run: go test -v -race -coverprofile coverage.txt -covermode atomic ./...
 
     - name: Upload coverage to Codecov
+      if: ${{ matrix.update-coverage }}
       uses: codecov/codecov-action@v1
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
