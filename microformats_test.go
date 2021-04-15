@@ -6,7 +6,6 @@ package microformats
 import (
 	"bytes"
 	"net/url"
-	"reflect"
 	"regexp"
 	"strings"
 	"testing"
@@ -316,7 +315,7 @@ func Test_GetOnlyChild(t *testing.T) {
 			got.PrevSibling = nil
 			got.NextSibling = nil
 		}
-		if !reflect.DeepEqual(got, want) {
+		if !cmp.Equal(got, want) {
 			t.Errorf("getOnlyChild(%q) returned %#v, want %#v", tt.html, got, want)
 		}
 	}
@@ -360,7 +359,7 @@ func Test_GetOnlyChildAtom(t *testing.T) {
 			got.PrevSibling = nil
 			got.NextSibling = nil
 		}
-		if !reflect.DeepEqual(got, want) {
+		if !cmp.Equal(got, want) {
 			t.Errorf("getOnlyChildAtom(%q, %q) returned %#v, want %#v", tt.html, tt.atom, got, want)
 		}
 	}
@@ -407,7 +406,7 @@ func Test_GetOnlyChildAtomWithAttr(t *testing.T) {
 			got.PrevSibling = nil
 			got.NextSibling = nil
 		}
-		if !reflect.DeepEqual(got, want) {
+		if !cmp.Equal(got, want) {
 			t.Errorf("getOnlyChildAtomWithAttr(%q, %q, %q) returned %#v, want %#v", tt.html, tt.atom, tt.attr, got, want)
 		}
 	}
