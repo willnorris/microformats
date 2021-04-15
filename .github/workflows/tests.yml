@@ -7,8 +7,6 @@ on:
       - main
 
 name: tests
-env:
-  GO111MODULE: on
 
 jobs:
   test:
@@ -20,19 +18,18 @@ jobs:
           - 1.15.x
         platform: [ubuntu-latest]
         include:
-          # include windows, but only with the latest Go version, since there
-          # shouldn't be anything in the library that is platform specific
+          # include windows with the latest Go version
           - go-version: 1.x
             platform: windows-latest
 
-          # only update test coverage stats with the most recent go version on linux
+          # update test coverage stats with the latest go version on linux
           - go-version: 1.x
             platform: ubuntu-latest
             update-coverage: true
     runs-on: ${{ matrix.platform }}
 
     steps:
-    - uses: actions/setup-go@v1
+    - uses: actions/setup-go@v2
       with:
         go-version: ${{ matrix.go-version }}
 
@@ -41,10 +38,10 @@ jobs:
         submodules: recursive
 
     - name: Cache go modules
-      uses: actions/cache@v1
+      uses: actions/cache@v2
       with:
         path: ~/go/pkg/mod
-        key: ${{ runner.os }}-go-${{ hashFiles('go.sum') }}
+        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
         restore-keys: ${{ runner.os }}-go-
 
     - name: Run go test
