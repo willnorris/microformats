@@ -53,5 +53,3 @@ jobs:
     - name: Upload coverage to Codecov
       if: ${{ matrix.update-coverage }}
       uses: codecov/codecov-action@v1
-      with:
-        token: ${{ secrets.CODECOV_TOKEN }}
