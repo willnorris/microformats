@@ -365,53 +365,6 @@ func Test_GetOnlyChildAtom(t *testing.T) {
 	}
 }
 
-func Test_GetOnlyChildAtomWithAttr(t *testing.T) {
-	tests := []struct {
-		html, atom, attr, child string
-	}{
-		{"", "", "", ""},
-		{`<a><img></a>`, "img", "", ""},
-
-		{`<a><img src></a>`, "img", "src", "<img src>"},
-		{`<a><img src=""></a>`, "img", "src", `<img src="">`},
-		{`<a><img src=""><img></a>`, "img", "src", `<img src="">`},
-		{`<a>foo<img src>bar</a>`, "img", "src", "<img src>"},
-		{`<a><b class><img></b></a>`, "b", "class", "<b class><img></b>"},
-
-		// wrong atom
-		{`<a><img src></a>`, "b", "", ""},
-		// wrong attr
-		{`<a><img src></a>`, "img", "class", ""},
-		// too many children
-		{`<a><img src><img src></a>`, "img", "src", ""},
-		// child too deep
-		{`<a><b><img src></b></a>`, "img", "src", ""},
-	}
-
-	for _, tt := range tests {
-		n, err := parseNode(tt.html)
-		if err != nil {
-			t.Fatalf("Error parsing HTML: %v", err)
-		}
-
-		want, err := parseNode(tt.child)
-		if err != nil {
-			t.Fatalf("Error parsing HTML: %v", err)
-		}
-
-		got := getOnlyChildAtomWithAttr(n, atom.Lookup([]byte(tt.atom)), tt.attr)
-		if got != nil {
-			// for the purposes of comparison, adjacent nodes don't matter
-			got.Parent = nil
-			got.PrevSibling = nil
-			got.NextSibling = nil
-		}
-		if !cmp.Equal(got, want) {
-			t.Errorf("getOnlyChildAtomWithAttr(%q, %q, %q) returned %#v, want %#v", tt.html, tt.atom, tt.attr, got, want)
-		}
-	}
-}
-
 func Test_GetImpliedName(t *testing.T) {
 	tests := []struct {
 		html, name string
