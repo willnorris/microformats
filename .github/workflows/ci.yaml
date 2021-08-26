@@ -1,21 +1,16 @@
+name: ci
 on:
   push:
-    branches:
-      - main
+    branches: [main]
   pull_request:
-    branches:
-      - main
-
-name: tests
+    branches: [main]
 
 jobs:
   test:
     strategy:
       matrix:
-        go-version:
-          # support the two most recent major go versions
-          - 1.x
-          - 1.15.x
+        # support the two most recent major go versions
+        go-version: [1.x, 1.15.x]
         platform: [ubuntu-latest]
         include:
           # include windows with the latest Go version
@@ -50,3 +45,12 @@ jobs:
     - name: Upload coverage to Codecov
       if: ${{ matrix.update-coverage }}
       uses: codecov/codecov-action@v1
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: golangci-lint
+      uses: golangci/golangci-lint-action@v2
+      with:
+        version: v1.38
