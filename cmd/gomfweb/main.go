@@ -69,6 +69,7 @@ func index(w http.ResponseWriter, r *http.Request) {
 		if callback := r.FormValue("callback"); callback != "" {
 			fmt.Fprintf(w, "%s(%s)", callback, buf.String())
 		} else {
+			w.Header().Set("Content-Type", "application/json")
 			if _, err := io.Copy(w, buf); err != nil {
 				log.Print(err)
 			}
