@@ -63,11 +63,11 @@ const (
 // "YYYY-MM-DD HH:MM:SS+XXYY", but omitting certain values not specified in the
 // creation of d.  For example:
 //
-//     - if no date was specified, d is invalid and an empty string is returned
-//     - if no time was specified, time and timezone are omitted
-//     - if no timezone was specified, timezone is omitted
-//     - if no seconds were specified, seconds are omitted
-//     - if no minutes were specified, 00 is implied
+//   - if no date was specified, d is invalid and an empty string is returned
+//   - if no time was specified, time and timezone are omitted
+//   - if no timezone was specified, timezone is omitted
+//   - if no seconds were specified, seconds are omitted
+//   - if no minutes were specified, 00 is implied
 //
 // Microformat docs: http://microformats.org/wiki/value-class-pattern#Date_and_time_parsing
 func (d *datetime) String() string {

@@ -6,7 +6,7 @@
 //
 // Usage:
 //
-//     import "willnorris.com/go/microformats"
+//	import "willnorris.com/go/microformats"
 //
 // Retrieve the HTML contents of a page, and call Parse or ParseNode, depending
 // on what input you have (an io.Reader or an html.Node).

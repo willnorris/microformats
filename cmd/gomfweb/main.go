@@ -18,6 +18,7 @@ import (
 	"net/url"
 	"os"
 	"strings"
+	"time"
 
 	"willnorris.com/go/microformats"
 )
@@ -27,14 +28,21 @@ var addr = flag.String("addr", ":4001", "Address and port to listen on")
 func main() {
 	flag.Parse()
 
-	http.Handle("/", http.HandlerFunc(index))
+	srv := &http.Server{
+		Addr:    *addr,
+		Handler: http.HandlerFunc(index),
 
-	if port := os.Getenv("PORT"); port != "" {
-		*addr = ":" + port
+		ReadTimeout:  10 * time.Second,
+		WriteTimeout: 30 * time.Second,
+		IdleTimeout:  120 * time.Second,
 	}
 
-	fmt.Printf("gomfweb listening on %s\n", *addr)
-	log.Fatal(http.ListenAndServe(*addr, nil))
+	if port := os.Getenv("PORT"); port != "" {
+		srv.Addr = ":" + port
+	}
+
+	fmt.Printf("gomfweb listening on %s\n", srv.Addr)
+	log.Fatal(srv.ListenAndServe())
 }
 
 func index(w http.ResponseWriter, r *http.Request) {
