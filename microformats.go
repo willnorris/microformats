@@ -268,6 +268,7 @@ func (p *parser) walk(node *html.Node) {
 			}
 
 			if _, ok := p.curData.RelURLs[urlVal]; !ok {
+				sort.Strings(rels)
 				p.curData.RelURLs[urlVal] = &RelURL{
 					Text:     getTextContent(node, nil),
 					Rels:     rels,
