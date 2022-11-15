@@ -10,7 +10,7 @@ import (
 )
 
 // shortcut for "property map"
-type pm map[string][]interface{}
+type pm map[string][]any
 
 func Test_NilItems(t *testing.T) {
 	want := ""
@@ -122,18 +122,18 @@ func Test_ResponseType(t *testing.T) {
 
 func Test_ValidURL(t *testing.T) {
 	tests := []struct {
-		values []interface{}
+		values []any
 		want   bool
 	}{
-		{[]interface{}{}, false},
-		{[]interface{}{""}, false},
-		{[]interface{}{"%"}, false},
-		{[]interface{}{struct{}{}}, false},
+		{[]any{}, false},
+		{[]any{""}, false},
+		{[]any{"%"}, false},
+		{[]any{struct{}{}}, false},
 
-		{[]interface{}{"a"}, true},
-		{[]interface{}{"a", "b"}, true},
-		{[]interface{}{"", "a"}, true},
-		{[]interface{}{"%", "a"}, true},
+		{[]any{"a"}, true},
+		{[]any{"a", "b"}, true},
+		{[]any{"", "a"}, true},
+		{[]any{"%", "a"}, true},
 	}
 
 	for _, tt := range tests {

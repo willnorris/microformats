@@ -226,48 +226,48 @@ func Test_ImplyEndDate(t *testing.T) {
 	tests := []struct {
 		description string
 		start, end  []string
-		want        []interface{}
+		want        []any
 	}{
 		{
 			"invalid dates",
 			[]string{"foo"},
 			[]string{"bar"},
-			[]interface{}{"bar"},
+			[]any{"bar"},
 		},
 		{
 			"single start and end date",
 			[]string{"2006-01-02 03:04:05"},
 			[]string{"01:02:03"},
-			[]interface{}{"2006-01-02 01:02:03"},
+			[]any{"2006-01-02 01:02:03"},
 		},
 		{
 			"single start and end date, end has date",
 			[]string{"2006-01-02 03:04:05"},
 			[]string{"2007-01-02 01:02:03"},
-			[]interface{}{"2007-01-02 01:02:03"},
+			[]any{"2007-01-02 01:02:03"},
 		},
 		{
 			"multiple start dates",
 			[]string{"2006-01-02 03:04:05", "2007-01-02"},
 			[]string{"01:02:03"},
-			[]interface{}{"2006-01-02 01:02:03"},
+			[]any{"2006-01-02 01:02:03"},
 		},
 		{
 			"multiple start dates, first with no date",
 			[]string{"03:04:05", "2007-01-02"},
 			[]string{"01:02:03"},
-			[]interface{}{"2007-01-02 01:02:03"},
+			[]any{"2007-01-02 01:02:03"},
 		},
 		{
 			"multiple start and end dates",
 			[]string{"03:04:05", "2007-01-02"},
 			[]string{"01:02:03", "2006-01-02 01:02:03"},
-			[]interface{}{"2007-01-02 01:02:03", "2006-01-02 01:02:03"},
+			[]any{"2007-01-02 01:02:03", "2006-01-02 01:02:03"},
 		},
 	}
 
 	for _, tt := range tests {
-		item := &Microformat{Properties: map[string][]interface{}{}}
+		item := &Microformat{Properties: map[string][]any{}}
 		for _, d := range tt.start {
 			item.Properties["start"] = append(item.Properties["start"], d)
 		}

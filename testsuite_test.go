@@ -8,7 +8,6 @@ package microformats_test
 import (
 	"bytes"
 	"encoding/json"
-	"io/ioutil"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -81,7 +80,7 @@ func listTests(root string) ([]string, error) {
 }
 
 func runTest(t *testing.T, test string) {
-	input, err := ioutil.ReadFile(test + ".html")
+	input, err := os.ReadFile(test + ".html")
 	if err != nil {
 		t.Fatalf("error reading file %q: %v", test+".html", err)
 	}
@@ -89,19 +88,19 @@ func runTest(t *testing.T, test string) {
 	URL, _ := url.Parse("http://example.com/")
 	data := microformats.Parse(bytes.NewReader(input), URL)
 
-	expectedJSON, err := ioutil.ReadFile(test + ".json")
+	expectedJSON, err := os.ReadFile(test + ".json")
 	if err != nil {
 		t.Fatalf("error reading file %q: %v", test+".json", err)
 	}
 
-	want := make(map[string]interface{})
+	want := make(map[string]any)
 	err = json.Unmarshal(expectedJSON, &want)
 	if err != nil {
 		t.Fatalf("error unmarshaling json in file %q: %v", test+".json", err)
 	}
 
 	outputJSON, _ := json.Marshal(data)
-	got := make(map[string]interface{})
+	got := make(map[string]any)
 	err = json.Unmarshal(outputJSON, &got)
 	if err != nil {
 		t.Fatalf("error unmarshaling json: %v", err)

@@ -38,14 +38,14 @@ var (
 // Microformat specifies a single microformat object and its properties.  It
 // may represent a person, an address, a blog post, etc.
 type Microformat struct {
-	ID         string                   `json:"id,omitempty"`
-	Value      string                   `json:"value,omitempty"`
-	HTML       string                   `json:"html,omitempty"`
-	Type       []string                 `json:"type"`
-	Properties map[string][]interface{} `json:"properties"`
-	Shape      string                   `json:"shape,omitempty"`
-	Coords     string                   `json:"coords,omitempty"`
-	Children   []*Microformat           `json:"children,omitempty"`
+	ID         string           `json:"id,omitempty"`
+	Value      string           `json:"value,omitempty"`
+	HTML       string           `json:"html,omitempty"`
+	Type       []string         `json:"type"`
+	Properties map[string][]any `json:"properties"`
+	Shape      string           `json:"shape,omitempty"`
+	Coords     string           `json:"coords,omitempty"`
+	Children   []*Microformat   `json:"children,omitempty"`
 
 	// track whether this microformat has various types of properties or
 	// nested microformats. Used in processing implied property values.
@@ -215,7 +215,7 @@ func (p *parser) walk(node *html.Node) {
 		sort.Strings(rootclasses)
 		curItem = &Microformat{
 			Type:       rootclasses,
-			Properties: make(map[string][]interface{}),
+			Properties: make(map[string][]any),
 			backcompat: backcompat,
 		}
 		if !backcompat {

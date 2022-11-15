@@ -20,7 +20,6 @@ linters:
     - misspell
     - nakedret
     - revive
-    - rowserrcheck
     - staticcheck
     - stylecheck
     - typecheck

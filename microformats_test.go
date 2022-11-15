@@ -539,19 +539,19 @@ func Test_GetValueClassPattern(t *testing.T) {
 
 func Test_GetFirstPropValue(t *testing.T) {
 	tests := []struct {
-		properties map[string][]interface{}
+		properties map[string][]any
 		prop       string
 		value      *string
 	}{
 		{nil, "", nil},
 		{nil, "name", nil},
-		{map[string][]interface{}{"name": {"n"}}, "", nil},
+		{map[string][]any{"name": {"n"}}, "", nil},
 
-		{map[string][]interface{}{"name": {"n"}}, "name", ptr("n")},
-		{map[string][]interface{}{"name": {"a", "b"}}, "name", ptr("a")},
-		{map[string][]interface{}{"name": {"a", "b"}}, "url", nil},
-		{map[string][]interface{}{"name": {1, 2}}, "name", nil},
-		{map[string][]interface{}{"name": {"n"}, "url": {"u"}}, "url", ptr("u")},
+		{map[string][]any{"name": {"n"}}, "name", ptr("n")},
+		{map[string][]any{"name": {"a", "b"}}, "name", ptr("a")},
+		{map[string][]any{"name": {"a", "b"}}, "url", nil},
+		{map[string][]any{"name": {1, 2}}, "name", nil},
+		{map[string][]any{"name": {"n"}, "url": {"u"}}, "url", ptr("u")},
 	}
 
 	for _, tt := range tests {
