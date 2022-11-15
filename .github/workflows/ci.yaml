@@ -10,47 +10,41 @@ jobs:
     strategy:
       matrix:
         # support the two most recent major go versions
-        go-version: [1.17, 1.16]
+        go-version: [1.x, 1.18]
         platform: [ubuntu-latest]
         include:
           # include windows with the latest Go version
-          - go-version: 1.17
+          - go-version: 1.x
             platform: windows-latest
 
           # update test coverage stats with the latest go version on linux
-          - go-version: 1.17
+          - go-version: 1.x
             platform: ubuntu-latest
             update-coverage: true
     runs-on: ${{ matrix.platform }}
 
     steps:
-    - uses: actions/setup-go@v2
-      with:
-        go-version: ${{ matrix.go-version }}
-
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         submodules: recursive
 
-    - name: Cache go modules
-      uses: actions/cache@v2
+    - uses: actions/setup-go@v3
       with:
-        path: ~/go/pkg/mod
-        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-        restore-keys: ${{ runner.os }}-go-
+        go-version: ${{ matrix.go-version }}
+        cache: true
 
     - name: Run go test
       run: go test -v -race -coverprofile coverage.txt -covermode atomic ./...
 
     - name: Upload coverage to Codecov
       if: ${{ matrix.update-coverage }}
-      uses: codecov/codecov-action@v1
+      uses: codecov/codecov-action@v3
 
   lint:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: golangci-lint
-      uses: golangci/golangci-lint-action@5c56cd6c9dc07901af25baab6f2b0d9f3b7c3018 #v2.5.2
+      uses: golangci/golangci-lint-action@0ad9a0988b3973e851ab0a07adf248ec2e100376 # v3.3.1
       with:
-        version: v1.42
+        version: v1.50.1
