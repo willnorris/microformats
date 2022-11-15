@@ -10,7 +10,7 @@
 // For example, to parse all microformats from https://microformats.io inside
 // the <main> element, call:
 //
-//     gomf "https://microformats.io" "main"
+//	gomf "https://microformats.io" "main"
 package main
 
 import (
