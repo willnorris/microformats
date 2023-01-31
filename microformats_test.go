@@ -561,3 +561,23 @@ func Test_GetFirstPropValue(t *testing.T) {
 		}
 	}
 }
+
+func Test_ParseNodeNil(t *testing.T) {
+	tests := []struct {
+		name string
+		html string
+	}{
+		{"absolute", "<html><head><base href=\"https://example.com\"></head></html>"},
+		{"relative", "<html><head><base href=\"./something\"></head></html>"},
+		{"none", "<html><head></head></html>"}, // parseNode(tt.html) == nil
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			n, err := parseNode(tt.html)
+			if err != nil {
+				t.Fatalf("Error parsing HTML: %v", err)
+			}
+			ParseNode(n, nil) // this should not panic
+		})
+	}
+}

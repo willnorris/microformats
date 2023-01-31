@@ -108,16 +108,22 @@ type parser struct {
 }
 
 // Parse the microformats found in the HTML document read from r.  baseURL is
-// the URL this document was retrieved from and is used to resolve any
-// relative URLs.
+// the URL this document was retrieved from and is used to expand any
+// relative URLs.  If baseURL is nil and the base URL is not referenced in the
+// document, relative URLs are not expanded.
 func Parse(r io.Reader, baseURL *url.URL) *Data {
 	doc, _ := html.Parse(r)
 	return ParseNode(doc, baseURL)
 }
 
 // ParseNode parses the microformats found in doc.  baseURL is the URL this
-// document was retrieved from and is used to resolve any relative URLs.
+// document was retrieved from and is used to expand any relative URLs. If
+// baseURL is nil and the base URL is not referenced in the document,
+// relative URLs are not expanded.
 func ParseNode(doc *html.Node, baseURL *url.URL) *Data {
+	if doc == nil { // makes no sense to go further
+		return nil
+	}
 	p := new(parser)
 	p.curData = &Data{
 		Items:   make([]*Microformat, 0),
@@ -125,6 +131,9 @@ func ParseNode(doc *html.Node, baseURL *url.URL) *Data {
 		RelURLs: make(map[string]*RelURL),
 	}
 	p.base = baseURL
+	if p.base == nil { // can make sense if base can be inferred from contents
+		p.base = &url.URL{}
+	}
 	p.baseFound = false
 	p.root = doc
 	p.walk(doc)
