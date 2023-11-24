@@ -23,9 +23,20 @@ func Test_NilItems(t *testing.T) {
 }
 
 func Test_PostType_Type(t *testing.T) {
-	item := &microformats.Microformat{Type: []string{"h-event"}}
-	if got, want := PostType(item), "event"; got != want {
-		t.Errorf("ResponseType(%v) returned %q, want %q", item, got, want)
+	tests := []struct {
+		typ  string
+		want string
+	}{
+		{"h-event", "event"},
+		{"h-recipe", "recipe"},
+		{"h-review", "review"},
+	}
+
+	for _, tt := range tests {
+		item := &microformats.Microformat{Type: []string{tt.typ}}
+		if got, want := PostType(item), tt.want; got != want {
+			t.Errorf("ResponseType(%v) returned %q, want %q", item, got, want)
+		}
 	}
 }
 
@@ -58,7 +69,11 @@ func Test_PostType_Properties(t *testing.T) {
 		{pm{"in-reply-to": {}}, "note"},
 		{pm{"in-reply-to": {""}}, "note"},
 		{pm{"in-reply-to": {"foo"}}, "reply"},
+		{pm{"bookmark-of": {"foo"}}, "bookmark"},
+		{pm{"follow-of": {"foo"}}, "follow"},
+		{pm{"checkin": {"foo"}}, "checkin"},
 		{pm{"video": {"foo"}}, "video"},
+		{pm{"audio": {"foo"}}, "audio"},
 		{pm{"photo": {"foo"}}, "photo"},
 
 		// content and name variations

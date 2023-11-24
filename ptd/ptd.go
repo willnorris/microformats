@@ -22,8 +22,9 @@ func PostType(item *microformats.Microformat) string {
 	}
 
 	for _, t := range item.Type {
-		if t == "h-event" {
-			return "event"
+		switch t {
+		case "h-event", "h-recipe", "h-review":
+			return t[2:]
 		}
 	}
 
@@ -32,8 +33,14 @@ func PostType(item *microformats.Microformat) string {
 		return t
 	}
 
+	if _, ok := item.Properties["checkin"]; ok {
+		return "checkin"
+	}
 	if validURL(item.Properties["video"]) {
 		return "video"
+	}
+	if validURL(item.Properties["audio"]) {
+		return "audio"
 	}
 	if validURL(item.Properties["photo"]) {
 		return "photo"
@@ -104,6 +111,12 @@ func ResponseType(item *microformats.Microformat) string {
 	}
 	if validURL(item.Properties["in-reply-to"]) {
 		return "reply"
+	}
+	if validURL(item.Properties["bookmark-of"]) {
+		return "bookmark"
+	}
+	if _, ok := item.Properties["follow-of"]; ok {
+		return "follow"
 	}
 
 	return "mention"
