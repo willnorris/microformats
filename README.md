@@ -16,20 +16,20 @@ It is based on Andy Leap's [original library][andyleap/microformats].
 To see this package in action, the simplest way is to install the command line
 app and use it to fetch and parse a webpage with microformats on it:
 
-``` sh
+```sh
 % go install willnorris.com/go/microformats/cmd/gomf@latest
 % gomf https://indieweb.org
 ```
 
 To use it in your own code, import the package:
 
-``` go
+```go
 import "willnorris.com/go/microformats"
 ```
 
 If you have the HTML contents of a page in an [io.Reader][], call [Parse][] like in this example:
 
-``` go
+```go
 content := `<article class="h-entry"><h1 class="p-name">Hello</h1></article>`
 r := strings.NewReader(content)
 
@@ -48,7 +48,7 @@ An example of doing this with the [goquery package] can be seen in [cmd/gomf/mai
 To see that in action using the gomf app installed above,
 you can parse the microformats from indieweb.org that appear within the `#content` element:
 
-``` sh
+```sh
 % gomf https://indieweb.org "#content"
 
 {
@@ -72,3 +72,14 @@ you can parse the microformats from indieweb.org that appear within the `#conten
 [io.Reader]: https://golang.org/pkg/io/#Reader
 [html.Node]: https://pkg.go.dev/golang.org/x/net/html#Node
 [goquery package]: https://github.com/PuerkitoBio/goquery
+
+## Additional helper packages
+
+Use the [ptd package] to perform [Post Type Discovery].
+
+Use the [rhc package] to find a [Representative h-card].
+
+[ptd package]: https://pkg.go.dev/willnorris.com/go/microformats/ptd
+[Post Type Discovery]: https://www.w3.org/TR/post-type-discovery/
+[rhc package]: https://pkg.go.dev/willnorris.com/go/microformats/rhc
+[Representative h-card]: http://microformats.org/wiki/representative-hcard
