@@ -1,4 +1,4 @@
-// Copyright (c) 2015 Andy Leap, Google
+// Copyright (c) The microformats project authors.
 // SPDX-License-Identifier: MIT
 
 // This file includes backwards compatibility support for microformats v1.

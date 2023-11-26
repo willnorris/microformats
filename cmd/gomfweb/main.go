@@ -1,4 +1,4 @@
-// Copyright (c) 2015 Andy Leap, Google
+// Copyright (c) The microformats project authors.
 // SPDX-License-Identifier: MIT
 
 // The gomfweb command runs a simple web server that demonstrates the use of

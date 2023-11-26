@@ -1,4 +1,4 @@
-// Copyright (c) 2015 Andy Leap, Google
+// Copyright (c) The microformats project authors.
 // SPDX-License-Identifier: MIT
 
 // Run the shared test suite from https://github.com/microformats/tests

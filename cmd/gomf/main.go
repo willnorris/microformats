@@ -1,4 +1,4 @@
-// Copyright (c) 2015 Andy Leap, Google
+// Copyright (c) The microformats project authors.
 // SPDX-License-Identifier: MIT
 
 // The gomf tool is a command line tool which parses microformats from the
