@@ -1,0 +1,25 @@
+name: deploy
+on:
+  push:
+    branches:
+      - "main"
+  workflow_dispatch:
+  repository_dispatch:
+    types: [deploy]
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+      - run: flyctl -c cmd/gomfweb/fly.toml deploy --remote-only
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}

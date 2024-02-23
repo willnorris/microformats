@@ -1,0 +1,19 @@
+# To deploy, run this from the repo root:
+#
+#   fly deploy -c cmd/gomfweb/fly.toml
+
+app = 'microformats-go'
+primary_region = 'sjc'
+
+[build]
+  dockerfile = "Dockerfile"
+
+[http_service]
+  internal_port = 4001
+  force_https = true
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 0
+
+[[vm]]
+  size = 'shared-cpu-1x'
