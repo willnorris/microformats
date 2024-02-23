@@ -8,6 +8,7 @@ import (
 	"willnorris.com/go/microformats"
 )
 
+//nolint:funlen
 func TestRepresentativeHcard(t *testing.T) {
 	tests := []struct {
 		name string

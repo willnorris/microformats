@@ -16,6 +16,8 @@ import (
 // microformat using the Post Type Algorithm.
 //
 // See also https://www.w3.org/TR/post-type-discovery/#algorithm
+//
+//nolint:funlen
 func PostType(item *microformats.Microformat) string {
 	if item == nil {
 		return ""
