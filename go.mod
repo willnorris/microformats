@@ -1,11 +1,11 @@
 module willnorris.com/go/microformats
 
+go 1.18
+
 require (
-	github.com/PuerkitoBio/goquery v1.8.0
-	github.com/google/go-cmp v0.5.9
-	golang.org/x/net v0.2.0
+	github.com/PuerkitoBio/goquery v1.9.0
+	github.com/google/go-cmp v0.6.0
+	golang.org/x/net v0.21.0
 )
 
-require github.com/andybalholm/cascadia v1.3.1 // indirect
-
-go 1.18
+require github.com/andybalholm/cascadia v1.3.2 // indirect
