@@ -56,4 +56,45 @@ func TestRepresentativeHcard(t *testing.T) {
 			}
 		})
 	}
+
+	// additional tests for zero values
+	if got := RepresentativeHcard(nil, srcURL.String()); got != nil {
+		t.Errorf("RepresentativeHcard() = %v, want nil", got)
+	}
+	if got := RepresentativeHcard(&microformats.Data{}, srcURL.String()); got != nil {
+		t.Errorf("RepresentativeHcard() = %v, want nil", got)
+	}
+	if got := RepresentativeHcard(&microformats.Data{Items: []*microformats.Microformat{}}, srcURL.String()); got != nil {
+		t.Errorf("RepresentativeHcard() = %v, want nil", got)
+	}
+	if got := RepresentativeHcard(&microformats.Data{Items: []*microformats.Microformat{{}}}, ""); got != nil {
+		t.Errorf("RepresentativeHcard() = %v, want nil", got)
+	}
+	if got := RepresentativeHcard(&microformats.Data{Items: []*microformats.Microformat{{}}}, srcURL.String()); got != nil {
+		t.Errorf("RepresentativeHcard() = %v, want nil", got)
+	}
+}
+
+func TestURLMatch(t *testing.T) {
+	tests := []struct {
+		a, b string
+		want bool
+	}{
+		{"", "", false},   // empty input
+		{"a", "", false},  // empty input
+		{"", "b", false},  // empty input
+		{"%", "b", false}, // url.Parse error
+		{"a", "%", false}, // url.Parse error
+		{"a", "b", false}, // mismatched inputs
+
+		{"a", "a", true},
+		{"http://x", "http://x/", true}, // missing trailing slash
+		{"http://x/", "http://x", true}, // missing trailing slash
+	}
+
+	for _, tt := range tests {
+		if got := urlMatch(tt.a, tt.b); got != tt.want {
+			t.Errorf("urlMatch(%q, %q) = %v, want %v", tt.a, tt.b, got, tt.want)
+		}
+	}
 }

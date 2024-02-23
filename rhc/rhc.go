@@ -13,7 +13,7 @@ import (
 
 // RepresentativeHcard returns the representative h-card for the given parsed data from srcURL.
 func RepresentativeHcard(data *microformats.Data, srcURL string) *microformats.Microformat {
-	if len(data.Items) == 0 || srcURL == "" {
+	if data == nil || len(data.Items) == 0 || srcURL == "" {
 		return nil
 	}
 
