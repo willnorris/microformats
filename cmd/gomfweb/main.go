@@ -8,6 +8,7 @@ package main
 
 import (
 	"bytes"
+	_ "embed"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -108,72 +109,6 @@ func index(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-var tpl = template.Must(template.New("").Parse(`<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
-  <title>Go Microformats Parser</title>
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
-  <style>
-    form label { font-weight: bold; }
-    form textarea, form input[type=url] { font-family: "SF Mono", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
-    form .form-control:disabled { cursor: default; background: #efefef; color: black; }
-  </style>
-</head>
-
-<body>
-  <main class="container">
-    <h1 class="mt-5 mb-3">Microformats Parser (Go)</h1>
-
-    <form method="get">
-      <div class="form-group">
-        <label for="url">Enter a URL</label>
-        <input name="url" type="url" placeholder="https://indieweb.org" class="form-control form-control-lg" />
-      </div>
-
-      <button type="submit" class="btn btn-lg btn-success">Parse</button>
-    </form>
-
-    <h2 class="h4 my-5">OR parse just a snippet of HTML</h2>
-
-    <form method="post" class="mb-5">
-      <div class="form-group">
-        <label for="html">HTML</label>
-        <textarea id="html" name="html" rows="6" class="form-control form-control-lg">{{ .HTML }}</textarea>
-      </div>
-
-      <div class="form-group">
-        <label for="base-url">Base URL</label>
-        <input id="base-url" name="base-url" type="url" value="{{ .URL }}" placeholder="https://indieweb.org" class="form-control form-control-lg" />
-      </div>
-
-      <button type="submit" class="btn btn-lg btn-success">Parse</button>
-    </form>
-
-    {{ with .JSON }}
-    <div class="form-group mb-5">
-      <label for="json">JSON</label>
-      <textarea id="json" name="json" rows="10" class="form-control form-control-lg" disabled="disabled">{{ . }}</textarea>
-    </div>
-    {{ end }}
-
-    <footer class="mb-5">
-      <ul>
-        <li><a href="https://microformats.io">About Microformats</a></li>
-        <li><a href="https://github.com/willnorris/microformats/tree/master/cmd/gomfweb">Source code for this site</a></li>
-        <li><a href="https://github.com/willnorris/microformats">Source code for the Microformats Go Parser</a></li>
-        <li>
-          Other Microformats Parser websites:
-          <a href="https://node.microformats.io">Node</a>,
-          <a href="https://php.microformats.io">PHP</a>,
-          <a href="https://python.microformats.io">Python</a>, and
-          <a href="https://ruby.microformats.io">Ruby</a>.
-        </li>
-	<li><a href="https://microformats.org/wiki/microformats2#Parsers">More Microformats parsers</a></li>
-      </ul>
-    </footer>
-  </main>
-</body>
-</html>`))
+//go:embed index.html
+var indexHTML string
+var tpl = template.Must(template.New("").Parse(indexHTML))
