@@ -281,9 +281,10 @@ func (p *parser) backcompatIncludeRefs(node *html.Node) (refs []string, replace 
 	for _, class := range classes {
 		if class == "include" {
 			var id string
-			if node.DataAtom == atom.A {
+			switch node.DataAtom {
+			case atom.A:
 				id = getAttr(node, "href")
-			} else if node.DataAtom == atom.Object {
+			case atom.Object:
 				id = getAttr(node, "data")
 			}
 
