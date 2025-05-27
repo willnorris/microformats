@@ -68,7 +68,9 @@ func index(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			http.Error(w, fmt.Sprintf("error fetching url content: %v", err), http.StatusInternalServerError)
 		}
-		defer resp.Body.Close()
+		defer func() {
+			_ = resp.Body.Close()
+		}()
 
 		mf := microformats.Parse(resp.Body, parsedURL)
 		if err := enc.Encode(mf); err != nil {
@@ -76,7 +78,7 @@ func index(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if callback := r.FormValue("callback"); callback != "" {
-			fmt.Fprintf(w, "%s(%s)", callback, buf.String())
+			_, _ = fmt.Fprintf(w, "%s(%s)", callback, buf.String())
 		} else {
 			w.Header().Set("Content-Type", "application/mf2+json")
 			if _, err := io.Copy(w, buf); err != nil {
