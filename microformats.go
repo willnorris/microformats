@@ -23,6 +23,7 @@ import (
 	"io"
 	"net/url"
 	"regexp"
+	"slices"
 	"sort"
 	"strings"
 
@@ -509,13 +510,9 @@ func getClasses(node *html.Node) []string {
 
 // hasMatchingClass whether node contains a class that matches regex.
 func hasMatchingClass(node *html.Node, regex *regexp.Regexp) bool {
-	classes := getClasses(node)
-	for _, class := range classes {
-		if regex.MatchString(class) {
-			return true
-		}
-	}
-	return false
+	return slices.ContainsFunc(getClasses(node), func(s string) bool {
+		return regex.MatchString(s)
+	})
 }
 
 // getAttr returns the value of the specified attribute on node.
@@ -550,12 +547,7 @@ func isAtom(node *html.Node, atoms ...atom.Atom) bool {
 	if node == nil {
 		return false
 	}
-	for _, atom := range atoms {
-		if atom == node.DataAtom {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(atoms, node.DataAtom)
 }
 
 // getTextContent returns the text content of node, following the common

@@ -92,8 +92,8 @@ func (d *datetime) String() string {
 	}
 
 	// convert "+0000" to "Z", since time doesn't support a "Z-0700" format
-	if strings.HasSuffix(value, "+0000") {
-		value = strings.TrimSuffix(value, "+0000") + "Z"
+	if v, ok := strings.CutSuffix(value, "+0000"); ok {
+		value = v + "Z"
 	}
 	return value
 }
