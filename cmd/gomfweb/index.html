@@ -1,70 +1,158 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
 
-  <title>Go Microformats Parser</title>
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" 
-      integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
-  <style>
-    form label { font-weight: bold; }
-    form textarea, form input[type=url] { font-family: "SF Mono", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
-    form .form-control:disabled { cursor: default; background: #efefef; color: black; }
-  </style>
-</head>
+    <title>Go Microformats Parser</title>
 
-<body>
-  <main class="container">
-    <h1 class="mt-5 mb-3">Microformats Parser (Go)</h1>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
+      crossorigin="anonymous"
+    />
+    <link
+      rel="icon"
+      href="https://microformats.io/assets/images/microformats-logo.svg"
+      type="image/svg+xml"
+    />
+  </head>
 
-    <form method="get">
-      <div class="form-group">
-        <label for="url">Enter a URL</label>
-        <input name="url" type="url" placeholder="https://indieweb.org" class="form-control form-control-lg" />
-      </div>
+  <body>
+    <div class="container">
+      <h1 class="mt-5 mb-3">Microformats Parser (Go)</h1>
 
-      <button type="submit" class="btn btn-lg btn-success">Parse</button>
-    </form>
+      <main>
+        <section class="mb-5">
+          <h2 class="h4">Parse a URL</h2>
 
-    <h2 class="h4 my-5">OR parse just a snippet of HTML</h2>
+          <form action="/" accept-charset="UTF-8" method="get">
+            <div class="mb-3">
+              <label for="url" class="form-label fw-bold">Enter a URL</label>
+              <input
+                required
+                id="url"
+                class="form-control form-control-lg font-monospace"
+                type="url"
+                name="url"
+                placeholder="https://example.com/person.html"
+              />
+            </div>
 
-    <form method="post" class="mb-5">
-      <div class="form-group">
-        <label for="html">HTML</label>
-        <textarea id="html" name="html" rows="6" class="form-control form-control-lg">{{ .HTML }}</textarea>
-      </div>
+            <button type="submit" class="btn btn-lg btn-success">Parse</button>
+          </form>
+        </section>
 
-      <div class="form-group">
-        <label for="base-url">Base URL</label>
-        <input id="base-url" name="base-url" type="url" value="{{ .URL }}" placeholder="https://indieweb.org" class="form-control form-control-lg" />
-      </div>
+        <section class="mb-5">
+          <h2 class="h4 mb-5">OR parse just a snippet of HTML</h2>
 
-      <button type="submit" class="btn btn-lg btn-success">Parse</button>
-    </form>
+          <form method="post" action="/">
+            <div class="mb-3">
+              <label for="html" class="form-label fw-bold">HTML</label>
+              <textarea
+                required
+                id="html"
+                name="html"
+                rows="6"
+                class="form-control form-control-lg font-monospace"
+              ></textarea>
+            </div>
 
-    {{ with .JSON }}
-    <div class="form-group mb-5">
-      <label for="json">JSON</label>
-      <textarea id="json" name="json" rows="10" class="form-control form-control-lg" disabled="disabled">{{ . }}</textarea>
+            <div class="mb-3">
+              <label for="base-url" class="form-label fw-bold"
+                >Base URL
+                <span class="fw-normal text-body-secondary"
+                  >(Optional)</span
+                ></label
+              >
+              <input
+                id="base-url"
+                name="url"
+                type="url"
+                class="form-control form-control-lg font-monospace"
+              />
+            </div>
+
+            <button type="submit" class="btn btn-lg btn-success">Parse</button>
+          </form>
+        </section>
+
+        <section class="card mb-5">
+          <div class="card-body">
+            <h2 class="h4 card-title">Bookmarklet</h2>
+            <p class="card-text">
+              Drag this link to your bookmarks toolbar to parse a page with one
+              click!
+            </p>
+            <a
+              class="btn btn-primary btn-sm"
+              href="javascript:(function(){document.location.href='https://go.microformats.io/?url='+encodeURIComponent(document.location.href);}())"
+              onclick="event.preventDefault()"
+              >mf2 parser</a
+            >
+          </div>
+        </section>
+      </main>
+
+      <footer class="my-5">
+        <ul class="d-xl-flex flex-xl-wrap">
+          <li class="col-xl-6 order-xl-1">
+            <a href="https://microformats.io">About Microformats</a>
+          </li>
+          <li class="col-xl-6 order-xl-2">
+            <a
+              href="https://github.com/willnorris/microformats/tree/main/cmd/gomfweb"
+              >Source code for this site</a
+            >
+          </li>
+          <li class="col-xl-6 order-xl-4">
+            <a href="https://github.com/willnorris/microformats"
+              >Source code for the Microformats Go Parser</a
+            >
+            <span class="badge text-bg-light">v{{ .LibVersion }}</span>
+          </li>
+          <li id="parser-list" class="col-xl-6 order-xl-3">
+            Other Microformats Parser websites:
+            <a href="https://node.microformats.io">Node</a>,
+            <a href="https://php.microformats.io">PHP</a>,
+            <a href="https://python.microformats.io">Python</a>,
+            <a href="https://ruby.microformats.io">Ruby</a>, and
+            <a href="https://rust.microformats.io">Rust</a>.
+          </li>
+          <li class="col-xl-6 order-xl-5">
+            <a href="https://microformats.org/wiki/microformats2#Parsers"
+              >More Microformats parsers</a
+            >
+          </li>
+        </ul>
+        <p class="text-center mt-5 pt-5">
+          <a
+            href="https://github.com/willnorris/microformats/blob/main/LICENSE"
+            rel="license"
+            class="link-secondary link-underline-opacity-25"
+            >MIT</a
+          >
+        </p>
+      </footer>
+
+      <script type="module">
+        const nodeList = document
+          .getElementById("parser-list")
+          .querySelectorAll("a");
+        const values = Array.from(nodeList, (node) => [
+          Math.random(),
+          node.href,
+          node.innerText,
+        ]).toSorted(([v1], [v2]) => v2 - v1);
+        nodeList.forEach((node, ix) => {
+          node.href = values[ix][1];
+          node.innerText = values[ix][2];
+        });
+      </script>
     </div>
-    {{ end }}
-
-    <footer class="mb-5">
-      <ul>
-        <li><a href="https://microformats.io">About Microformats</a></li>
-        <li><a href="https://github.com/willnorris/microformats/tree/master/cmd/gomfweb">Source code for this site</a></li>
-        <li><a href="https://github.com/willnorris/microformats">Source code for the Microformats Go Parser</a></li>
-        <li>
-          Other Microformats Parser websites:
-          <a href="https://node.microformats.io">Node</a>,
-          <a href="https://php.microformats.io">PHP</a>,
-          <a href="https://python.microformats.io">Python</a>, and
-          <a href="https://ruby.microformats.io">Ruby</a>.
-        </li>
-        <li><a href="https://microformats.org/wiki/microformats2#Parsers">More Microformats parsers</a></li>
-      </ul>
-    </footer>
-  </main>
-</body>
+  </body>
 </html>
