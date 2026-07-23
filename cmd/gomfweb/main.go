@@ -18,6 +18,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"runtime/debug"
 	"strings"
 	"time"
 
@@ -25,6 +26,18 @@ import (
 )
 
 var addr = flag.String("addr", ":4001", "Address and port to listen on")
+
+func libVersion() string {
+	info, ok := debug.ReadBuildInfo()
+	if !ok {
+		return "devel"
+	}
+	v := strings.TrimPrefix(info.Main.Version, "v")
+	if v == "" || v == "(devel)" {
+		return "devel"
+	}
+	return v
+}
 
 func main() {
 	flag.Parse()
@@ -97,13 +110,15 @@ func index(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data := struct {
-		HTML string
-		URL  string
-		JSON string
+		HTML       string
+		URL        string
+		JSON       string
+		LibVersion string
 	}{
 		html,
 		u,
 		buf.String(),
+		libVersion(),
 	}
 
 	if err := tpl.Execute(w, data); err != nil {
