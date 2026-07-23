@@ -90,14 +90,7 @@ func index(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, fmt.Sprintf("error marshaling json: %v", err), http.StatusInternalServerError)
 		}
 
-		if callback := r.FormValue("callback"); callback != "" {
-			_, _ = fmt.Fprintf(w, "%s(%s)", callback, buf.String())
-		} else {
-			w.Header().Set("Content-Type", "application/mf2+json")
-			if _, err := io.Copy(w, buf); err != nil {
-				log.Print(err)
-			}
-		}
+		writeJSON(w, r, buf)
 		return
 	}
 
@@ -107,22 +100,29 @@ func index(w http.ResponseWriter, r *http.Request) {
 		if err := enc.Encode(mf); err != nil {
 			http.Error(w, fmt.Sprintf("error marshaling json: %v", err), http.StatusInternalServerError)
 		}
+		writeJSON(w, r, buf)
+		return
 	}
 
 	data := struct {
-		HTML       string
-		URL        string
-		JSON       string
 		LibVersion string
 	}{
-		html,
-		u,
-		buf.String(),
 		libVersion(),
 	}
 
 	if err := tpl.Execute(w, data); err != nil {
 		log.Print(err)
+	}
+}
+
+func writeJSON(w http.ResponseWriter, r *http.Request, buf *bytes.Buffer) {
+	if callback := r.FormValue("callback"); callback != "" {
+		_, _ = fmt.Fprintf(w, "%s(%s)", callback, buf.String())
+	} else {
+		w.Header().Set("Content-Type", "application/mf2+json")
+		if _, err := io.Copy(w, buf); err != nil {
+			log.Print(err)
+		}
 	}
 }
 

@@ -59,8 +59,7 @@
                 name="html"
                 rows="6"
                 class="form-control form-control-lg font-monospace"
-              >
-{{ .HTML }}</textarea>
+              ></textarea>
             </div>
 
             <div class="mb-3">
@@ -74,7 +73,6 @@
                 id="base-url"
                 name="url"
                 type="url"
-                value="{{ .URL }}"
                 class="form-control form-control-lg font-monospace"
               />
             </div>
@@ -82,20 +80,6 @@
             <button type="submit" class="btn btn-lg btn-success">Parse</button>
           </form>
         </section>
-
-        {{ with .JSON }}
-        <section class="mb-5">
-          <label for="json" class="form-label fw-bold">JSON</label>
-          <textarea
-            id="json"
-            name="json"
-            rows="10"
-            class="form-control form-control-lg font-monospace"
-            disabled="disabled"
-          >
-{{ . }}</textarea>
-        </section>
-        {{ end }}
 
         <section class="card mb-5">
           <div class="card-body">
